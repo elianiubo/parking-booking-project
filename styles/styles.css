@@ -1,0 +1,41 @@
+
+*{
+    margin: 0;
+    padding: 0;
+}
+body,
+h1,
+h2,
+p,
+ul,
+li,
+form,
+input,
+textarea,
+a {
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-family: "Arial", sans-serif;
+}
+  
+  form {
+    max-width: 400px;
+    margin: auto;
+  }
+  
+  label {
+    display: block;
+    margin: 10px 0 5px;
+  }
+  
+  input, button {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0 15px;
+  }
+  
+  #error-message {
+    font-size: 0.9em;
+  }
+  
