@@ -1,0 +1,62 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* body,
+h1,
+h2,
+p,
+ul,
+li,
+form,
+input,
+textarea,
+a {
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-family: "Arial", sans-serif;
+} */
+
+* {
+  margin: 0;
+  padding: 0;
+}
+body {
+  height: 100%;
+}
+
+/*Layout*/
+
+#booking-form {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+
+
+}
+
+.row {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+
+#price-display {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+  }
+
+  .form-group {
+    width: 100%;
+  }
+}
