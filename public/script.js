@@ -1,5 +1,39 @@
 
 document.addEventListener("DOMContentLoaded", () => {
+  const pricePerDay = 10;
+
+  // // Selecciona los elementos del formulario
+  // const arrivalDateInput = document.getElementById('arrival_date');
+  // const departureDateInput = document.getElementById('departure_date');
+  // const totalPriceDisplay = document.getElementById('total-price');
+
+  // // Función para calcular el precio
+  // function calculateTotalPrice() {
+  //   const arrivalDate = new Date(arrivalDateInput.value);
+  //   const departureDate = new Date(departureDateInput.value);
+
+  //   // Verifica que ambas fechas sean válidas
+  //   if (!isNaN(arrivalDate) && !isNaN(departureDate)) {
+  //     // Calcula la diferencia en días
+  //     const timeDiff = departureDate - arrivalDate;
+  //     const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // Convertir ms a días
+      
+  //     // Verifica que las fechas sean coherentes
+  //     if (days > 0) {
+  //       const totalPrice = days * pricePerDay;
+  //       totalPriceDisplay.textContent = totalPrice; // Actualiza el precio en el formulario
+  //     } else {
+  //       totalPriceDisplay.textContent = "0"; // Si las fechas no son coherentes
+  //     }
+  //   } else {
+  //     totalPriceDisplay.textContent = "0"; // Si las fechas no están completas
+  //   }
+  // }
+
+  // // Escucha cambios en los campos de fecha
+  // arrivalDateInput.addEventListener('change', calculateTotalPrice);
+  // departureDateInput.addEventListener('change', calculateTotalPrice);
+
   // console.log("Script Loaded Successfully!");
   // form.addEventListener("submit", async function (event) {
   //   event.preventDefault();
@@ -89,27 +123,27 @@ document.addEventListener("DOMContentLoaded", () => {
   //     } catch (error) {
   //       console.error('Error:', error);
   //     }
-    // }
-      // document.getElementById('booking-form').addEventListener('submit', function (event) {
-      //   const arrivalDate = new Date(document.getElementById('arrival_date').value);
-      //   const departureDate = new Date(document.getElementById('departure_date').value);
-      //   const arrivalTime = document.getElementById('arrival_time').value;
-      //   const departureTime = document.getElementById('departure_time').value;
+  // }
+  // document.getElementById('booking-form').addEventListener('submit', function (event) {
+  //   const arrivalDate = new Date(document.getElementById('arrival_date').value);
+  //   const departureDate = new Date(document.getElementById('departure_date').value);
+  //   const arrivalTime = document.getElementById('arrival_time').value;
+  //   const departureTime = document.getElementById('departure_time').value;
 
-      //   const errorMessage = document.getElementById('error-message');
-      //   errorMessage.textContent = '';
+  //   const errorMessage = document.getElementById('error-message');
+  //   errorMessage.textContent = '';
 
-      //   if (departureDate < arrivalDate || (departureDate.getTime() === arrivalDate.getTime() && departureTime <= arrivalTime)) {
-      //     errorMessage.textContent = 'Departure date and time must be after arrival date and time.';
-      //     event.preventDefault();
-      //   }
+  //   if (departureDate < arrivalDate || (departureDate.getTime() === arrivalDate.getTime() && departureTime <= arrivalTime)) {
+  //     errorMessage.textContent = 'Departure date and time must be after arrival date and time.';
+  //     event.preventDefault();
+  //   }
 
-      //   const days = (departureDate - arrivalDate) / (1000 * 60 * 60 * 24) + 1; // At least 1 day
-      //   document.getElementById('total-price').textContent = (days * 10).toFixed(2);
+  //   const days = (departureDate - arrivalDate) / (1000 * 60 * 60 * 24) + 1; // At least 1 day
+  //   document.getElementById('total-price').textContent = (days * 10).toFixed(2);
 
-      //   console.log("Arrival Date: ", arrivalDate);
-      //   console.log("Departure Date: ", departureDate);
-      //   console.log("Total Price: ", document.getElementById('total-price').textContent);
+  //   console.log("Arrival Date: ", arrivalDate);
+  //   console.log("Departure Date: ", departureDate);
+  //   console.log("Total Price: ", document.getElementById('total-price').textContent);
 
-      // });
-    })
+  // });
+})

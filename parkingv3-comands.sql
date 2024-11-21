@@ -14,8 +14,18 @@ CREATE TABLE user_bookings (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE parking_slots (
-    slot VARCHAR(10) PRIMARY KEY
+    slot VARCHAR(10) PRIMARY KEY,
+	price DECIMAL(10, 2)
 );
+select * from parking_slots
+UPDATE parking_slots
+SET price = CASE
+    WHEN slot = 'Slot1' THEN 10.00
+    WHEN slot = 'Slot2' THEN 10.00
+    WHEN slot = 'Slot3' THEN 10.00
+    WHEN slot = 'Slot4' THEN 10.00
+    ELSE 10.00 -- Default price for unspecified slots
+END;
 
 -- Create the parking_bookings table
 CREATE TABLE parking_bookings (
@@ -76,3 +86,5 @@ WHERE pb."status" = 'pending'
   AND pb.created < NOW() - INTERVAL '24 hours';
 
   select * from parking_bookings
+  select * from user_bookings
+  delete from parking_bookings
