@@ -1,10 +1,80 @@
 
-document.addEventListener("DOMContentLoaded", () => {
-  const pricePerDay = 10;
 
-  // // Selecciona los elementos del formulario
-  // const arrivalDateInput = document.getElementById('arrival_date');
-  // const departureDateInput = document.getElementById('departure_date');
+document.addEventListener("DOMContentLoaded", () => {
+
+
+  const arrivalDateInput = document.getElementById('arrival_date');
+  const departureDateInput = document.getElementById('departure_date');
+  const submitButton = document.getElementById('submit-btn');
+  const availabilityMessage = document.createElement("p");
+availabilityMessage.id = "availabilityMessage";
+document.getElementById("booking-form").appendChild(availabilityMessage);
+
+  // Función para mostrar las fechas seleccionadas
+
+  async function checkAvailability() {
+    const arrivDate = arrivalDateInput.value;
+    const depDate = departureDateInput.value;
+
+    availabilityMessage.textContent = 'Checking availability...';
+
+    if (!arrivDate || !depDate) {
+      availabilityMessage.textContent = 'Please select both arrival and departure dates.';
+      submitButton.disabled = true;
+      return;
+    }
+
+    try {
+      const response = await fetch("/check-availability", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ arrival_date: arrivDate, departure_date: depDate })
+      });
+
+      const result = await response.json();
+      if (result.available) {
+        submitButton.disabled = false; // Enable button if dates are available
+        availabilityMessage.innerHTML = '<p>Dates are available!</p>';
+      } else {
+        submitButton.disabled = true; // Disable button if dates are not available
+        availabilityMessage.innerHTML = '<p>Selected dates are not available. Please choose different dates.</p>';
+      }
+    } catch (error) {
+      console.error('Error checking availability:', error);
+      submitButton.disabled = true;
+      availabilityMessage.innerHTML = '<p>Error checking availability.</p>';
+    }
+  }
+  
+
+  // Add event listeners to check availability when the dates are changed
+  arrivalDateInput.addEventListener('change', checkAvailability);
+  departureDateInput.addEventListener('change', checkAvailability);
+
+  // function showDateisSelected() {
+  //   const arrivDate = arrivalDateInput.value; // Obtén el valor del input de llegada
+  //   const depDate = departureDateInput.value; // Obtén el valor del input de salida
+  //   if (arrivDate) {
+  //     console.log("Fecha de llegada:", arrivDate);
+  //     let text = document.createTextNode("Justadded")
+  //     paragraph.appendChild(text);
+
+  //   } else if (depDate) {
+  //     console.log("Fecha de salida:", depDate);
+  //   }
+
+
+  // }
+
+
+  // function dateSelected(){
+  //   let dateObj = new Date(arrivalDateInput)
+
+  //     console.log("dates not empty")
+
+  // }
+  //  arrivalDateInput.addEventListener("change", dateSelected)
+  //  departureDateInput.addEventListener("change", dateSelected)
   // const totalPriceDisplay = document.getElementById('total-price');
 
   // // Función para calcular el precio
@@ -17,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //     // Calcula la diferencia en días
   //     const timeDiff = departureDate - arrivalDate;
   //     const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // Convertir ms a días
-      
+
   //     // Verifica que las fechas sean coherentes
   //     if (days > 0) {
   //       const totalPrice = days * pricePerDay;
