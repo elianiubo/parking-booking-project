@@ -49,15 +49,7 @@ app.post('/book', async (req, res) => {
   console.log("Departure Date:", departure_date);
   console.log("Total Days:", totalDays);
 
-  // Combine the date and time to form full start and end datetime
-  //Deleted this one and changed it for the data upsters coz I only want to
-  //store the dates the hours are just as a data not usable for booking process
-  // const startdate = `${arrival_date} ${arrival_time}`;
-  // const enddate = `${departure_date} ${departure_time}`;
-
   try {
-
-
     // Query to check available parking slots for the given start and end datetime
     const query = `
     WITH booked_slots AS (
@@ -141,7 +133,12 @@ app.post('/book', async (req, res) => {
     ];
 
     await db.query(userBookingQuery, userBookingValues); // Execute the user booking insertion
-  
+    sendMailConfirmation(
+      arrival_date, departure_date, arrival_time, departure_time,
+      name, email, car_brand, car_color, car_type, license_plate,
+      availableSlot, totalPrice
+    );
+
     res.json({
       message: "Booking successful, availability and user insertion made.",
       bookingId: bookResult.rows[0].id,
@@ -152,6 +149,36 @@ app.post('/book', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Error checking availability or booking');
+  }
+})
+
+//endpoint to check avaliability and show it in user interface
+app.post('/check-availability', async (req, res) => {
+  const { arrival_date, departure_date } = req.body;
+  try {
+    const query = `
+  WITH booked_slots AS (
+    SELECT DISTINCT slot
+    FROM parking_bookings
+    WHERE DATE(startdate) <= $2
+      AND DATE(enddate) >= $1
+      AND "status" != 'cancelled'
+  )
+  SELECT slot
+  FROM parking_slots
+  WHERE slot NOT IN (SELECT slot FROM booked_slots)
+  LIMIT 1;
+`;
+    const checkValues = [arrival_date, departure_date];
+    const checkResult = await db.query(query, checkValues); // Execute the booking insertion
+    if (checkResult.rows.length > 0) {
+      return res.json({ available: true });
+    } else {
+      return res.json({ available: false });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error checking availability' });
   }
 })
 app.post('/check-pending', async (req, res) => {
@@ -192,6 +219,55 @@ app.post('/payment-success', async (req, res) => {
     res.status(500).send('Error confirming booking');
   }
 });
+
+
+//Send mail confirmation 
+function sendMailConfirmation(
+  arrival_date, departure_date, arrival_time, departure_time,
+  name, email, car_brand, car_color, car_type, license_plate,
+  availableSlot, totalPrice
+) {
+  if (!email || email.trim() === '') {
+    console.error('Recipient email is invalid or missing.');
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'Gmail', // or your email provider
+    auth: {
+      user: process.env.MAIL_USER, // replace with your email
+      pass: process.env.MAIL_PASS // replace with your email password or app password
+    }
+  });
+
+  // Configure the mail options object
+  const mailOptions = {
+    from: 'elia.nibu@gmail.com', // Replace with a verified sender email
+    to: email,
+    subject: 'Booking Pending Payment',
+    html: `
+      <h1>Booking Details</h1>
+      <p>Hello, ${name}!</p>
+      <p>You have almost completed your booking. Here are the details:</p>
+      <ul>
+        <li><strong>Slot:</strong> ${availableSlot}</li>
+        <li><strong>Arrival Date:</strong> ${arrival_date}</li>
+        <li><strong>Departure Date:</strong> ${departure_date}</li>
+        <li><strong>Total Price:</strong> €${totalPrice}</li>
+      </ul>
+      <p>Please complete your payment to confirm your booking.</p>
+    `,
+  };
+
+  // Send the email
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.error('Error sending email:', error);
+    } else {
+      console.log('Email sent:', info.response);
+    }
+  });
+}
 
 // updates every2 hours to check if booking is payed
 cron.schedule('*/5 * * * *', async () => {
