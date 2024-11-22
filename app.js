@@ -141,37 +141,7 @@ app.post('/book', async (req, res) => {
     ];
 
     await db.query(userBookingQuery, userBookingValues); // Execute the user booking insertion
-    //Integrate NODEMAILER
-    //   const transporter = nodemailer.createTransport({
-    //     service: 'Gmail', // or your email provider
-    //     auth: {
-    //       user: 'process.env.MAIL_USER', // replace with your email
-    //       pass: 'process.env.MAIL_PASS' // replace with your email password or app password
-    //     }
-    //   });
-    //   const mailOptions = {
-    //     from: 'process.env.MAIL_OUT',
-    //     to: email, // User's email from booking
-    //     subject: 'Parking Slot Booking Confirmation',
-    //     html: `
-    //   <h2>Booking Confirmation</h2>
-    //   <p>Thank you for booking with us, ${name}!</p>
-    //   <p>Here are your booking details:</p>
-    //   <ul>
-    //     <li><strong>Parking Slot:</strong> ${availableSlot}</li>
-    //     <li><strong>Arrival Date:</strong> ${arrival_date}</li>
-    //     <li><strong>Departure Date:</strong> ${departure_date}</li>
-    //     <li><strong>Total Price:</strong> $${totalPrice.toFixed(2)}</li>
-    //   </ul>
-    //   <p>Please complete the payment within 2 hours to confirm your booking.</p>
-    //   <p>If you have any questions, contact us at support@parkingservice.com.</p>
-    // `,
-    //   };
-    //   await transporter.sendMail(mailOptions);
-    //TODO change this so it shows price in the form and info in the email
-    // const totalPrice = await calculatePrice(db, availableSlot, startdate, enddate);
-    // res.render('index.ejs', { totalPrice: totalPrice.toFixed(2) });
-    // TODO For confirmation or email
+  
     res.json({
       message: "Booking successful, availability and user insertion made.",
       bookingId: bookResult.rows[0].id,
@@ -222,32 +192,6 @@ app.post('/payment-success', async (req, res) => {
     res.status(500).send('Error confirming booking');
   }
 });
-
-//functions TODO 
-// const calculatePrice = async (db, slot, startdate, enddate) => {
-//   try {
-//     const priceQuery = `SELECT price from parking_slots WHERE slot = $1`
-//     const priceResult = await db.query(priceQuery, [slot])
-//     if (priceResult.rows.length === 0) {
-//       throw new Error("Slot price not found")
-//     }
-//     //calculate booking duration in days
-//     const pricePerDay = priceResult.rows[0].price;
-//     console.log(pricePerDay)
-
-//     // const durationQuery_alter = `SELECT slot, COUNT(*) AS pricePerDay, (DATEDIFF(day, startdate, enddate) 
-//     // FROM myTable
-//     // GROUP BY agentName;`;
-//     const durationQuery = `SELECT EXTRACT(EPOCH FROM ($2::timestamp - $1::timestamp)) / 86400 AS duration_days;`;
-//     const durationResult = await db.query(durationQuery, [startdate, enddate]);
-//     const durationDays = Math.ceil(durationResult.rows[0].duration_days);
-//     return pricePerDay * durationDays;
-//   } catch (err) {
-//     console.error('Error calculating total price:', err);
-//     throw err;
-//   }
-// }
-
 
 // updates every2 hours to check if booking is payed
 cron.schedule('*/5 * * * *', async () => {
