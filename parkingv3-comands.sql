@@ -17,6 +17,12 @@ CREATE TABLE parking_slots (
     slot VARCHAR(10) PRIMARY KEY,
 	price DECIMAL(10, 2)
 );
+CREATE TABLE pricing (
+  id SERIAL PRIMARY KEY,
+  base_price DECIMAL NOT NULL DEFAULT 49,      -- Price for up to 7 days
+  extra_day_price DECIMAL NOT NULL DEFAULT 7,  -- Price for each additional day beyond 7
+  max_days INT NOT NULL DEFAULT 7              -- Max days for base price
+);
 select * from parking_slots
 UPDATE parking_slots
 SET price = CASE
@@ -86,5 +92,7 @@ WHERE pb."status" = 'pending'
   AND pb.created < NOW() - INTERVAL '24 hours';
 
   select * from parking_bookings
+  select * from pricing
   select * from user_bookings
+  select * from parking_slots
   delete from parking_bookings
