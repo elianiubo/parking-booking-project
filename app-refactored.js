@@ -69,27 +69,6 @@ async function getAvailableSlot(arrival_date, departure_date) {
 //   `;
 //   return db.query(query);
 // }
-app.post('/check-pending', async (req, res) => {
-  try {
-    const query = `
-      UPDATE parking_bookings
-      SET "status" = 'cancelled'
-      WHERE "status" = 'pending'
-        AND created < NOW() - INTERVAL '2 hours'
-      RETURNING id;
-    `;
-    const result = await db.query(query);
-    
-    if (result.rows.length === 0) {
-      return res.json({ message: 'No pending bookings', pending: false });
-    }
-
-    return res.json({ message: 'Pending bookings found', pending: true, cancelledBookings: result.rows });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error updating pending bookings');
-  }
-});
 
 function sendMailConfirmation(data) {
   const { name, email, arrival_date, departure_date, totalPrice, availableSlot } = data;
@@ -135,17 +114,17 @@ function sendMailConfirmation(data) {
 }
 
 async function createBookingAndUserDetails(bookingData, userData) {
-  const client = await db.connect();
   try {
-    await client.query('BEGIN');
 
+    // Insert the booking data
     const bookingQuery = `
       INSERT INTO parking_bookings (startdate, enddate, slot, "status", created)
       VALUES ($1, $2, $3, 'pending', NOW())
       RETURNING id;
     `;
-    const bookingResult = await client.query(bookingQuery, bookingData);
+    const bookingResult = await db.query(bookingQuery, bookingData);
 
+    // Insert the user booking data
     const userBookingQuery = `
       INSERT INTO user_bookings (
         parking_spot_id, name, email, arrival_date, departure_date,
@@ -154,15 +133,10 @@ async function createBookingAndUserDetails(bookingData, userData) {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING id;
     `;
-    await client.query(userBookingQuery, userData);
-
-    await client.query('COMMIT');
+    await db.query(userBookingQuery, userData);
     return bookingResult.rows[0];
   } catch (error) {
-    await client.query('ROLLBACK');
-    throw error;
-  } finally {
-    client.release();
+    throw error;  // Rethrow the error for handling elsewhere
   }
 }
 
@@ -202,7 +176,7 @@ app.post('/book', async (req, res) => {
 
     const booking = await createBookingAndUserDetails(bookingData, userData);
 
-    await sendMailConfirmation({ name, email, arrival_date, departure_date, totalPrice, availableSlot });
+    sendMailConfirmation({ name, email, arrival_date, departure_date, totalPrice, availableSlot });
 
     res.json({ message: "Booking successful", bookingId: booking.id, parking_spot_id: availableSlot, totalPrice });
   } catch (err) {
@@ -233,6 +207,28 @@ app.post('/check-availability', async (req, res) => {
     res.status(500).json({ error: 'Error checking availability' });
   }
 });
+app.post('/check-pending', async (req, res) => {
+  try {
+    const query = `
+      UPDATE parking_bookings
+      SET "status" = 'cancelled'
+      WHERE "status" = 'pending'
+        AND created < NOW() - INTERVAL '2 hours'
+      RETURNING id;
+    `;
+    const result = await db.query(query);
+
+    if (result.rows.length === 0) {
+      return res.json({ message: 'No pending bookings', pending: false });
+    }
+
+    return res.json({ message: 'Pending bookings found', pending: true, cancelledBookings: result.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error updating pending bookings');
+  }
+});
+
 
 app.post('/payment-success', async (req, res) => {
   const { bookingId } = req.body;
