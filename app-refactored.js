@@ -12,6 +12,8 @@ import Stripe from "stripe"
 const app = express();
 const PORT = 3000;
 const YOUR_DOMAIN = 'http://localhost:3000';
+let stripe; // Declare globally to make it accessible across the application
+
 
 
 env.config();
@@ -23,8 +25,9 @@ const db = new pg.Client({
   port: process.env.PG_PORT,
 });
 db.connect();
-const stripe = new Stripe(process.env.STRIPE_KEY);
-console.log('Stripe Key:', process.env.STRIPE_KEY);
+//const stripe = new Stripe(process.env.STRIPE_KEY);
+
+//onsole.log('Stripe Key:', process.env.STRIPE_KEY);
 
 // Middleware
 
@@ -35,9 +38,55 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.render('index.ejs', { totalPrice: 0 });
 });
+(async () => {
+  try {
+    const { stripeKey } = await getEnvVariables(); // Retrieve Stripe key from DB
+    stripe = new Stripe (stripeKey); // Initialize Stripe
+    console.log('Stripe initialized successfully.');
+  } catch (error) {
+    console.error('Failed to initialize Stripe:', error.message);
+    process.exit(1); // Exit if initialization fails
+  }
+})();
+
+//function gt
+async function getEnvVariables() {
+  try {
+    const query = 'SELECT value FROM env_variables WHERE key_name = $1';
+    //const passQuery = 'SELECT value FROM env_variables WHERE key_name = $1';
+
+    // Fetch both values in parallel
+    const emailResult = await db.query(query, ['EMAIL']);
+    const passResult = await db.query(query, ['EMAIL_PASS']);
+    const stripe_key = await db.query(query, ['STRIPE_KEY']);
+    ;
+    if (emailResult.rows.length > 0 && passResult.rows.length > 0 && stripe_key.rows.length > 0) {
+      // Return the value from the result
+      return {
+        emailOut: emailResult.rows[0].value,
+        pass: passResult.rows[0].value,
+        stripeKey: stripe_key.rows[0].value
+      }
 
 
-
+    }
+    throw new Error(`EMAIL or EMAIL_PASS not found in env_variables table.`);
+  } catch (error) {
+    console.error('Error fetching environment variable:', error.message);
+    throw error;
+  }
+}
+//get stripe key from db
+async function setupStripe() {
+  try {
+    const { stripeKey } = await getEnvVariables();
+    console.log('Retrieved Stripe Key:', stripeKey); // Debug log
+    return (stripeKey);
+  } catch (error) {
+    console.error('Error setting up Stripe:', error.message);
+    throw error;
+  }
+}
 
 // Helper Functions
 function calculateTotalPrice(totalDays, basePrice, extraDayPrice, maxDays) {
@@ -77,12 +126,16 @@ async function getAvailableSlot(arrival_date, departure_date) {
 //   return db.query(query);
 // }
 
-function sendMailConfirmation(data) {
+async function sendMailConfirmation(data) {
   console.log('Data received in sendMailConfirmation:', data);
-  const { bookingId, name, sessionUrl, slot, email, arrival_date, departure_date, totalPrice, isPaid } = data;
+  const { bookingId, name, sessionUrl, slot, email, arrival_date, departure_date, arrival_time, departure_time, totalPrice, isPaid } = data;
   const formattedArrival = formatDate(arrival_date)
   const formattedDeparture = formatDate(departure_date)
-  console.log(formattedArrival + "    " + formattedDeparture)
+  //console.log(formattedArrival + "    " + formattedDeparture)
+
+  const { emailOut, pass } = await getEnvVariables(); // Fetch email and password
+  console.log("Email out in function send email is " + emailOut);
+  console.log("Pass in function send email is " + pass);
   if (!email || email.trim() === '') {
     console.error('Recipient email is invalid or missing.');
     return;
@@ -93,29 +146,33 @@ function sendMailConfirmation(data) {
   const transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
-      user: 'elia.nibu@gmail.com', //process.env.MAIL_USER,
-      pass: process.env.MAIL_PASS,
+      user: emailOut,//'elia.nibu@gmail.com', //process.env.MAIL_USER,
+      pass: pass//process.env.MAIL_PASS,
     },
   });
 
   const mailOptions = {
-    from: 'elia.nibu@gmail.com',
+    from: emailOut,
     to: email,
-    subject: `${isPaid ? 'Booking Confirmation' : 'Booking Pending Payment'}(Ref: EIN${bookingId})`,
+    subject: `${isPaid ? 'Booking Confirmation' : 'Booking Pending for Payment'}(Ref: EIN${bookingId})`,
     html: `
-        <h1>${isPaid ? 'Booking Confirmation' : 'Booking Pending Payment'}</h1>
+        <h1>${isPaid ? 'Your Booking Confirmation' : 'Booking Pending forPayment'}</h1>
       <p>Hello, ${name}!</p>
       <p>${isPaid
         ? `Your booking has been confirmed. Here are the details:`
-        : `You have almost completed your booking. Please complete the payment to confirm.`}</p>
+        : `You have almost completed your booking. Please complete the payment to confirm.<br>
+        <strong>You have 2h to pay your booking, otherwise it will be cancelled</strong>`}</p>
       <ul>
         <li><strong>Slot:</strong> ${slot}</li>
         <li><strong>Arrival Date:</strong> ${formattedArrival}</li>
-        <li><strong>Departure Date:</strong> ${formattedDeparture}</li>
+        <li><strong>Arrival Date:</strong> ${formattedDeparture}</li>
+        <li><strong>Arrival Time:</strong> ${arrival_time}</li>
+        <li><strong>Departure Time:</strong> ${departure_time}</li>
         <li><strong>Total Price:</strong> €${totalPrice}</li>
       </ul>
       ${!isPaid
         ? `<p>Click the button below to complete your payment:</p>
+           <p><strong>Please make sure you pay within 2h to confirm your booking</strong></p>
            <p><a href="${sessionUrl}" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">Pay Now</a></p>
            <p>If the button does not work, you can use the following link:</p>
            <p><a href="${sessionUrl}">${sessionUrl}</a></p>`
@@ -203,8 +260,11 @@ async function createBookingAndUserDetails(bookingData, userData, totalPrice) {
     throw error;  // Rethrow the error for handling elsewhere
   }
 }
-async function createSession({ bookingId, email, name, slot, totalPrice, arrival_date, departure_date }) {
+async function createSession({ bookingId, email, name, slot, totalPrice, arrival_date, departure_date, arrival_time, departure_time }) {
   try {
+    if (!stripe) {
+      throw new Error('Stripe is not initialized. Please check the setupStripe function.');
+    }
     // Create Stripe session
     const query = `select created from parking_bookings where id =$1`
     const result = await db.query(query, [bookingId])
@@ -230,7 +290,7 @@ async function createSession({ bookingId, email, name, slot, totalPrice, arrival
       ],
       mode: 'payment',
       success_url: `http://localhost:3000/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-     // cancel_url: `http://localhost:3000/payment-cancelled?session_id={CHECKOUT_SESSION_ID}`,
+      // cancel_url: `http://localhost:3000/payment-cancelled?session_id={CHECKOUT_SESSION_ID}`,
       //cancel_url not necessary so far cox if cancelled still link shows payment page(within 2 hours that is still avaliable)
       //and if expired shows pages expired
       //expires_at: Math.floor((new Date(createdDate).getTime() + 2 * 60 * 60 * 1000) / 1000),
@@ -256,6 +316,8 @@ async function createSession({ bookingId, email, name, slot, totalPrice, arrival
       slot,
       arrival_date,
       departure_date,
+      arrival_time,
+      departure_time,
       totalPrice,
     });
     console.log("session id: " + session.id)
@@ -330,6 +392,8 @@ app.post('/book', async (req, res) => {
       totalPrice,
       arrival_date,
       departure_date,
+      arrival_time,
+      departure_time,
       isPaid: false
     });
     //mail is sent on the session payment link
@@ -405,7 +469,7 @@ app.get('/payment-success', async (req, res) => {
 
     // // Fetch booking details from the database using the booking ID
     const query = `       
-     SELECT ub.parking_spot_id, ub.name, ub.email, ub.arrival_date, ub.departure_date, ub.fk_parking_bookings_id, pb.total_price
+     SELECT ub.parking_spot_id, ub.name, ub.email, ub.arrival_date, ub.departure_date, ub.arrival_time,ub.departure_time, ub.fk_parking_bookings_id, pb.total_price
   FROM user_bookings ub
   JOIN parking_bookings pb ON pb.id = ub.fk_parking_bookings_id
   WHERE ub.fk_parking_bookings_id = $1
@@ -431,6 +495,8 @@ app.get('/payment-success', async (req, res) => {
       email: booking.email,
       arrival_date: booking.arrival_date,
       departure_date: booking.departure_date,
+      arrival_time: booking.arrival_time,
+      departure_time: booking.departure_time,
       totalPrice: booking.total_price,
       isPaid: true,
     });
@@ -442,39 +508,42 @@ app.get('/payment-success', async (req, res) => {
     res.status(500).send('Error retrieving payment session');
   }
 });
+
+//NOT NECESSARY FOR NOW AS IT IS NOT NEDED TO HANLD ECANCEL_PAYMENTE
+//2H EXPIRE OTHERWISE USER IS ALLOWED TO STILL PAY
 //You can also choose to redirect your customers to your website instead of providing a confirmation page. If you redirect your customers to your own confirmation page, you can include {CHECKOUT_SESSION_ID} in the redirect URL to dynamically pass the customer’s current Checkout Session ID. 
 // This is helpful if you want to tailor the success message on your website based on the information in the Checkout Session. 
 // You can also add UTM codes as parameters in the query string of the payment link URL.
 //  The UTM codes are automatically added to your redirect URL when your customer completes a payment.
-app.get('/payment-cancelled', async (req, res) => {
+// app.get('/payment-cancelled', async (req, res) => {
 
-  const sessionId = req.query.session_id;
+//   const sessionId = req.query.session_id;
 
-  if (!sessionId) {
-    return res.status(400).json({ error: 'Session ID is missing' });
-  }
+//   if (!sessionId) {
+//     return res.status(400).json({ error: 'Session ID is missing' });
+//   }
 
-  try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+//   try {
+//     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    if (!session) {
-      return res.status(404).json({ error: 'Session not found' });
-    }
+//     if (!session) {
+//       return res.status(404).json({ error: 'Session not found' });
+//     }
 
-    const bookingId = session.client_reference_id;
+//     const bookingId = session.client_reference_id;
 
-    // Update the booking status to "cancelled"
-    await db.query('UPDATE parking_bookings SET status = $1 WHERE id = $2', ['cancelled', bookingId]);
+//     // Update the booking status to "cancelled"
+//     await db.query('UPDATE parking_bookings SET status = $1 WHERE id = $2', ['cancelled', bookingId]);
 
-    console.log(`Booking ${bookingId} marked as cancelled.`);
+//     console.log(`Booking ${bookingId} marked as cancelled.`);
 
-    return res.status(200).json({ status: 'cancelled', message: 'Payment has been cancelled.' });
-  } catch (error) {
-    console.error('Error handling payment cancellation:', error);
-    return res.status(500).json({ error: 'Failed to handle cancellation' });
-  }
+//     return res.status(200).json({ status: 'cancelled', message: 'Payment has been cancelled.' });
+//   } catch (error) {
+//     console.error('Error handling payment cancellation:', error);
+//     return res.status(500).json({ error: 'Failed to handle cancellation' });
+//   }
 
-})
+// })
 function formatDate(date) {
   //It shows full date which is more user frendly
   const options = { dateStyle: 'full' }
