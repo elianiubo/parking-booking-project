@@ -14,63 +14,70 @@
   <form id="booking-form" action="/book" method="POST">
     <div class="row">
       <div class="form-group">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-      
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-      </div>
-    </div>
-  
-    <div class="row">
-      <div class="form-group">
         <label for="arrival_date">Arrival Date:</label>
         <input type="date" id="arrival_date" name="arrival_date" required>
-      
+
         <label for="departure_date">Departure Date:</label>
         <input type="date" id="departure_date" name="departure_date" required>
       </div>
     </div>
-  
     <div id="price-display">
       Total Price: EUR <span id="total-price"> 0</span>
     </div>
-  
+    <div class="row">
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+    </div>
+
+
+
+
+
     <div class="row">
       <div class="form-group">
         <label for="arrival_time">Arrival Time:</label>
         <input type="time" id="arrival_time" name="arrival_time" required>
-      
+
         <label for="departure_time">Departure Time:</label>
         <input type="time" id="departure_time" name="departure_time" required>
       </div>
     </div>
-  
+
     <div class="row">
       <div class="form-group">
         <label for="car_brand">Car Brand:</label>
         <input type="text" id="car_brand" name="car_brand" required>
-     
+
         <label for="car_color">Car Color:</label>
         <input type="text" id="car_color" name="car_color" required>
       </div>
     </div>
-  
+
     <div class="row">
       <div class="form-group">
         <label for="car_type">Car Type:</label>
         <input type="text" id="car_type" name="car_type" required>
-     
+
         <label for="license_plate">License Plate Number:</label>
         <input type="text" id="license_plate" name="license_plate" required>
       </div>
     </div>
-  
+
     <button type="submit" id="submit-btn" disabled>Submit</button>
     <p class="error" id="error-message"></p>
   </form>
-  
-  
+<div hidden id="payment-process">
+<h1>Congratulations NAME</h1>
+<p>Thank you for booking with us</p>
+<p>You have recieved an email with your booking details and payment link</p>
+<p>Please make sure you pay your booking within <span>2 hours</span> or the booking will be cancelled</p>
+</div>
+
 
   <!-- <form id="booking-form" action="/book" method="POST">
     <label for="name">Name:</label>

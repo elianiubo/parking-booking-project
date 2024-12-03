@@ -85,9 +85,22 @@ SELECT pb.id
 FROM parking_bookings AS pb
 WHERE pb."status" = 'pending' 
   AND pb.created < NOW() - INTERVAL '24 hours';
-
+ALTER TABLE parking_bookings
+ADD COLUMN total_price NUMERIC(10, 2) NOT NULL DEFAULT 0.00;
   select * from parking_bookings
   select * from pricing
   select * from user_bookings
   select * from parking_slots
   delete from parking_bookings
+
+  ALTER TABLE user_bookings
+ADD COLUMN booking_id INT;
+
+ALTER TABLE user_bookings
+ADD CONSTRAINT fk_booking_id
+FOREIGN KEY (booking_id)
+REFERENCES parking_bookings(id);
+
+
+
+  update parking_bookings set status = 'cancelled'
