@@ -8,7 +8,6 @@ import nodemailer from "nodemailer"
 import axios from "axios"
 import Stripe from "stripe"
 
-//const stripe = require('stripe')('sk_test_51QPgn9J2H1ZlEkVDFm19Md3IfjMF86gNJI8lED424xKNbzQpXNthjMsonwvIaWxSBcpsvqQxsGGh4OEDzWAcxFlK00clHOLYdG');
 const app = express();
 const PORT = 3000;
 const YOUR_DOMAIN = 'http://localhost:3000';
