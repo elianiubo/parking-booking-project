@@ -8,7 +8,7 @@ import nodemailer from "nodemailer"
 import axios from "axios"
 import Stripe from "stripe"
 
-//const stripe = require('stripe')('sk_test_51QPgn9J2H1ZlEkVDFm19Md3IfjMF86gNJI8lED424xKNbzQpXNthjMsonwvIaWxSBcpsvqQxsGGh4OEDzWAcxFlK00clHOLYdG');
+
 const app = express();
 const PORT = 3000;
 const YOUR_DOMAIN = 'http://localhost:3000';
@@ -38,10 +38,13 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.render('index.ejs', { totalPrice: 0 });
 });
+
+// gets the stripe key from getEnvVariables and globally initializes the secret_key
+//for the session in function createSession
 (async () => {
   try {
     const { stripeKey } = await getEnvVariables(); // Retrieve Stripe key from DB
-    stripe = new Stripe (stripeKey); // Initialize Stripe
+    stripe = new Stripe(stripeKey); // Initialize Stripe
     console.log('Stripe initialized successfully.');
   } catch (error) {
     console.error('Failed to initialize Stripe:', error.message);
@@ -49,7 +52,7 @@ app.get('/', (req, res) => {
   }
 })();
 
-//function gt
+//function that gets the env var from the database
 async function getEnvVariables() {
   try {
     const query = 'SELECT value FROM env_variables WHERE key_name = $1';
@@ -58,17 +61,20 @@ async function getEnvVariables() {
     // Fetch both values in parallel
     const emailResult = await db.query(query, ['EMAIL']);
     const passResult = await db.query(query, ['EMAIL_PASS']);
-    const stripe_key = await db.query(query, ['STRIPE_KEY']);
+    const stripeKeyResult = await db.query(query, ['STRIPE_KEY']);
+    const cancelMinutesResult = await db.query(query, ['CANCEL_MINUTES']);
     ;
-    if (emailResult.rows.length > 0 && passResult.rows.length > 0 && stripe_key.rows.length > 0) {
+    if (emailResult.rows.length > 0
+      && passResult.rows.length > 0
+      && stripeKeyResult.rows.length > 0
+      && cancelMinutesResult.rows.length > 0) {
       // Return the value from the result
       return {
         emailOut: emailResult.rows[0].value,
         pass: passResult.rows[0].value,
-        stripeKey: stripe_key.rows[0].value
+        stripeKey: stripeKeyResult.rows[0].value,
+        cancel_minutes: parseInt(cancelMinutesResult.rows[0].value)
       }
-
-
     }
     throw new Error(`EMAIL or EMAIL_PASS not found in env_variables table.`);
   } catch (error) {
@@ -76,19 +82,8 @@ async function getEnvVariables() {
     throw error;
   }
 }
-//get stripe key from db
-async function setupStripe() {
-  try {
-    const { stripeKey } = await getEnvVariables();
-    console.log('Retrieved Stripe Key:', stripeKey); // Debug log
-    return (stripeKey);
-  } catch (error) {
-    console.error('Error setting up Stripe:', error.message);
-    throw error;
-  }
-}
 
-// Helper Functions
+// Hcalculates total price that the price is used in 
 function calculateTotalPrice(totalDays, basePrice, extraDayPrice, maxDays) {
   if (totalDays <= maxDays) {
     return parseFloat(basePrice.toFixed(2));
@@ -114,18 +109,8 @@ async function getAvailableSlot(arrival_date, departure_date) {
   const values = [arrival_date, departure_date];
   return db.query(query, values);
 }
-
-// async function cancelPendingBookings() {
-//   const query = `
-//     UPDATE parking_bookings
-//     SET "status" = 'cancelled'
-//     WHERE "status" = 'pending'
-//       AND created < NOW() - INTERVAL '2 hours'
-//     RETURNING id;
-//   `;
-//   return db.query(query);
-// }
-
+//Funtion that gets user data and sned the email wether is pending or confirmed booking
+//the email format is also developed
 async function sendMailConfirmation(data) {
   console.log('Data received in sendMailConfirmation:', data);
   const { bookingId, name, sessionUrl, slot, email, arrival_date, departure_date, arrival_time, departure_time, totalPrice, isPaid } = data;
@@ -133,15 +118,31 @@ async function sendMailConfirmation(data) {
   const formattedDeparture = formatDate(departure_date)
   //console.log(formattedArrival + "    " + formattedDeparture)
 
-  const { emailOut, pass } = await getEnvVariables(); // Fetch email and password
+  const { emailOut, pass, cancel_minutes } = await getEnvVariables(); // Fetch email and password from en variables
   console.log("Email out in function send email is " + emailOut);
   console.log("Pass in function send email is " + pass);
+  console.log("Time to cancel is " + cancel_minutes)
+
   if (!email || email.trim() === '') {
     console.error('Recipient email is invalid or missing.');
     return;
   }
   console.log("Sending confirmation email to:", email);
   console.log("Booking id from mail function" + bookingId)
+  //format to add the text in minutes or hours in case of future chamnges in time in db
+  //automatically adaps to minutes or hours the text
+  let cancelTimeText;
+  //checks wether is hours or minutes
+  if (cancel_minutes >= 60) {
+    const hours = Math.floor(cancel_minutes / 60);
+    const minutes = cancel_minutes % 60;
+    //Makes the text adding an s depending if is 1 or more hours and the same with minutes
+    cancelTimeText = `${hours} hour${hours > 1 ? 's' : ''}${minutes > 0 ? ` and ${minutes} minute${minutes > 1 ? 's' : ''}` : ''}`;
+  } else {
+    cancelTimeText = `${cancel_minutes} minute${cancel_minutes > 1 ? 's' : ''}`;
+  }
+
+  console.log("Formatted cancel time:", cancelTimeText);
 
   const transporter = nodemailer.createTransport({
     service: 'Gmail',
@@ -161,7 +162,7 @@ async function sendMailConfirmation(data) {
       <p>${isPaid
         ? `Your booking has been confirmed. Here are the details:`
         : `You have almost completed your booking. Please complete the payment to confirm.<br>
-        <strong>You have 2h to pay your booking, otherwise it will be cancelled</strong>`}</p>
+        <strong>You have ${cancelTimeText} to pay your booking, otherwise it will be cancelled</strong>`}</p>
       <ul>
         <li><strong>Slot:</strong> ${slot}</li>
         <li><strong>Arrival Date:</strong> ${formattedArrival}</li>
@@ -172,7 +173,7 @@ async function sendMailConfirmation(data) {
       </ul>
       ${!isPaid
         ? `<p>Click the button below to complete your payment:</p>
-           <p><strong>Please make sure you pay within 2h to confirm your booking</strong></p>
+           <p><strong>Please, make sure you pay within ${cancelTimeText} to confirm your booking</strong></p>
            <p><a href="${sessionUrl}" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">Pay Now</a></p>
            <p>If the button does not work, you can use the following link:</p>
            <p><a href="${sessionUrl}">${sessionUrl}</a></p>`
@@ -180,25 +181,6 @@ async function sendMailConfirmation(data) {
     
       `,
   };
-  // const mailOptions2 = {
-  //   from: 'elia.nibu@gmail.com',
-  //   to: email,
-  //   subject: `Booking confirmed (Ref: EIN${bookingId})`,
-  //   html: `
-  //     <h1>Booking Details</h1>
-  //   <p>Hello, ${name}!</p>
-  //   <p>You have completed your booking. Here are the details:</p>
-  //   <ul>
-  //     <li><strong>Reference number: </strong>EIN${bookingId}</li>
-  //     <li><strong>Slot:</strong> ${slot}</li>
-  //     <li><strong>Arrival Date:</strong> ${arrival_date}</li>
-  //     <li><strong>Departure Date:</strong> ${departure_date}</li>
-  //     <li><strong>Total Price:</strong> €${totalPrice}</li>
-  //   </ul>
-  //   <p>Thank you veyy much for booking with us:</p>
-  //   <p>We look for to seeing you again</p>
-  //   <p>For any enquiery you can contact us at info@contact.nl</p>
-  //     `,
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.error('Error sending email:', error);
@@ -209,21 +191,6 @@ async function sendMailConfirmation(data) {
   });
 
 };
-
-
-// if (success) {
-//   transporter.sendMail(mailOptions2, (error, info) => {
-//     if (error) {
-//       console.error('Error sending email:', error);
-//     } else {
-//       console.log('Stripe session URL:', session.url);
-//       console.log('Email sent:', info.response);
-//     }
-//   });
-// }
-
-
-// }
 
 async function createBookingAndUserDetails(bookingData, userData, totalPrice) {
   try {
@@ -265,7 +232,14 @@ async function createSession({ bookingId, email, name, slot, totalPrice, arrival
     if (!stripe) {
       throw new Error('Stripe is not initialized. Please check the setupStripe function.');
     }
+    const { cancel_minutes } = await getEnvVariables()
+    console.log("Cancel Duration from DB:", cancel_minutes);
     // Create Stripe session
+    // Parse cancel_duration into minutes
+    // const durationInMinutes = parseFloat(cancel_minutes);
+    // if (isNaN(durationInMinutes) || durationInMinutes <= 0) {
+    //   throw new Error("Invalid cancel duration from database.");
+    // }
     const query = `select created from parking_bookings where id =$1`
     const result = await db.query(query, [bookingId])
     console.log("ID from the creted from db" + bookingId)
@@ -282,7 +256,7 @@ async function createSession({ bookingId, email, name, slot, totalPrice, arrival
         {
           price_data: {
             currency: 'eur',
-            product_data: { name: `Parking Space for ref EIN${bookingId}` },
+            product_data: { name: `Payment for Parking Space ref EIN${bookingId}` },
             unit_amount: Math.round(totalPrice * 100),
           },
           quantity: 1,
@@ -293,10 +267,10 @@ async function createSession({ bookingId, email, name, slot, totalPrice, arrival
       // cancel_url: `http://localhost:3000/payment-cancelled?session_id={CHECKOUT_SESSION_ID}`,
       //cancel_url not necessary so far cox if cancelled still link shows payment page(within 2 hours that is still avaliable)
       //and if expired shows pages expired
-      //expires_at: Math.floor((new Date(createdDate).getTime() + 2 * 60 * 60 * 1000) / 1000),
+      //expires_at: Math.floor((new Date(createdDate).getTime() + 30 * 60 * 60 * 1000) / 1000),
 
       //it expires at 30 min CHANGE TO 2 HOURS IN THE FUTURE
-      expires_at: Math.floor((new Date(createdDate).getTime() + 30 * 60 * 1000) / 1000), // Expire in 30 minutes
+      expires_at: Math.floor((new Date(createdDate).getTime() + cancel_minutes * 60 * 1000) / 1000), // Expire in 30 minutes
 
       client_reference_id: bookingId,
       //customer_email: email this make email to be in the input payment system
@@ -430,23 +404,43 @@ app.post('/check-availability', async (req, res) => {
 });
 app.post('/check-pending', async (req, res) => {
   try {
-    const query = `
-      UPDATE parking_bookings
-      SET "status" = 'cancelled'
-      WHERE "status" = 'pending'
-        AND created < NOW() - INTERVAL '2 hours'
-      RETURNING id;
-    `;
-    const result = await db.query(query);
-
-    if (result.rows.length === 0) {
-      return res.json({ message: 'No pending bookings', pending: false });
+    //I get the minutes from function
+    const { cancel_minutes } = await getEnvVariables();
+    if (!cancel_minutes) {
+      throw new Error('Cancel time not defined or invalid');
     }
+    // const query = `
+    //   UPDATE parking_bookings
+    //   SET "status" = 'cancelled'
+    //   WHERE "status" = 'pending'
+    //     AND created < NOW() - INTERVAL 2h
+    //   RETURNING id;
+    // `;
+    // const result = await db.query(query);
 
-    return res.json({ message: 'Pending bookings found', pending: true, cancelledBookings: result.rows });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error updating pending bookings');
+    //Changed the query to get the time of the booking depending on te value of cancel time in DB
+    //link explains the CAST
+    //https://neon.tech/postgresql/postgresql-tutorial/postgresql-cast
+    const query = `
+  UPDATE parking_bookings
+  SET "status" = 'cancelled'
+  WHERE "status" = 'pending'
+    AND created < NOW() - (CAST($1 || ' minutes' AS INTERVAL))
+  RETURNING id;
+`;
+    const result = await db.query(query, [cancel_minutes]);
+    console.log("The minutes after pending cancelled are" + cancel_minutes)
+
+    if (result.rows.length > 0) {
+      console.log('Cancelled bookings:', result.rows.map(row => row.id));
+      res.status(200).json({ message: 'Pending bookings cancelled', cancelledIds: result.rows.map(row => row.id) });
+    } else {
+      console.log('No pending bookings to cancel.');
+      res.status(200).json({ message: 'No pending bookings to cancel' });
+    }
+  } catch (error) {
+    console.error('Error in check-pending:', error.message);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
