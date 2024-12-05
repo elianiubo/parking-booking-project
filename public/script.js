@@ -6,14 +6,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const arrivalDateInput = document.getElementById('arrival_date');
   const departureDateInput = document.getElementById('departure_date');
-  const totalPriceElement = document.getElementById('total-price');
   const submitButton = document.getElementById('submit-btn');
-  // const availabilityMessage = document.createElement("p");
-  // availabilityMessage.id = "availabilityMessage";
-  //document.getElementById("booking-form").appendChild(availabilityMessage);
-
+  const priceDisplay = document.getElementById("price-display");
+  if (!priceDisplay) {
+    console.error("Element with ID 'price-display' not found.");
+    return;
+  }
   // I save this variables in local so ig¡f page reloads are saved and user can reuse them
-  
+
   // document.getElementById("booking-form").addEventListener('submit', () => {
 
   //   const arrivDate = arrivalDateInput.value;
@@ -25,35 +25,49 @@ document.addEventListener("DOMContentLoaded", () => {
   //   localStorage.setItem('totalPrice', totalPrice);
 
   // })
-
-
-  window.addEventListener('load', () => {
-    // Restore form state
-
-  });
-
+  // Create the span element for total price dynamically
+  const span = document.createElement("span");
+  span.id = "total-price";
+  span.textContent = "0"; // Default price
+  priceDisplay.appendChild(span);
+  console.log("Dynamic span created and appended to #price-display.");
   async function checkAvailability(e) {
     const arrivDate = arrivalDateInput.value;
     const depDate = departureDateInput.value;
-    let priceDisplay = document.getElementById("price-display");
-    //e.prevendDefault() if i put it doesn't show total price
 
-    // Ensure departure date is after arrival date by setting the min value for departure
-    if (arrivDate) {
+
+    console.log("Arrival Date:", arrivDate, "Departure Date:", depDate);
+     // Ensure departure date is after arrival date by setting the min value for departure
+     if (arrivDate) {
       departureDateInput.setAttribute("min", arrivDate); // Disable dates before arrival date
     }
-    if (!arrivDate || !depDate) {
-      // priceDisplay.textContent = '';
-      //totalPriceElement.textContent = '0';
-      //availabilityMessage.innerHTML = '<p>Please select both arrival and departure dates.</p>';
-      submitButton.disabled = false;
-      return;
+
+   //If both dates are selected
+    if (arrivDate && depDate) {
+      // if departure date is smaller tha arrival date ex arriv 10-12-24 and dep 09-12-24
+      //should run this code to fix this issue
+      if (depDate < arrivDate) {
+        departureDateInput.value = ""; // Clear invalid departure date
+        span.textContent = "0"; // Reset total price
+        priceDisplay.textContent = "Total Price: EUR 0"; // Inform the user
+        submitButton.disabled = true; // Disable submit button
+        departureDateInput.setAttribute("min", arrivDate);
+        return; // Exit early
+      }
     }
+    // Proceed only if both arrival and departure dates are valid and selected
+    if (!arrivDate || !depDate) {
+      span.textContent = "0";
+      //priceDisplay.textContent = "Please select both arrival and departure dates.";
+      submitButton.disabled = true;
+      return; // Exit early
+    }
+
     try {
       const response = await fetch("/check-availability", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ arrival_date: arrivDate, departure_date: depDate, totalPrice: totalPriceElement })
+        body: JSON.stringify({ arrival_date: arrivDate, departure_date: depDate, totalPrice: span })
       });
 
       const result = await response.json();
@@ -62,30 +76,18 @@ document.addEventListener("DOMContentLoaded", () => {
         //Clear dates not avaliable
         priceDisplay.textContent = `Total Price: EUR ${result.totalPrice}`;
         submitButton.disabled = false; // Enable button if dates are available
-        totalPriceElement.textContent = `${result.totalPrice}`;
-        //priceDisplay.textContent = '';
-        //availabilityMessage.innerHTML = "<p>Dates are available!</p>";
-        // totalPriceElement.innerHTML = `${result.totalPrice}`;
-
-
-        //e.prevendDefault()
+        span.textContent = `${result.totalPrice}`;
 
       } else {
         priceDisplay.textContent = "Selected dates are not available. Please choose different dates.";
-        totalPriceElement.textContent = '0';  // Reset total price when dates aren't available
+        span.textContent = '0';  // Reset total price when dates aren't available
         submitButton.disabled = true; // Disable button if dates are not available
-        // availabilityMessage.innerHTML = "<p>Selected dates are not available. Please choose different dates.</p>";
-        // totalPriceElement.textContent = "0"
-        //  availabilityMessage.appendChild(document.createTextNode("Selected dates are not available. Please choose different dates"))
-        // let text = availabilityMessage.textContent;
-        //  console.log("text:", text);
       }
     } catch (error) {
       console.error("Error checking availability:", error);
       submitButton.disabled = true;
-      totalPriceElement.textContent = '0';
-      priceDisplay.textContent = "<p>Error checking availability.</p>";
-      //totalPriceElement.textContent = "0";
+      span.textContent = '0';
+      priceDisplay.textContent = "<p>Error checking availability.</p>"
     }
   }
   // function showCongratsMessage() {
