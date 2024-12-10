@@ -5,13 +5,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Parking Booking</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,200..800;1,200..800&family=Monda:wght@400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet"  href="/styles.css">
 <body>
-  <h1>Book Your Parking Spot</h1>
-  <p>Secure parking at affordable rates. Fill in your details to book!</p>
-  <form id="booking-form" action="/book" method="POST">
+
+  <%- include('partials/header.ejs') %>
+    <!-- <header>
+    <h1>Cheap Parking aerport</h1>
+    <nav>
+      <ul>
+        <li ><a href="/" >Home</a></li>
+        <li href=#><a href="/">Contact</a></li>
+        <!--Future aditions-->
+    <!-- </ul>
+    </nav>-->
+
+    <main>
+
+      <%- include('booking-form.ejs') %>
+      <!-- <h1>Book Your Parking Spot</h1>
+  <p>Secure parking at affordable rates. Fill in your details to book!</p> -->
+
+      <!-- <form id="booking-form" action="/book" method="POST">
     <div class="row">
       <div class="form-group">
         <label for="arrival_date">Arrival Date:</label>
@@ -22,9 +39,9 @@
       </div>
     </div>
     <div id="price-display">
-      Total Price EUR 
+      Total Price EUR
       <!-- Total Price: EUR <span id="total-price"> 0</span> -->
-    </div>
+      <!-- </div>
     <div class="row">
       <div class="form-group">
         <label for="name">Name:</label>
@@ -33,13 +50,11 @@
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required>
       </div>
-    </div>
+    </div>  -->
 
 
 
-
-
-    <div class="row">
+      <!-- <div class="row">
       <div class="form-group">
         <label for="arrival_time">Arrival Time:</label>
         <input type="time" id="arrival_time" name="arrival_time" required>
@@ -71,16 +86,17 @@
 
     <button type="submit" id="submit-btn" disabled>Submit</button>
     <p class="error" id="error-message"></p>
-  </form>
-<div hidden id="payment-process">
-<h1>Congratulations NAME</h1>
-<p>Thank you for booking with us</p>
-<p>You have recieved an email with your booking details and payment link</p>
-<p>Please make sure you pay your booking within <span>2 hours</span> or the booking will be cancelled</p>
-</div>
+  </form> -->
+    </main>
+    <div hidden id="payment-process">
+      <h1>Congratulations NAME</h1>
+      <p>Thank you for booking with us</p>
+      <p>You have recieved an email with your booking details and payment link</p>
+      <p>Please make sure you pay your booking within <span>2 hours</span> or the booking will be cancelled</p>
+    </div>
 
 
-  <!-- <form id="booking-form" action="/book" method="POST">
+    <!-- <form id="booking-form" action="/book" method="POST">
     <label for="name">Name:</label>
     <input type="text" id="name" name="name" required>
   
@@ -117,7 +133,7 @@
     <p id="error-message" style="color: red;"></p>
   </form> -->
 
-  <script src="/script.js"></script>
+    <script src="/script.js"></script>
 </body>
 
 </html>
