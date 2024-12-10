@@ -1,62 +1,325 @@
 * {
-  margin: 0;
-  padding: 0;
-}
-
-/* body,
-h1,
-h2,
-p,
-ul,
-li,
-form,
-input,
-textarea,
-a {
-  margin: 0;
-  padding: 0;
-  border: none;
-  font-family: "Arial", sans-serif;
-} */
-
-* {
-  margin: 0;
-  padding: 0;
-}
-body {
-  height: 100%;
-}
-
-/*Layout*/
-
-#booking-form {
-  display: flex;
-  flex-direction: column;
-
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-
-
-}
-
-.row {
-  display: flex;
-  margin-bottom: 20px;
-}
-
-
-#price-display {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-@media (max-width: 768px) {
-  .row {
-    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
-
-  .form-group {
+  body {
+  
+  
     width: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: "Monda", sans-serif;
+    font-weight: 900;
+    /* background-image: url(/assets/images/background-img.jpg);
+    
+    background-size: cover; /* Ensure the image covers the entire viewport */
+    /* background-attachment: fixed; /* Keeps the background fixed while scrolling */
+    /* background-position: center; */
+  
+    background-image: url(/assets/images/background-img.jpg);
+    background-position: center;
+    
+    /* animation: animatedBackground 1s ease-in-out; */
   }
-}
+  header{
+    width: 70%;
+    margin: 0px auto;
+    box-shadow:  4px 3px 10px rgb(0, 0, 0);
+  }
+  
+  /*Layout*/
+  /* HEADER */
+  .logo {
+    width: 90px;
+    height: 90px;
+    margin-left: -150px;
+  }
+  
+  
+  /* Navigation Bar Styling */
+  #title-nav-bar-container {
+    width: 70%;
+  height: 80px; /* Set a fixed height for the navigation bar */
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color:#333333; /* Add a background color */
+  border-bottom: 2px solid #000000;
+  box-shadow: 3px 3px 10px rgba(53, 50, 50, 1);
+  position: fixed; /* Keeps the navbar fixed at the top */
+  top: 0;
+  z-index: 3;
+  }
+  /*Puts the nav on the cengter of the container*/
+  /* #nav {
+    margin: 0;
+    padding: 0;
+    align-self: center;
+  
+  
+  } */
+  
+  /*Puts the  list next to each other*/
+  #nav ul {
+    display: flex;
+    list-style: none;
+  }
+  
+  #nav li {
+    margin-left: 70px;
+    text-align: center;
+  }
+  
+  #nav a {
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 17px;
+    color:#FFFFFF;
+  }
+  
+  #nav a:hover {
+    color:#00ADB5;
+    transition: all ease-in-out 290ms;
+  }
+  
+  nav a::before {
+    content: '';
+    display: block;
+    height: 5px;
+    background-color:#00ADB5;
+    top: 0;
+    width: 0%;
+    transition: all ease-in-out 290ms;
+  }
+  
+  nav a:hover::before {
+    width: 100%;
+    color: #3B1E54;
+  }
+  
+  /* Image Section */
+  #img-container {
+    position: relative;
+    width: 100%;
+    height: 70vh; /* Adjusted height for the image section */
+    margin-top: 80px; /* Offset by the height of the navbar */
+    overflow: hidden;
+  }
+  
+  .img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("/assets/images/main-img3.jpg");
+    background-size: cover;
+    background-position: center;
+    filter: brightness(50%);
+    z-index: 1;
+  }
+  
+  #img-container .content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    padding: 0 80px;
+    box-sizing: border-box;
+    color: #EEEEEE;
+  }
+  
+  #img-container .left-content {
+    max-width: 40%;
+    font-size: 30px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+  }
+  
+  /* Right Section Layout */
+  .right-content {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 20px;
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  
+  
+  .content-box {
+    border: 1px solid #000;
+    padding: 20px;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.705);
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .content-box .content-text {
+    text-align: center;
+  }
+  
+  .content-box .content-text p,
+  .content-box .content-text li {
+    list-style: none;
+    font-size: 1rem;
+    color: #555;
+    text-align: center;
+  }
+  
+  .content-box .buttons {
+    text-align: center;
+  }
+  
+  .content-box .buttons a {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color:#00ADB5;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    
+  }
+  
+  .content-box .buttons a:hover {
+    /* background-color: #F5F0CD; */
+    background-color:#2d6d7b;
+    transition: 0.3s ease;
+  }
+  
+  /* Specific Layout Styling for Right Content */
+  .right-content .explanation-box {
+    grid-row: 1;
+  }
+  
+  .bottom-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+  }
+  .bottom-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+  }
+  span{
+    color:#00ADB5 ;
+    font-size: 20px;
+  }
+  /* New Section: Why Choose Us */
+#why-choose-us {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    padding: 40px 80px;
+    /* background-color: rgba(255, 255, 255, 0.9); */
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .why-left {
+    max-width: 40%;
+  }
+  
+  .why-left h2 {
+    font-size: 2rem;
+    color: #00ADB5;
+  }
+  
+  .why-right {
+    max-width: 50%;
+  }
+  
+  .why-right ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .why-right ul li {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    list-style: none;
+  }
+  
+  /* .why-right ul li:before {
+    content: '';
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: #FADA7A;
+    border-radius: 50%;
+    margin-right: 10px;
+  } */
+  /* #img-container a {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    display: inline-block;
+    background-color: #4f638d;
+    color: white;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 1rem;
+    z-index: 2;
+    
+  }
+  
+  #img-container a:hover {
+    background-color: #6f85b5;
+  } */
+  
+  
+  
+  
+  @keyframes animatedBackground {
+    from {
+      background-position: 50% 0;
+    }
+  
+    to {
+      background-position: 50% 0;
+    }
+  }
+  
+  /* BOOKING FORM */
+  
+  /* #booking-form {
+      display: flex;
+      flex-direction: column;
+    
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    
+    
+    }
+    
+    .row {
+      display: flex;
+      margin-bottom: 20px;
+    }
+    
+    
+    #price-display {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      .row {
+        flex-direction: column;
+      }
+    
+      .form-group {
+        width: 100%;
+      }
+    } */
