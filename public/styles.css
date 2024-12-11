@@ -2,10 +2,17 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+/*error message style*/
+.error-message {
+    color: red;
+    font-size: 0.75rem;
+    margin-top: 5px;
+    display: none; /* Hidden by default */
   }
-  body {
-  
-  
+
+body {
     width: 100%;
     margin: 0;
     padding: 0;
@@ -16,98 +23,92 @@
     background-size: cover; /* Ensure the image covers the entire viewport */
     /* background-attachment: fixed; /* Keeps the background fixed while scrolling */
     /* background-position: center; */
-  
+
     background-image: url(/assets/images/background-img.jpg);
     background-position: center;
-    
+
     /* animation: animatedBackground 1s ease-in-out; */
-  }
-  header{
-    width: 70%;
+}
+
+header {
+    max-width: 70%;
     margin: 0px auto;
-    box-shadow:  4px 3px 10px rgb(0, 0, 0);
-  }
-  
-  /*Layout*/
-  /* HEADER */
-  .logo {
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+}
+
+/* HEADER */
+.logo {
     width: 90px;
     height: 90px;
-    margin-left: -150px;
-  }
-  
-  
-  /* Navigation Bar Styling */
-  #title-nav-bar-container {
-    width: 70%;
-  height: 80px; /* Set a fixed height for the navigation bar */
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background-color:#333333; /* Add a background color */
-  border-bottom: 2px solid #000000;
-  box-shadow: 3px 3px 10px rgba(53, 50, 50, 1);
-  position: fixed; /* Keeps the navbar fixed at the top */
-  top: 0;
-  z-index: 3;
-  }
-  /*Puts the nav on the cengter of the container*/
-  /* #nav {
+}
+
+/* Navigation Bar Styling */
+#title-nav-bar-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    /* background-color: #333333; */
+    /* Add a background color */
+    border-bottom: 2px solid #000000;
+    background-image: url(assets/images/dark-concrete-textured-wall.jpg);
+    background-position: bottom;
+    transform: animatedBackground ease-in-out 1s;
+    background-size: cover;
+}
+
+/*Puts the nav on the cengter of the container*/
+/* #nav {
     margin: 0;
     padding: 0;
-    align-self: center;
-  
-  
+    align-self: center; 
   } */
-  
-  /*Puts the  list next to each other*/
-  #nav ul {
+#nav ul {
     display: flex;
     list-style: none;
-  }
-  
-  #nav li {
+}
+
+#nav li {
     margin-left: 70px;
     text-align: center;
-  }
-  
-  #nav a {
+}
+
+#nav a {
     text-decoration: none;
     text-transform: uppercase;
     font-size: 17px;
-    color:#FFFFFF;
-  }
-  
-  #nav a:hover {
-    color:#00ADB5;
+    color: #FFFFFF;
+}
+
+#nav a:hover {
+    color: #00ADB5;
     transition: all ease-in-out 290ms;
-  }
-  
-  nav a::before {
+}
+
+nav a::before {
     content: '';
     display: block;
     height: 5px;
-    background-color:#00ADB5;
+    background-color: #00ADB5;
     top: 0;
     width: 0%;
     transition: all ease-in-out 290ms;
-  }
-  
-  nav a:hover::before {
+}
+
+nav a:hover::before {
     width: 100%;
     color: #3B1E54;
-  }
-  
-  /* Image Section */
-  #img-container {
+}
+
+/* Image Section */
+#img-container {
     position: relative;
     width: 100%;
-    height: 70vh; /* Adjusted height for the image section */
-    margin-top: 80px; /* Offset by the height of the navbar */
+    height: 70vh;
+    /* Adjusted height for the image section */
     overflow: hidden;
-  }
-  
-  .img {
+}
+
+.img {
     position: absolute;
     top: 0;
     left: 0;
@@ -118,9 +119,9 @@
     background-position: center;
     filter: brightness(50%);
     z-index: 1;
-  }
-  
-  #img-container .content {
+}
+
+#img-container .content {
     position: relative;
     z-index: 2;
     display: flex;
@@ -130,88 +131,94 @@
     padding: 0 80px;
     box-sizing: border-box;
     color: #EEEEEE;
-  }
-  
-  #img-container .left-content {
-    max-width: 40%;
-    font-size: 30px;
+}
+
+#img-container .left-content {
+    max-width: 35%;
+    font-size: 28px;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
-  }
-  
-  /* Right Section Layout */
-  .right-content {
+}
+
+/* Right Section Layout */
+.right-content {
     display: grid;
     grid-template-rows: auto 1fr;
     gap: 20px;
-    max-width: 800px;
-    width: 100%;
-    margin: 0 auto;
-  }
-  
-  
-  .content-box {
-    border: 1px solid #000;
+    max-width: 700px;
+    /* width: 90%;
+    margin: 0 auto; */
+}
+
+.content-box {
+
     padding: 20px;
     border-radius: 5px;
     background-color: rgba(255, 255, 255, 0.705);
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .content-box .content-text {
+    /* box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); */
+}
+
+.content-box .content-text {
     text-align: center;
-  }
-  
-  .content-box .content-text p,
-  .content-box .content-text li {
-    list-style: none;
+}
+
+.content-box .content-text p,
+.content-box .content-text li {
+    margin-bottom: 8px;
     font-size: 1rem;
     color: #555;
+    /* display: flex; */
+    /* flex-direction: column; */
+
+}
+
+.content-box .buttons {
     text-align: center;
-  }
-  
-  .content-box .buttons {
-    text-align: center;
-  }
-  
-  .content-box .buttons a {
+    font-size: 12px;
+}
+
+.content-box .buttons a {
     display: inline-block;
     padding: 10px 20px;
-    background-color:#00ADB5;
+    background-color: #00ADB5;
     color: white;
     text-decoration: none;
     font-weight: bold;
     border-radius: 5px;
-    
-  }
-  
-  .content-box .buttons a:hover {
+
+}
+
+.content-box .buttons a:hover {
     /* background-color: #F5F0CD; */
-    background-color:#2d6d7b;
+    background-color: #2d6d7b;
     transition: 0.3s ease;
-  }
-  
-  /* Specific Layout Styling for Right Content */
-  .right-content .explanation-box {
+}
+
+/* Specific Layout Styling for Right Content */
+.right-content .explanation-box {
     grid-row: 1;
-  }
-  
-  .bottom-container {
+}
+
+.bottom-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
-  }
-  .bottom-container {
+}
+
+.bottom-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
-  }
-  span{
-    color:#00ADB5 ;
-    font-size: 20px;
-  }
-  /* New Section: Why Choose Us */
+}
+
+span,
+#total-price {
+    color: #00ADB5;
+    font-size: 17px;
+}
+
+/* New Section: Why Choose Us */
 #why-choose-us {
     display: flex;
     justify-content: space-evenly;
@@ -219,36 +226,37 @@
     padding: 40px 80px;
     /* background-color: rgba(255, 255, 255, 0.9); */
     background-color: rgba(255, 255, 255, 0.5);
-  }
-  
-  .why-left {
+
+}
+
+.why-left {
     max-width: 40%;
-  }
-  
-  .why-left h2 {
+}
+
+.why-left h2 {
     font-size: 2rem;
     color: #00ADB5;
-  }
-  
-  .why-right {
+}
+
+.why-right {
     max-width: 50%;
-  }
-  
-  .why-right ul {
+}
+
+.why-right ul {
     list-style: none;
     padding: 0;
-  }
-  
-  .why-right ul li {
+}
+
+.why-right ul li {
     font-size: 1rem;
     color: #555;
     margin-bottom: 10px;
     display: flex;
     align-items: center;
     list-style: none;
-  }
-  
-  /* .why-right ul li:before {
+}
+
+/* .why-right ul li:before {
     content: '';
     display: inline-block;
     width: 10px;
@@ -257,7 +265,7 @@
     border-radius: 50%;
     margin-right: 10px;
   } */
-  /* #img-container a {
+/* #img-container a {
     display: flex;
     flex-direction: column;
     margin-top: 20px;
@@ -276,23 +284,234 @@
   #img-container a:hover {
     background-color: #6f85b5;
   } */
-  
-  
-  
-  
-  @keyframes animatedBackground {
+/*CONTACT FORM*/
+main {
+    margin-top: 30px;
+}
+
+/*Main box from form*/
+#form-box {
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+    padding: 30px;
+    max-width: 70%;
+    margin: 0px auto;
+    background-color: rgba(255, 255, 255, 0.5);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+#form-box #price-display,
+p {
+    align-content: center;
+    text-align: center;
+    font-size: 15px;
+    color: #555;
+}
+
+/*titiel from contact form box*/
+.book-h2-form {
+    color: #000000;
+    align-content: center;
+    text-align: center;
+    font-size: 35px;
+}
+
+/*POSItionig from form*/
+#booking-form {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+
+}
+
+.row {
+    display: flex;
+    justify-content: space-around;
+    margin: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+
+
+}
+
+.form-group label {
+    margin-bottom: 5px;
+
+}
+
+.div-total-price {
+    align-content: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #EEEEEE;
+    width: 70%;
+    margin: 0px auto;
+
+
+}
+
+/*INPUTS*/
+label {
+    font-size: 15px;
+    color: #555;
+}
+
+input {
+    border: #00ADB5 1px solid;
+    /* width: var(--width-inputs); */
+    width: 280px;
+    border-radius: 5px;
+    max-width: 100%;
+    height: 30px;
+    padding: 20px 10px 20px 10px;
+    box-shadow: 0 0.3rem #dfd9d9;
+    font-size: 13px;
+}
+
+input:focus {
+    outline-color: #00ADB5;
+
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background-color: #00ADB5;
+    height: 20px;
+    position: relative;
+    width: 20px;
+    z-index: 0;
+    border-radius: 5px;
+
+
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+    background-color: #00ADB5;
+    border-radius: 5px;
+    height: 20px;
+    position: relative;
+    width: 20px;
+}
+
+/*submit button*/
+
+
+/* CSS */
+
+/* CSS */
+/* #submit-btn:disabled {
+    background-image: linear-gradient(144deg, #B3B3B3, #8F8F8F 50%, #B3B3B3);
+    color: #CCCCCC;
+    cursor: not-allowed;
+    box-shadow: none;
+  } */
+
+
+/* CSS */
+#submit-btn:disabled {
+    background-image: linear-gradient(144deg, #B3B3B3, #8F8F8F 50%, #B3B3B3);
+    color: #CCCCCC;
+    cursor: not-allowed;
+    box-shadow: none;
+    /* background-color: #111; */
+}
+
+/* CSS */
+#submit-btn {
+    align-items: center;
+    background-color: #00ADB5;
+    border: 2px solid #111;
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: #111;
+    cursor: pointer;
+    display: flex;
+    font-family: Inter, sans-serif;
+    font-size: 16px;
+    height: 48px;
+    justify-content: center;
+    line-height: 24px;
+    max-width: 100%;
+    padding: 0 25px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    width: 180px;
+    margin :0px auto;
+    margin-top: 30px;
+}
+
+#submit-btn:after {
+    background-color: #111;
+    border-radius: 8px;
+    content: "";
+    display: block;
+    height: 48px;
+    left: 0;
+    width: 100%;
+    position: absolute;
+    top: -2px;
+    transform: translate(8px, 8px);
+    transition: transform .2s ease-out;
+    z-index: -1;
+}
+
+/* Prevent movement when disabled */
+#submit-btn:disabled:hover:after {
+    transform: translate(8px, 8px);
+    /* No movement */
+}
+
+#submit-btn:hover:after {
+    transform: translate(0, 0);
+}
+
+
+#submit-btn:active {
+    background-color: #ffdeda;
+    outline: 0;
+}
+
+#submit-btn:hover {
+    outline: 0;
+}
+
+@media (min-width: 768px) {
+    #submit-btn {
+        padding: 0 40px;
+    }
+}
+
+
+@media (min-width: 768px) {
+    #submit-btn {
+        padding: 16px 32px;
+    }
+}
+
+
+
+
+
+@keyframes animatedBackground {
     from {
-      background-position: 50% 0;
+        background-position: 50% 0;
     }
-  
+
     to {
-      background-position: 50% 0;
+        background-position: 50% 0;
     }
-  }
-  
-  /* BOOKING FORM */
-  
-  /* #booking-form {
+}
+
+/* BOOKING FORM */
+
+/* #booking-form {
       display: flex;
       flex-direction: column;
     

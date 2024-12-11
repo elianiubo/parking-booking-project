@@ -1,0 +1,77 @@
+<div id="form-box">
+    <h2 class="book-h2-form">Book Your Parking Spot</h2>
+    <p>Secure parking at affordable rates. Fill in your details to book!</p>
+    <form id="booking-form" action="/book" method="POST">
+
+        <div class="row">
+            <div class="form-group">
+                <label for="arrival_date">Arrival Date: <span>*</span></label>
+                <input type="date" id="arrival_date" name="arrival_date" required>
+            </div>
+            <div class="form-group">
+                <label for="departure_date">Departure Date: <span>*</span></label>
+                <input type="date" id="departure_date" name="departure_date" required>
+            </div>
+        </div>
+        <div class="div-total-price">
+            <p id="price-display">Total Price € </p>
+            <!-- Total Price: EUR <span id="total-price"> 0</span> -->
+        </div>
+        <div class="row">
+            <div class="form-group">
+                <label for="name">Name and Surname: <span>*</span></label>
+                <input type="text" placeholder="Your Name and Surname" id="name" name="name" required>
+                <p class="error-message" id="name-error"></p>
+            </div>
+            <div class="form-group">
+                <label for="email">Email: <span>*</span></label>
+                <input type="email" placeholder="Your Email" id="email" name="email" required>
+                <p class="error-message" id="email-error"></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group">
+                <label for="arrival_time">Arrival Time: <span>*</span></label>
+                <input type="time" placeholder="Arrival Time" id="arrival_time" name="arrival_time" required>
+                <p class="error-message" id="arrival-error"></p>
+            </div>
+            <div class="form-group">
+
+                <label for="departure_time">Departure Time: <span>*</span></label>
+                <input type="time" id="departure_time" name="departure_time" required>
+                <p class="error-message" id="departure-error"></p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label for="car_brand">Car Brand: <span>*</span></label>
+                <input type="text" placeholder="Car Brand" id="car_brand" name="car_brand" required>
+                <p class="error-message" id="brand-error"></p>
+            </div>
+            <div class="form-group">
+
+                <label for="car_color">Car Color :<span>*</span></label>
+                <input type="text" placeholder="Car Color" id="car_color" name="car_color" required>
+                <p class="error-message" id="color-error"></p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label for="car_type">Car Type: <span>*</span></label>
+                <input type="text" placeholder="Car Type" id="car_type" name="car_type" required>
+                <p class="error-message" id="type-error"></p>
+            </div>
+            <div class="form-group">
+                <label for="license_plate">License Plate Number: <span>*</span></label>
+                <input type="text" placeholder="License Plate" id="license_plate" name="license_plate" required>
+                <p style="font-size: 11px;">Make sure you write the correct license plate number</p>
+                <!-- <p class="error-message" id="license-error"></p> -->
+            </div>
+        </div>
+
+        <button type="submit" id="submit-btn" disabled>Submit</button>
+       
+    </form>
+</div>
