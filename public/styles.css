@@ -9,8 +9,9 @@
     color: red;
     font-size: 0.75rem;
     margin-top: 5px;
-    display: none; /* Hidden by default */
-  }
+    display: none;
+    /* Hidden by default */
+}
 
 body {
     width: 100%;
@@ -212,11 +213,10 @@ nav a:hover::before {
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
 }
 
-/* span,
-#total-price {
+span {
     color: #00ADB5;
     font-size: 17px;
-} */
+}
 
 /* New Section: Why Choose Us */
 #why-choose-us {
@@ -298,7 +298,7 @@ main {
     background-color: rgba(255, 255, 255, 0.5);
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: auto;
 }
 
 #form-box #price-display,
@@ -355,14 +355,15 @@ p {
 }
 
 /*INPUTS*/
-#question-mark{
+#question-mark {
     cursor: pointer;
-    
+
     float: right;
     width: 30px;
-    
+
 
 }
+
 #question-div {
     position: absolute;
     background-color: #f9f9f9;
@@ -372,12 +373,14 @@ p {
     z-index: 100;
     border-radius: 4px;
     font-size: 10px;
-    width:250px ;
-    
+    width: 250px;
+
 }
+
 .hidden {
     display: none;
 }
+
 label {
     font-size: 15px;
     color: #555;
@@ -466,7 +469,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     -webkit-user-select: none;
     touch-action: manipulation;
     width: 180px;
-    margin :0px auto;
+    margin: 0px auto;
     margin-top: 30px;
 }
 
@@ -503,6 +506,41 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 #submit-btn:hover {
     outline: 0;
+}
+
+
+/*STYLES OF CONFIRMATION UI*/
+#confirmation-text{
+    text-align: center;
+    
+}
+#confirmation-text h3{
+    font-size: 23px;
+}
+.para-confirmed-div {
+    text-align: center;
+    font-size: 15px;
+    color: #333;
+    margin-top: 20px;
+    line-height: 1.5;
+}
+
+#confirmation-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    max-width: 80%;
+    margin: 30px auto;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 10px;
+    border-radius: 8px;
+}
+
+#confirmation-message p {
+    font-size: 15px;
+    margin: 15px 0;
 }
 
 @media (min-width: 768px) {
