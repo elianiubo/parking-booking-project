@@ -7,11 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const arrivalDateInput = document.getElementById('arrival_date');
   const departureDateInput = document.getElementById('departure_date');
   const submitButton = document.getElementById('submit-btn');
-  const priceDisplay = document.getElementById("price-display");
-  if (!priceDisplay) {
-    console.error("Element with ID 'price-display' not found.");
-    return;
-  }
+
   // I save this variables in local so ig¡f page reloads are saved and user can reuse them
 
   // document.getElementById("booking-form").addEventListener('submit', () => {
@@ -26,73 +22,98 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // })
   // Create the span element for total price dynamically
-  const span = document.createElement("span");
-  span.id = "total-price";
-  span.textContent = "0"; // Default price
-  priceDisplay.appendChild(span);
-  console.log("Dynamic span created and appended to #price-display.");
 
+  function showTotalDays(arrivDate, depDate) {
+     const arriv = new Date(arrivDate);
+  const dep = new Date(depDate);
+
+  if (isNaN(arriv) || isNaN(dep)) {
+    console.error("Invalid dates provided to showTotalDays:", arrivDate, depDate);
+    return 0; // Return 0 if dates are invalid
+  }
+
+  // Calculate the difference in time between the two dates
+  let differenceInTime = dep - arriv;
+
+  // Calculate the number of days between the two dates
+  let differenceInDays = Math.round(differenceInTime / (1000 * 3600 * 24)+1);
+
+  console.log(`Total days: ${differenceInDays}`);
+  return differenceInDays;
+
+
+
+  }
   //checks avaliability of parking slots when selected
   async function checkAvailability() {
     const arrivDate = arrivalDateInput.value;
     const depDate = departureDateInput.value;
-
-
+  
+    const priceDisplay = document.getElementById("price-display");
+    const daysDisplay = document.getElementById("days-display");
+  
+    // Reset price and days display initially
+    priceDisplay.textContent = "Total Price € 0"; // Ensure the initial text is correct
+    daysDisplay.textContent = "Total days reserved: 0"; // Ensure the initial days display is correct
+    submitButton.disabled = true; // Disable submit button by default
+  
     console.log("Arrival Date:", arrivDate, "Departure Date:", depDate);
+  
     // Ensure departure date is after arrival date by setting the min value for departure
     if (arrivDate) {
-      departureDateInput.setAttribute("min", arrivDate); // Disable dates before arrival date
+      departureDateInput.setAttribute("min", arrivDate); // Prevent earlier dates for departure
     }
-
-    //If both dates are selected
+  
+    // If both dates are selected, check if departure is before arrival
     if (arrivDate && depDate) {
-      // if departure date is smaller tha arrival date ex arriv 10-12-24 and dep 09-12-24
-      //should run this code to fix this issue
       if (depDate < arrivDate) {
         departureDateInput.value = ""; // Clear invalid departure date
-        span.textContent = "0"; // Reset total price
-
-        priceDisplay.innerHTML = "Total Price: EUR 0"; // Inform the user
+        priceDisplay.textContent = "Total Price € 0"; // Reset the price display
+        daysDisplay.textContent = "Total days reserved: 0"; // Reset days display
         submitButton.disabled = true; // Disable submit button
-        departureDateInput.setAttribute("min", arrivDate);
+        departureDateInput.setAttribute("min", arrivDate); // Ensure departure date can't be before arrival date
         return; // Exit early
       }
     }
+  
     // Proceed only if both arrival and departure dates are valid and selected
     if (!arrivDate || !depDate) {
-      span.textContent = "0";
-      //priceDisplay.textContent = "Please select both arrival and departure dates.";
-      submitButton.disabled = true;
+      priceDisplay.textContent = "Total Price € 0"; // Reset the price display
+      daysDisplay.textContent = "Total days reserved: 0"; // Reset days display
+      submitButton.disabled = true; // Disable submit button
       return; // Exit early
     }
-    //calls endpots and get response of avaliability
+  
     try {
+      // Call the endpoint to check availability
       const response = await fetch("/check-availability", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ arrival_date: arrivDate, departure_date: depDate, totalPrice: span })
+        body: JSON.stringify({ arrival_date: arrivDate, departure_date: depDate })
       });
-
+  
       const result = await response.json();
+  
       if (result.available) {
-        //console.log(totalPrice)
-        //Clear dates not avaliable
-        //priceDisplay.textContent = "Total Price: EUR "; // Reset the main content
-        priceDisplay.appendChild(span);
-        submitButton.disabled = false; // Enable button if dates are available
-        span.textContent = ` ${result.totalPrice}`;
-
+        const totalDays = showTotalDays(arrivDate, depDate); // Calculate total days
+  priceDisplay.style.color = ""
+        priceDisplay.textContent = `Total Price € ${result.totalPrice}`; // Update the price display
+        daysDisplay.textContent = `Total days reserved: ${totalDays}`; // Update the days display
+        submitButton.disabled = false; // Enable the submit button
+  
       } else {
+        // If dates are not available
         priceDisplay.textContent = "Selected dates are not available. Please choose different dates.";
-        span.textContent = '0';  // Reset total price when dates aren't available
-        submitButton.disabled = true; // Disable button if dates are not available
-        priceDisplay.style.color = 'red';
+        daysDisplay.textContent = ""; // Reset the days display
+        priceDisplay.style.color = "red"; // Change color to red for error
+        submitButton.disabled = true; // Disable submit button
       }
     } catch (error) {
       console.error("Error checking availability:", error);
-      submitButton.disabled = true;
-      span.textContent = '0';
-      priceDisplay.textContent = "<p>Error checking availability.</p>"
+      priceDisplay.textContent = "Error checking availability"; // Show error message
+      daysDisplay.textContent = "Total days reserved: 0"; // Reset the days display
+      priceDisplay.style.color = "red"; // Change color to red for error
+      submitButton.disabled = true; // Disable submit button
     }
   }
   // function showCongratsMessage() {
@@ -192,6 +213,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Disable past dates for arrival
     arrivalDateInput.setAttribute("min", formattedToday);
   }
+
+
   //chanckes the pending status on rout /check-pending everytime user loads the page
   async function updatePage() {
 
@@ -220,6 +243,17 @@ document.addEventListener("DOMContentLoaded", () => {
       // If the form is valid, you can proceed with the form submission
       this.submit(); // Proceed to submit the form if valid
     }
+  });
+  //SHow question mark or hide it 
+  const questionMark = document.getElementById('question-mark');
+  const questionDiv = document.getElementById('question-div');
+
+  questionMark.addEventListener('mouseover', () => {
+    questionDiv.style.display = 'block'; // Show the explanation text
+  });
+
+  questionMark.addEventListener('mouseleave', () => {
+    questionDiv.style.display = 'none'; // Hide the explanation text when mouse leaves
   });
 
   // submitButton.addEventListener("click", showCongratsMessage)

@@ -212,11 +212,11 @@ nav a:hover::before {
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
 }
 
-span,
+/* span,
 #total-price {
     color: #00ADB5;
     font-size: 17px;
-}
+} */
 
 /* New Section: Why Choose Us */
 #why-choose-us {
@@ -355,6 +355,29 @@ p {
 }
 
 /*INPUTS*/
+#question-mark{
+    cursor: pointer;
+    
+    float: right;
+    width: 30px;
+    
+
+}
+#question-div {
+    position: absolute;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    padding: 10px;
+    display: none;
+    z-index: 100;
+    border-radius: 4px;
+    font-size: 10px;
+    width:250px ;
+    
+}
+.hidden {
+    display: none;
+}
 label {
     font-size: 15px;
     color: #555;

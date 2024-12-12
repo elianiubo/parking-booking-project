@@ -14,9 +14,13 @@
             </div>
         </div>
         <div class="div-total-price">
-            <p id="price-display">Total Price € </p>
-            <!-- Total Price: EUR <span id="total-price"> 0</span> -->
-        </div>
+            <p id="price-display">
+              Total Price € 0
+            </p>
+            <p id="days-display">
+              Total days reserved: 0
+            </p>
+          </div>
         <div class="row">
             <div class="form-group">
                 <label for="name">Name and Surname: <span>*</span></label>
@@ -56,12 +60,13 @@
                 <p class="error-message" id="color-error"></p>
             </div>
         </div>
-
+        
         <div class="row">
             <div class="form-group">
-                <label for="car_type">Car Type: <span>*</span></label>
+                <label for="car_type">Car Type: <span>*</span><div id="question-mark"><a href="https://www.flaticon.com/free-icons/question" title="question icons"></a><img src="/assets/icons/question.png" ></img></div></label>
                 <input type="text" placeholder="Car Type" id="car_type" name="car_type" required>
                 <p class="error-message" id="type-error"></p>
+                <div id="question-div" class="hidden">This is for entering the type of car, e.g., Sedan, SUV, Sportscar, Coupe.</div>
             </div>
             <div class="form-group">
                 <label for="license_plate">License Plate Number: <span>*</span></label>
