@@ -9,6 +9,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const submitButton = document.getElementById('submit-btn');
   disablePastDates();  // Disable past dates for arrival date on page load
   updatePage();
+
+  //FAQS text shpows up when clicked
+  const faqs = document.querySelectorAll(".faq");
+
+  faqs.forEach(faq => {
+    faq.addEventListener("click", () => {
+      faq.classList.toggle("active");
+    })
+  })
   // I save this variables in local so ig¡f page reloads are saved and user can reuse them
 
   // document.getElementById("booking-form").addEventListener('submit', () => {
@@ -264,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-  
+
 
 
   //chanckes the pending status on rout /check-pending everytime user loads the page

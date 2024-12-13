@@ -17,8 +17,8 @@ body {
     width: 100%;
     margin: 0;
     padding: 0;
-    font-family: "Monda", sans-serif;
-    font-weight: 900;
+    font-family: "Montserrat", sans-serif;
+    
     /* background-image: url(/assets/images/background-img.jpg);
     
     background-size: cover; /* Ensure the image covers the entire viewport */
@@ -136,7 +136,7 @@ nav a:hover::before {
 
 #img-container .left-content {
     max-width: 35%;
-    font-size: 28px;
+    font-size: 24px;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
 }
 
@@ -299,6 +299,7 @@ main {
     display: flex;
     flex-direction: column;
     height: auto;
+    margin-bottom: 20px;
 }
 
 #form-box #price-display,
@@ -314,7 +315,7 @@ p {
     color: #000000;
     align-content: center;
     text-align: center;
-    font-size: 35px;
+    font-size: 2.2rem;;
 }
 
 /*POSItionig from form*/
@@ -342,8 +343,8 @@ p {
     margin-bottom: 5px;
 
 }
-
-.div-total-price {
+/*styls div dor price display it gived background also for the FAqs paragrapg*/
+.div-total-price, .paragraph {
     align-content: center;
     padding-top: 10px;
     padding-bottom: 10px;
@@ -403,7 +404,7 @@ input:focus {
 
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator {
+input[type="date"]::-webkit-calendar-picker-indicator, input[type="time"]::-webkit-calendar-picker-indicator{
     background-color: #00ADB5;
     height: 20px;
     position: relative;
@@ -412,14 +413,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-radius: 5px;
 
 
-}
-
-input[type="time"]::-webkit-calendar-picker-indicator {
-    background-color: #00ADB5;
-    border-radius: 5px;
-    height: 20px;
-    position: relative;
-    width: 20px;
 }
 
 /*submit button*/
@@ -539,9 +532,102 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 #confirmation-message p {
-    font-size: 15px;
+    font-size: 13px;
     margin: 15px 0;
 }
+
+
+/*FAQS styls and layout*/
+#faqs-box{
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+    
+    max-width: 70%;
+    margin: 0px auto;
+    background-color: rgba(255, 255, 255, 0.5);
+    flex-direction: column;
+    height: auto;
+    padding: 18px 10px 10px 10px;
+}
+#faqs-box p{
+    padding: 10px 20px 30px 20px;
+    font-size: 14px
+}
+strong a{
+    color: #00ADB5;
+    text-decoration: underline;
+    font-size: 14px;
+    
+}
+strong a:hover{
+   
+    text-decoration: none;
+    
+}
+.title
+{
+  font-size: 2.2rem;
+  text-align: center;
+
+
+  padding: 20px 10px 20px 10px;
+}
+
+#faqs-div{
+    min-height: 100vh;
+    width: 70%; /* Ensures the FAQ section takes up the full width */
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* Makes children span the full width */
+}
+
+ .faq
+{
+    width: 100%; /* Take full width of the parent container */
+    margin-top: 1.6rem;
+    padding: 1rem; /* Add padding for a clean layout */
+    border-bottom: 2px solid #000000;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column; /* Stack content vertically */
+}
+
+.question
+{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.question h5
+{
+    margin-top: 5px;
+  font-size: 1.3rem;
+  color: #00ADB5;
+  
+}
+.question img {
+    margin-left: 50px;
+}
+.answer
+{
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 1s ease-in-out;
+}
+
+.answer p
+{
+  padding-top: 1rem;
+  line-height: 1.6;
+  font-size: 0.8rem;
+}
+
+.faq.active .answer
+{
+  max-height: 300px;
+} 
+
 
 @media (min-width: 768px) {
     #submit-btn {
@@ -557,7 +643,27 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 
-
+@media (max-width: 941px) {
+    #form-box {
+        width: 90%; /* Increase width for smaller screens */
+        padding: 20px;
+       
+    }
+    #booking-form{
+        margin: 0px auto;
+    }
+    .row {
+        flex-direction: column; /* Stack form elements on smaller screens */
+        width: 100%;
+    }
+    .form-group:last-child{
+        margin-top: 5px;
+    }
+    
+    .div-total-price {
+        width: 90%; /* Increase width for smaller screens */
+    }
+}
 
 
 @keyframes animatedBackground {
