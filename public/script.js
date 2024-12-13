@@ -10,14 +10,17 @@ document.addEventListener("DOMContentLoaded", () => {
   disablePastDates();  // Disable past dates for arrival date on page load
   updatePage();
 
-  //FAQS text shpows up when clicked
+  //FAQS text shpows up when clicked and roates icon
   const faqs = document.querySelectorAll(".faq");
 
   faqs.forEach(faq => {
+    const arrowIcon = faq.querySelector(".arrow-icon"); // Get the arrow icon inside each FAQ
+
     faq.addEventListener("click", () => {
-      faq.classList.toggle("active");
-    })
-  })
+      faq.classList.toggle("active"); // Toggle the "active" class on the FAQ
+      arrowIcon.classList.toggle("rotate"); // Toggle the "rotate" class on the arrow icon
+    });
+  });
   // I save this variables in local so ig¡f page reloads are saved and user can reuse them
 
   // document.getElementById("booking-form").addEventListener('submit', () => {
@@ -316,6 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
   questionMark.addEventListener('mouseleave', () => {
     questionDiv.style.display = 'none'; // Hide the explanation text when mouse leaves
   });
+
 
 
   // const savedArrivalDate = localStorage.getItem('arrivalDate');
