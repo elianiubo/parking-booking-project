@@ -7,7 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const arrivalDateInput = document.getElementById('arrival_date');
   const departureDateInput = document.getElementById('departure_date');
   const submitButton = document.getElementById('submit-btn');
-
+  disablePastDates();  // Disable past dates for arrival date on page load
+  updatePage();
   // I save this variables in local so ig¡f page reloads are saved and user can reuse them
 
   // document.getElementById("booking-form").addEventListener('submit', () => {
@@ -22,7 +23,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // })
   // Create the span element for total price dynamically
+  function disablePastDates() {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0
+    const yyyy = today.getFullYear();
+    const formattedToday = `${yyyy}-${mm}-${dd}`;
 
+    if (arrivalDateInput) {
+      arrivalDateInput.setAttribute("min", formattedToday);
+    }
+  }
+  //SHows error when function is called the message is writtten 
+  //in when the function is called to a nother function
+  function showErrors(errorElement, message) {
+    if (errorElement) {
+      errorElement.textContent = message;
+      if (message) {
+        errorElement.style.display = 'block'; // Show error message
+      } else {
+        errorElement.style.display = 'none'; // Hide error message
+      }
+    }
+  }
   function showTotalDays(arrivDate, depDate) {
     const arriv = new Date(arrivDate);
     const dep = new Date(depDate);
@@ -43,6 +66,75 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+  }
+  //VAlidate input formatiing
+  function validateForm() {
+    let isValid = true;
+
+    //name validation
+    const nameInput = document.getElementById("name");
+    const nameError = document.getElementById("name-error");
+
+    if (/\d/.test(nameInput.value)) {
+      showErrors(nameError, "Name isn't correct")
+    }
+
+
+    // Email validation
+    const emailInput = document.getElementById("email");
+    const emailError = document.getElementById("email-error");
+    //checks whether it has an email format
+    if (!emailInput.value.trim()) {
+      showErrors(emailError, "Email is required");
+      isValid = false;
+    } else if (!/^\S+@\S+\.\S+$/.test(emailInput.value)) {
+      showErrors(emailError, "Please enter a valid email address");
+      isValid = false;
+    } else {
+      showErrors(emailError, ''); // Clear error
+    }
+
+    //validate arriv and dep time
+    const arrivalTimeInput = document.getElementById("arrival_time").value
+    const departureTimeInput = document.getElementById("departure_time").value
+    const departureError = document.getElementById("departure-error");
+    //it saved the format of date and time to check 
+    const arrivalDateTimeFormat = new Date(`${arrivalDateInput.value}T${arrivalTimeInput} `);
+    const departureDateTimeFormat = new Date(`${departureDateInput.value}T${departureTimeInput} `);
+    //if arrival date and departure date are on the same day(one day parking only) show error message
+    if (arrivalDateInput.value === departureDateInput.value) {
+      //shoe error message if arrival date is later than dep date on same day parking
+      if (departureDateTimeFormat <= arrivalDateTimeFormat) {
+        showErrors(departureError, "Departure time can't be before or the same as the arrival time");
+        isValid = false;
+
+      } else {
+        showErrors(departureError, "");
+        isValid = false;
+      }
+
+
+    }
+
+    //car brand values
+    const brandInput = document.getElementById("car_brand");
+    const brandError = document.getElementById("brand-error");
+    // car color values
+    const colorInput = document.getElementById("car_color");
+    const colorError = document.getElementById("color-error");
+    // car color values
+    const typeInput = document.getElementById("car_type");
+    const typeError = document.getElementById("type-error");
+
+    if (/\d/.test(brandInput.value)) {
+      showErrors(brandError, "Car brand isn't correct")
+    }
+    if (/\d/.test(colorInput.value)) {
+      showErrors(colorError, "Car color isn't correct")
+    }
+    if (/\d/.test(typeInput.value)) {
+      showErrors(typeError, "Car type isn't correct")
+    }
   }
   //checks avaliability of parking slots when selected
   async function checkAvailability() {
@@ -119,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //developing a confirmation booking UI response after submitting form
   document.getElementById('booking-form').addEventListener('submit', async function (event) {
     event.preventDefault(); // Prevent default form submission
-  
+
     // Collect the form data
     const formData = {
       arrival_date: document.getElementById('arrival_date').value,
@@ -133,22 +225,22 @@ document.addEventListener("DOMContentLoaded", () => {
       car_type: document.getElementById('car_type').value,
       license_plate: document.getElementById('license_plate').value
     };
-  
+
     try {
       const response = await fetch("/book", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-  
+
       const result = await response.json();
-  
+
       // Check if response contains bookingId
       if (result.bookingId) {
         // Hide the booking form and show confirmation
         document.getElementById('booking-form').style.display = 'none';
         document.getElementById('confirmation-message').style.display = 'block';
-  
+
         // Show the confirmation message
         document.getElementById("confirmation-text").innerHTML = `
           <h3 class="h3-confirm">Congratulations <span>${result.name}</span></h3>
@@ -171,100 +263,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  //SHows error when function is called the message is writtten 
-  //in when the function is called to a nother function
-  function showErrors(errorElement, message) {
-    if (errorElement) {
-      errorElement.textContent = message;
-      if (message) {
-        errorElement.style.display = 'block'; // Show error message
-      } else {
-        errorElement.style.display = 'none'; // Hide error message
-      }
-    }
-  }
-  //VAlidate input formatiing
-  function validateForm() {
-    let isValid = true;
 
-    //name validation
-    const nameInput = document.getElementById("name");
-    const nameError = document.getElementById("name-error");
-
-    if (/\d/.test(nameInput.value)) {
-      showErrors(nameError, "Name isn't correct")
-    }
-
-
-    // Email validation
-    const emailInput = document.getElementById("email");
-    const emailError = document.getElementById("email-error");
-    //checks whether it has an email format
-    if (!emailInput.value.trim()) {
-      showErrors(emailError, "Email is required");
-      isValid = false;
-    } else if (!/^\S+@\S+\.\S+$/.test(emailInput.value)) {
-      showErrors(emailError, "Please enter a valid email address");
-      isValid = false;
-    } else {
-      showErrors(emailError, ''); // Clear error
-    }
-
-    //validate arriv and dep time
-    const arrivalTimeInput = document.getElementById("arrival_time").value
-    const departureTimeInput = document.getElementById("departure_time").value
-    const departureError = document.getElementById("departure-error");
-    //it saved the format of date and time to check 
-    const arrivalDateTimeFormat = new Date(`${arrivalDateInput.value}T${arrivalTimeInput} `);
-    const departureDateTimeFormat = new Date(`${departureDateInput.value}T${departureTimeInput} `);
-    //if arrival date and departure date are on the same day(one day parking only) show error message
-    if (arrivalDateInput.value === departureDateInput.value) {
-      //shoe error message if arrival date is later than dep date on same day parking
-      if (departureDateTimeFormat <= arrivalDateTimeFormat) {
-        showErrors(departureError, "Departure time can't be before or the same as the arrival time");
-        isValid = false;
-
-      } else {
-        showErrors(departureError, "");
-        isValid = false;
-      }
-
-
-    }
-
-    //car brand values
-    const brandInput = document.getElementById("car_brand");
-    const brandError = document.getElementById("brand-error");
-    // car color values
-    const colorInput = document.getElementById("car_color");
-    const colorError = document.getElementById("color-error");
-    // car color values
-    const typeInput = document.getElementById("car_type");
-    const typeError = document.getElementById("type-error");
-
-    if (/\d/.test(brandInput.value)) {
-      showErrors(brandError, "Car brand isn't correct")
-    }
-    if (/\d/.test(colorInput.value)) {
-      showErrors(colorError, "Car color isn't correct")
-    }
-    if (/\d/.test(typeInput.value)) {
-      showErrors(typeError, "Car type isn't correct")
-    }
-  }
-  function disablePastDates() {
-
-    //e.prevendDefault() if i put it doesn't bclokck past dates
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, '0');
-    const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0
-    const yyyy = today.getFullYear();
-
-    const formattedToday = `${yyyy} -${mm} -${dd} `;
-
-    // Disable past dates for arrival
-    arrivalDateInput.setAttribute("min", formattedToday);
-  }
+  
 
 
   //chanckes the pending status on rout /check-pending everytime user loads the page
@@ -308,12 +308,6 @@ document.addEventListener("DOMContentLoaded", () => {
     questionDiv.style.display = 'none'; // Hide the explanation text when mouse leaves
   });
 
-  // submitButton.addEventListener("click", showCongratsMessage)
-  window.addEventListener('load', () => {
-    disablePastDates();  // Disable past dates for arrival date on page load
-    updatePage();
-
-  });
 
   // const savedArrivalDate = localStorage.getItem('arrivalDate');
   // const savedDepartureDate = localStorage.getItem('departureDate');
