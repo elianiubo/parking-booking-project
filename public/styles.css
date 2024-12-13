@@ -35,8 +35,10 @@ h1,
 h2,
 h3,
 h4,
-h5 {
+h5,
+h6 {
     font-weight: 800;
+    
 }
 
 header {
@@ -317,10 +319,12 @@ main {
 #form-box #price-display,
 p {
     align-content: center;
-    text-align: center;
+    
     font-size: 15px;
     color: #555;
-    margin-bottom: 3px;
+    margin-bottom: 13px;
+    text-align: center;
+    
 }
 
 /*titiel from contact form box*/
@@ -329,7 +333,9 @@ p {
     align-content: center;
     text-align: center;
     font-size: 2.2rem;
-    ;
+    padding: 20px 10px 20px 10px;
+    text-shadow: 0px 2px 0px rgba(101, 255, 242, 0.28);
+    
 }
 
 /*POSItionig from form*/
@@ -573,7 +579,6 @@ input:last-of-type {
 /*FAQS styls and layout*/
 #faqs-box {
     box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
-
     max-width: 70%;
     margin: 0px auto;
     background-color: rgba(255, 255, 255, 0.5);
@@ -588,6 +593,7 @@ input:last-of-type {
 
 }
 
+/*style for link on customer service*/
 strong a {
     color: #00ADB5;
     text-decoration: underline;
@@ -601,12 +607,15 @@ strong a:hover {
 
 }
 
+/*FAQ title*/
 .title {
     font-size: 2.2rem;
     text-align: center;
+    text-shadow: 0px 2px 0px rgba(101, 255, 242, 0.28);
+    
 
 
-    padding: 20px 10px 20px 10px;
+    padding: 30px 10px 35px 10px;
 }
 
 #faqs-div {
@@ -620,13 +629,32 @@ strong a:hover {
     /* Makes children span the full width */
 }
 
+/* FAQ Category */
+.faq-category {
+    margin-top: 1.5rem;
+}
+
+.category-title {
+    font-size: 1.2rem;
+    color: #3b3b3b;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Shadow effect */
+    border-left:  dotted #00ADB5  5px;
+    padding-left: 5px;
+    
+      
+}
+
+/* FAQ Item */
 .faq {
     width: 100%;
     /* Take full width of the parent container */
     margin-top: 1.6rem;
     padding: 1rem;
     /* Add padding for a clean layout */
-    border-bottom: 2px solid #000000;
+    border-bottom: 2px solid #00ADB5;
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -638,22 +666,22 @@ strong a:hover {
     justify-content: space-between;
     align-items: center;
 }
-
-.question h5 {
+/*title for questions FAQ*/
+.question h6 {
     margin-top: 5px;
-    font-size: 1.3rem;
-    color: #00ADB5;
+    font-size: 0.9rem;
+    color: #454444;
 
 }
 
 .question img {
     margin-left: 50px;
 }
-
+/*width of the box of the answer*/
 .answer {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 1s ease-in-out;
+    transition: max-height 1s ease-in-out;/* Smooth rotation transition */
 }
 
 .answer p {
@@ -661,10 +689,11 @@ strong a:hover {
 
     font-size: 0.8rem;
 }
-
+/* Show answer when FAQ is active */
 .faq.active .answer {
     max-height: 300px;
 }
+
 /*Rotate icon when clicked*/
 .arrow-icon {
     transition: transform 1s ease-in-out;
