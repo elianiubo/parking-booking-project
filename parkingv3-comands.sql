@@ -87,6 +87,25 @@ WHERE pb."status" = 'pending'
   AND pb.created < NOW() - INTERVAL '24 hours';
 ALTER TABLE parking_bookings
 ADD COLUMN total_price NUMERIC(10, 2) NOT NULL DEFAULT 0.00;
+
+--Create table for env variables
+CREATE TABLE env_variables (
+    id SERIAL PRIMARY KEY,
+    key_name VARCHAR(255) UNIQUE NOT NULL,
+    value TEXT NOT NULL
+);
+--first value
+INSERT INTO env_variables (key_name, value) 
+VALUES 
+('STRIPE_KEY', 'sk_test_51QPgn9J2H1ZlEkVDFm19Md3IfjMF86gNJI8lED424xKNbzQpXNthjMsonwvIaWxSBcpsvqQxsGGh4OEDzWAcxFlK00clHOLYdG');
+
+INSERT INTO env_variables (key_name, value) 
+VALUES 
+('CANCEL_MINUTES', 30);
+
+select * from env_variables
+
+
   select * from parking_bookings
   select * from pricing
   select * from user_bookings

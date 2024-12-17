@@ -7,9 +7,12 @@
 /*error message style*/
 .error-message {
     color: red;
-    font-size: 0.75rem;
-    margin-top: 5px;
-    display: none;
+    font-size: 0.70rem;
+    margin-top: 8px;
+    /* position: absolute; Position error message below input */
+    
+    /* width: 100%; */
+   
     /* Hidden by default */
 }
 
@@ -38,7 +41,7 @@ h4,
 h5,
 h6 {
     font-weight: 800;
-    
+
 }
 
 header {
@@ -53,8 +56,8 @@ p {
 
 /* HEADER */
 .logo {
-    width: 90px;
-    height: 90px;
+    width: 80px;
+    height: 80px;
 }
 
 /* Navigation Bar Styling */
@@ -143,23 +146,26 @@ nav a:hover::before {
     justify-content: space-between;
     align-items: center;
     height: 100%;
-    padding: 0 80px;
+    padding: 0 60px;
     box-sizing: border-box;
     color: #EEEEEE;
 }
 
 #img-container .left-content {
-    max-width: 40%;
+    /* max-width: 40%; */
     font-size: 25px;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
 }
-
+.left-content h1{
+    font-size: 2.2rem;
+}
 /* Right Section Layout */
 .right-content {
     display: grid;
     grid-template-rows: auto 1fr;
     gap: 20px;
-    max-width: 700px;
+    /* max-width: 700px; */
+    width: 100%;
     /* width: 90%;
     margin: 0 auto; */
 }
@@ -319,12 +325,12 @@ main {
 #form-box #price-display,
 p {
     align-content: center;
-    
+
     font-size: 15px;
     color: #555;
     margin-bottom: 13px;
     text-align: center;
-    
+
 }
 
 /*titiel from contact form box*/
@@ -335,7 +341,7 @@ p {
     font-size: 2.2rem;
     padding: 20px 10px 20px 10px;
     text-shadow: 0px 2px 0px rgba(101, 255, 242, 0.28);
-    
+
 }
 
 /*POSItionig from form*/
@@ -348,26 +354,28 @@ p {
 
 .row {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-evenly;
     margin: 15px;
+    
+  
+    width: 100%; /* Ensure the row spans the full width of the container */
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
+    align-items: flex-start; /* Align items to the left */
+    width: 100%; /* Take up full width of row */
+    max-width: 300px; /* Limit max width of inputs */
+    position: relative; /* Required for positioning error messages */
 
 
 }
 
 .form-group label {
     margin-bottom: 5px;
-    display: flex;
-    /* Use flexbox to align items inside the label */
-    align-items: center;
-    /* Vertically center the label's content */
     font-size: 15px;
     color: #555;
-    margin-bottom: 5px;
 
 }
 
@@ -501,6 +509,7 @@ input:last-of-type {
     width: 180px;
     margin: 0px auto;
     margin-top: 30px;
+    margin-bottom: 25px;
 }
 
 #submit-btn:after {
@@ -537,7 +546,9 @@ input:last-of-type {
 #submit-btn:hover {
     outline: 0;
 }
-
+.name{
+    font-size: 20px;
+}
 
 /*STYLES OF CONFIRMATION UI*/
 #confirmation-text {
@@ -585,6 +596,7 @@ input:last-of-type {
     flex-direction: column;
     height: auto;
     padding: 18px 10px 10px 10px;
+    margin-bottom: 40px;
 }
 
 #faqs-box p {
@@ -612,7 +624,7 @@ strong a:hover {
     font-size: 2.2rem;
     text-align: center;
     text-shadow: 0px 2px 0px rgba(101, 255, 242, 0.28);
-    
+
 
 
     padding: 30px 10px 35px 10px;
@@ -640,11 +652,12 @@ strong a:hover {
     font-weight: bold;
     text-transform: uppercase;
     margin-bottom: 15px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Shadow effect */
-    border-left:  dotted #00ADB5  5px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    /* Shadow effect */
+    border-left: dotted #00ADB5 5px;
     padding-left: 5px;
-    
-      
+
+
 }
 
 /* FAQ Item */
@@ -666,6 +679,7 @@ strong a:hover {
     justify-content: space-between;
     align-items: center;
 }
+
 /*title for questions FAQ*/
 .question h6 {
     margin-top: 5px;
@@ -677,11 +691,13 @@ strong a:hover {
 .question img {
     margin-left: 50px;
 }
+
 /*width of the box of the answer*/
 .answer {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 1s ease-in-out;/* Smooth rotation transition */
+    transition: max-height 1s ease-in-out;
+    /* Smooth rotation transition */
 }
 
 .answer p {
@@ -689,6 +705,7 @@ strong a:hover {
 
     font-size: 0.8rem;
 }
+
 /* Show answer when FAQ is active */
 .faq.active .answer {
     max-height: 300px;
@@ -704,6 +721,80 @@ strong a:hover {
     transform: rotate(180deg);
     /* Rotate the arrow 180 degrees */
 }
+
+/*Footer styles*/
+/*map responsive*/
+.google-map {
+    position: relative;
+    width: 100%; /* Full width of the parent container */
+   margin-top: 10px;
+    overflow: hidden;
+    border-radius: 10px; /* Optional: Add rounded corners for a polished look */
+    margin:0px auto;
+}
+
+.google-map iframe {
+   
+    top: 0;
+    left: 0;
+    width: 100%; /* Responsive width */
+    height: 100%; /* Responsive height */
+    border: 0; /* Remove border */
+    margin:  0px auto;
+}
+
+footer {
+
+    max-width: 70%;
+    margin: 0px auto;
+
+    background-color: #000000;
+}
+
+#footer-box {
+    
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+    height: auto;
+    display: flex;
+    justify-content: space-around;
+
+    color: #8e8d8d;
+}
+
+.footer-categories {
+    text-align: center;
+    padding: 10px 10px 10px 10px;
+    width: 100%;
+    margin: 50px;
+
+
+}
+.footer-categories p {
+    color: #00ADB5;
+
+
+}
+
+.footer-categories ul li {
+    list-style: none;
+    line-height: 1.4;
+
+}
+.footer-categories ul{
+    list-style: none;
+    margin-bottom: 18px
+    
+
+
+
+
+}
+
+
+
+
+
+
 
 @media (min-width: 768px) {
     #submit-btn {
@@ -745,18 +836,22 @@ strong a:hover {
         width: 90%;
         /* Increase width for smaller screens */
     }
-}
-
-
-@keyframes animatedBackground {
-    from {
-        background-position: 50% 0;
+    #footer-box {
+        flex-direction: column; /* Stack categories vertically */
+        text-align: center;
     }
 
-    to {
-        background-position: 50% 0;
+    .footer-categories {
+        margin: 20px; /* Adjust margins for smaller screens */
+    }
+
+    .google-map iframe {
+        width: 70%;
+        height: 70%;
+        margin: 0px auto;
     }
 }
+
 
 /* BOOKING FORM */
 

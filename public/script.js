@@ -1,7 +1,10 @@
 
 
 document.addEventListener("DOMContentLoaded", () => {
-
+  // this make that once i've recieved the confrimation email, and i reload the page it goes to the main page again, to avoid sneding emails again wiht onfirmation
+  if (window.performance.getEntriesByType("navigation")[0].type === 'reload') {
+    window.location.href = '/';
+  }
 
 
   const arrivalDateInput = document.getElementById('arrival_date');
@@ -34,6 +37,12 @@ document.addEventListener("DOMContentLoaded", () => {
   //   localStorage.setItem('totalPrice', totalPrice);
 
   // })
+
+  // makes the button to make a new buttin go to main page
+  document.getElementById('new-booking-btn')?.addEventListener('click', () => {
+    window.location.href = '/'; // Redirect to the main page
+
+  });
   // Create the span element for total price dynamically
   function disablePastDates() {
     const today = new Date();
@@ -48,15 +57,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   //SHows error when function is called the message is writtten 
   //in when the function is called to a nother function
-  function showErrors(errorElement, message) {
-    if (errorElement) {
-      errorElement.textContent = message;
-      if (message) {
-        errorElement.style.display = 'block'; // Show error message
-      } else {
-        errorElement.style.display = 'none'; // Hide error message
-      }
+  function showErrors(element, message) {
+    if (message) {
+      element.style.display = 'block'; // Show the error message
+      element.innerText = message;
+    } else {
+      element.style.display = 'none'; // Hide the error message
     }
+
   }
   function showTotalDays(arrivDate, depDate) {
     const arriv = new Date(arrivDate);
@@ -83,71 +91,90 @@ document.addEventListener("DOMContentLoaded", () => {
   function validateForm() {
     let isValid = true;
 
-    //name validation
+    // Name validation
     const nameInput = document.getElementById("name");
     const nameError = document.getElementById("name-error");
 
     if (/\d/.test(nameInput.value)) {
-      showErrors(nameError, "Name isn't correct")
+      showErrors(nameError, "Name isn't correct");
+      isValid = false; // Invalid name
     }
-
 
     // Email validation
     const emailInput = document.getElementById("email");
     const emailError = document.getElementById("email-error");
-    //checks whether it has an email format
+    // Check whether it has an email format
     if (!emailInput.value.trim()) {
       showErrors(emailError, "Email is required");
-      isValid = false;
+      isValid = false; // Invalid email
     } else if (!/^\S+@\S+\.\S+$/.test(emailInput.value)) {
       showErrors(emailError, "Please enter a valid email address");
-      isValid = false;
+      isValid = false; // Invalid email
     } else {
       showErrors(emailError, ''); // Clear error
     }
 
-    //validate arriv and dep time
-    const arrivalTimeInput = document.getElementById("arrival_time").value
-    const departureTimeInput = document.getElementById("departure_time").value
+    // Validate arrival and departure time
+    const arrivalTimeInput = document.getElementById("arrival_time").value;
+    const departureTimeInput = document.getElementById("departure_time").value;
     const departureError = document.getElementById("departure-error");
-    //it saved the format of date and time to check 
-    const arrivalDateTimeFormat = new Date(`${arrivalDateInput.value}T${arrivalTimeInput} `);
-    const departureDateTimeFormat = new Date(`${departureDateInput.value}T${departureTimeInput} `);
-    //if arrival date and departure date are on the same day(one day parking only) show error message
-    if (arrivalDateInput.value === departureDateInput.value) {
-      //shoe error message if arrival date is later than dep date on same day parking
+
+    const arrivalDate = arrivalDateInput.value;
+    const departureDate = departureDateInput.value;
+
+    // Create valid Date objects for arrival and departure
+    const arrivalDateTimeString = `${arrivalDate}T${arrivalTimeInput}:00`; // Combining date and time
+    const departureDateTimeString = `${departureDate}T${departureTimeInput}:00`;
+
+    const arrivalDateTimeFormat = new Date(arrivalDateTimeString);
+    const departureDateTimeFormat = new Date(departureDateTimeString);
+
+    // If arrival date and departure date are on the same day (one-day parking only), show error message
+    if (arrivalDate === departureDate) {
+      // Show error message if departure time is earlier than or the same as arrival time on the same day
       if (departureDateTimeFormat <= arrivalDateTimeFormat) {
         showErrors(departureError, "Departure time can't be before or the same as the arrival time");
-        isValid = false;
-
+        isValid = false; // Invalid departure time
       } else {
         showErrors(departureError, "");
-        isValid = false;
       }
-
-
     }
 
-    //car brand values
+    // Car brand values validation
     const brandInput = document.getElementById("car_brand");
     const brandError = document.getElementById("brand-error");
-    // car color values
+    // Car color values validation
     const colorInput = document.getElementById("car_color");
     const colorError = document.getElementById("color-error");
-    // car color values
+    // Car type values validation
     const typeInput = document.getElementById("car_type");
     const typeError = document.getElementById("type-error");
 
     if (/\d/.test(brandInput.value)) {
-      showErrors(brandError, "Car brand isn't correct")
+      showErrors(brandError, "Car brand isn't correct");
+      isValid = false; // Invalid car brand
     }
     if (/\d/.test(colorInput.value)) {
-      showErrors(colorError, "Car color isn't correct")
+      showErrors(colorError, "Car color isn't correct");
+      isValid = false; // Invalid car color
     }
     if (/\d/.test(typeInput.value)) {
-      showErrors(typeError, "Car type isn't correct")
+      showErrors(typeError, "Car type isn't correct");
+      isValid = false; // Invalid car type
     }
+
+    return isValid;
   }
+
+  // Listen for the form submit event
+  const form = document.querySelector("form");
+  form.addEventListener("submit", (event) => {
+    // Validate the form before submitting
+    if (!validateForm()) {
+      event.preventDefault(); // Prevent form submission if the form is invalid
+      return false;
+    }
+  });
   //checks avaliability of parking slots when selected
   async function checkAvailability() {
     const arrivDate = arrivalDateInput.value;
@@ -175,6 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
         priceDisplay.textContent = "Total Price € 0"; // Reset the price display
         daysDisplay.textContent = "Total days reserved: 0"; // Reset days display
         submitButton.disabled = true; // Disable submit button
+        priceDisplay.style.color = '#555'; // Reset the price display
         departureDateInput.setAttribute("min", arrivDate); // Ensure departure date can't be before arrival date
         return; // Exit early
       }
@@ -225,52 +253,56 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault(); // Prevent default form submission
 
     // Collect the form data
-    const formData = {
-      arrival_date: document.getElementById('arrival_date').value,
-      departure_date: document.getElementById('departure_date').value,
-      arrival_time: document.getElementById('arrival_time').value,
-      departure_time: document.getElementById('departure_time').value,
-      name: document.getElementById('name').value,
-      email: document.getElementById('email').value,
-      car_brand: document.getElementById('car_brand').value,
-      car_color: document.getElementById('car_color').value,
-      car_type: document.getElementById('car_type').value,
-      license_plate: document.getElementById('license_plate').value
-    };
+    if (validateForm()) {
+      const formData = {
+        arrival_date: document.getElementById('arrival_date').value,
+        departure_date: document.getElementById('departure_date').value,
+        arrival_time: document.getElementById('arrival_time').value,
+        departure_time: document.getElementById('departure_time').value,
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        car_brand: document.getElementById('car_brand').value,
+        car_color: document.getElementById('car_color').value,
+        car_type: document.getElementById('car_type').value,
+        license_plate: document.getElementById('license_plate').value
+      };
 
-    try {
-      const response = await fetch("/book", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
+      try {
+        const response = await fetch("/book", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
 
-      const result = await response.json();
+        const result = await response.json();
 
-      // Check if response contains bookingId
-      if (result.bookingId) {
-        // Hide the booking form and show confirmation
-        document.getElementById('booking-form').style.display = 'none';
-        document.getElementById('confirmation-message').style.display = 'block';
+        // Check if response contains bookingId
+        if (result.bookingId) {
+          // Hide the booking form and show confirmation
+          document.getElementById('booking-form').style.display = 'none';
+          document.getElementById('confirmation-message').style.display = 'block';
 
-        // Show the confirmation message
-        document.getElementById("confirmation-text").innerHTML = `
-          <h3 class="h3-confirm">Congratulations <span>${result.name}</span></h3>
+          // Show the confirmation message
+          document.getElementById("confirmation-text").innerHTML = `
+          <h3 class="h3-confirm">Thank you for your booking, <span class="name">${result.name}</span></h3>
           <div class="para-confirmed-div">
-            <p>Your booking was successful!</p>
             <p>You have received an email with your booking details and instructions on how to proceed.</p>
             <p>The booking payment procees will be opened for 30 min</p>
+            <p>Your will recieve a confirmation email once the payment is completed</p>
             <p>Booking REF: <span>EIN${result.bookingId}</span></p>
-            <p>Total Price € <span>${result.totalPrice}</span></p>
+            <p>Total € <span>${result.totalPrice}</span></p>
           </div>
         `;
-      } else {
-        console.error('Booking failed:', result.message);
-        alert('Booking failed: ' + result.message);
+        } else {
+          console.error('Booking failed:', result.message);
+          alert('Booking failed: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        alert('An error occurred while processing your booking.');
       }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('An error occurred while processing your booking.');
+    } else {
+      console.log("Form validation failed, submission prevented.");
     }
   });
 
@@ -300,14 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Add event listeners to check availability when the dates are changed
   arrivalDateInput.addEventListener('change', checkAvailability);
   departureDateInput.addEventListener('change', checkAvailability);
-  document.getElementById('booking-form').addEventListener('submit', function (e) {
-    e.preventDefault(); // Prevent form submission
 
-    if (validateForm()) {
-      // If the form is valid, you can proceed with the form submission
-      this.submit(); // Proceed to submit the form if valid
-    }
-  });
   //SHow question mark or hide it 
   const questionMark = document.getElementById('question-mark');
   const questionDiv = document.getElementById('question-div');
@@ -319,7 +344,6 @@ document.addEventListener("DOMContentLoaded", () => {
   questionMark.addEventListener('mouseleave', () => {
     questionDiv.style.display = 'none'; // Hide the explanation text when mouse leaves
   });
-
 
 
   // const savedArrivalDate = localStorage.getItem('arrivalDate');

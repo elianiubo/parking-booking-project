@@ -63,9 +63,10 @@
 
         <div class="row">
             <div class="form-group">
-                <label for="car_type">Car Type: <span>*</span>
-                    <div id="question-mark"><a href="https://www.flaticon.com/free-icons/question"
-                            title="question icons"></a><img src="/assets/icons/question.png"></img></div>
+                <label for="car_type">Car Type: <span>*</span><a href="https://www.flaticon.com/free-icons/question"
+                    title="question icons"></a><img  id="question-mark"src="/assets/icons/question.png"></img>
+                    <!-- <div id="question-mark"><a href="https://www.flaticon.com/free-icons/question"
+                            title="question icons"></a><img src="/assets/icons/question.png"></img></div> -->
                 </label>
                 <input type="text" placeholder="Car Type" id="car_type" name="car_type" required>
                 <p class="error-message" id="type-error"></p>
@@ -91,55 +92,62 @@
 <section id="faqs-box">
     <h4 class="title">Frequently Asked Questions</h4>
     <div class="paragraph">
-    <p> We understand you might have questions about how parking works, bookings, or payments. 
-        In this section, you'll find the most frequently asked questions from our customers. <br><br>
-        If you don’t find the answer you’re looking for, feel free to contact our <strong> <a href="#">customer service</a></strong>.
-        Our team is here to help!
-    </p>
+        <p> We understand you might have questions about how parking works, bookings, or payments.
+            In this section, you'll find the most frequently asked questions from our customers. <br><br>
+            If you don’t find the answer you’re looking for, feel free to contact our <strong> <a href="#">customer
+                    service</a></strong>.
+            Our team is here to help!
+        </p>
     </div>
     <div id="faqs-div">
-       <div class="faq">
-            <div class="question">
-                <h5>What is JavaScript?</h5>
-
-                <img src="/assets/icons/down-arrow.png" alt="Arrow Icon" class="arrow-icon" >
+        <!-- Category 1 -->
+        <div class="faq-category">
+            <h5 class="category-title">Category 1</h5>
+            <div class="faq">
+                <div class="question">
+                    <h6>What is JavaScript?</h6>
+                    <img src="/assets/icons/down-arrow.png" alt="Arrow Icon" class="arrow-icon">
+                </div>
+                <div class="answer">
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem ullam saepe eum eos.</p>
+                </div>
             </div>
-            <div class="answer">
-                <p>
-                    Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorem ullam saepe eum eos eveniet enim totam ut quisquam maiores numquam,
-                     ratione cupiditate iste vitae rerum reiciendis rem explicabo sequi dignissimos!
-                </p>
-            </div>
-        </div>
 
-        <div class="faq">
-            <div class="question">
-                <h5>What is JavaScript?</h5>
-
-                <img src="/assets/icons/down-arrow.png" alt="Arrow Icon" class="arrow-icon">
-            </div>
-            <div class="answer">
-                <p>
-                    Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Minima, dolor fugit reiciendis eaque ipsam suscipit animi expedita nisi, ullam voluptatibus incidunt laboriosam consequuntur temporibus, porro esse sapiente alias provident iusto!
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Culpa, error. Ex, odio excepturi? Maxime repudiandae inventore quia saepe voluptatum quidem sapiente, veritatis libero adipisci aliquam possimus cupiditate nisi architecto iste.
-                </p>
+            <div class="faq">
+                <div class="question">
+                    <h6>How does JavaScript work?</h6>
+                    <img src="/assets/icons/down-arrow.png" alt="Arrow Icon" class="arrow-icon">
+                </div>
+                <div class="answer">
+                    <p>JavaScript is a programming language used for dynamic website behavior. It works on the client side.</p>
+                </div>
             </div>
         </div>
 
-        <div class="faq">
-            <div class="question">
-                <h5>What is JavaScript?</h5>
-
-                <img src="/assets/icons/down-arrow.png" alt="Arrow Icon" class="arrow-icon">
+        <!-- Category 2 -->
+        <div class="faq-category">
+            <h5 class="category-title">Category 2</h5>
+            <div class="faq">
+                <div class="question">
+                    <h6>What is the difference between HTML and CSS?</h6>
+                    <img src="/assets/icons/down-arrow.png" alt="Arrow Icon" class="arrow-icon">
+                </div>
+                <div class="answer">
+                    <p>HTML provides the structure of the webpage, while CSS is used to style the content.</p>
+                </div>
             </div>
-            <div class="answer">
-                <p>
-                    Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Enim nemo quos aut perferendis non, temporibus quam corporis nihil illo velit, earum veritatis ipsam. Eaque in nihil ipsam quia nam sint.
-                </p>
+
+            <div class="faq">
+                <div class="question">
+                    <h6>How do you write a function in JavaScript?</h6>
+                    <img src="/assets/icons/down-arrow.png" alt="Arrow Icon" class="arrow-icon">
+                </div>
+                <div class="answer">
+                    <p>A function in JavaScript is written using the function keyword, followed by its name and parameters.</p>
+                </div>
             </div>
         </div>
     </div>
+
+
 </section>
