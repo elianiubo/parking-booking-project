@@ -192,7 +192,7 @@ async function sendMailConfirmation(data) {
     }
   });
 
-};
+}
 
 async function createBookingAndUserDetails(bookingData, userData, totalPrice) {
   try {
