@@ -35,10 +35,36 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(express.json());
 // Routes
-app.get('/', (req, res) => {
-  res.render('index.ejs', { totalPrice: 0 });
+app.get('/', async (req, res) => {
+  try {
+    const query = await db.query(`Select question, answer from faq`)
+    // If no rows are returned, log an empty array for debugging
+    const faqs = query.rows;
+    console.log(faqs)
+    res.render('index.ejs', { totalPrice: 0, faqs });
+  } catch (error) {
+    console.error('Error fetching FAQs:', error);
+    res.status(500).send('Internal Server Error');
+  }
+
 });
 
+
+// app.get('/faq', async (req, res) => {
+//   try {
+//     const result = await db.query('SELECT * FROM faq');
+//     const data = result.rows; // Get the rows from the database
+
+//     if (data.length === 0) {
+//       return res.render('booking-form', { faqs: [] }); // If no data, pass an empty array
+//     }
+
+//     res.render('booking-form', { faqs: data }); // Pass the fetched FAQs to the view
+//   } catch (error) {
+//     console.error('Error fetching FAQs:', error);
+//     res.status(500).send('Server error');
+//   }
+// });
 // gets the stripe key from getEnvVariables and globally initializes the secret_key
 //for the session in function createSession
 (async () => {

@@ -64,7 +64,7 @@
         <div class="row">
             <div class="form-group">
                 <label for="car_type">Car Type: <span>*</span><a href="https://www.flaticon.com/free-icons/question"
-                    title="question icons"></a><img  id="question-mark"src="/assets/icons/question.png"></img>
+                        title="question icons"></a><img id="question-mark" src="/assets/icons/question.png"></img>
                     <!-- <div id="question-mark"><a href="https://www.flaticon.com/free-icons/question"
                             title="question icons"></a><img src="/assets/icons/question.png"></img></div> -->
                 </label>
@@ -100,53 +100,22 @@
         </p>
     </div>
     <div id="faqs-div">
-        <!-- Category 1 -->
-        <div class="faq-category">
-            <h5 class="category-title">Category 1</h5>
-            <div class="faq">
-                <div class="question">
-                    <h6>What is JavaScript?</h6>
-                    <img src="/assets/icons/down-arrow.png" alt="Arrow Icon" class="arrow-icon">
-                </div>
-                <div class="answer">
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem ullam saepe eum eos.</p>
-                </div>
-            </div>
 
+        <% faqs.forEach((faq, i)=> { %> <!-- Loop through the faqs array -->
             <div class="faq">
                 <div class="question">
-                    <h6>How does JavaScript work?</h6>
+                    <h6>
+                        <%= faq.question %>
+                    </h6> <!-- Display the question from the database -->
                     <img src="/assets/icons/down-arrow.png" alt="Arrow Icon" class="arrow-icon">
                 </div>
                 <div class="answer">
-                    <p>JavaScript is a programming language used for dynamic website behavior. It works on the client side.</p>
+                    <p>
+                        <%= faq.answer %>
+                    </p> <!-- Display the answer from the database -->
                 </div>
             </div>
-        </div>
-
-        <!-- Category 2 -->
-        <div class="faq-category">
-            <h5 class="category-title">Category 2</h5>
-            <div class="faq">
-                <div class="question">
-                    <h6>What is the difference between HTML and CSS?</h6>
-                    <img src="/assets/icons/down-arrow.png" alt="Arrow Icon" class="arrow-icon">
-                </div>
-                <div class="answer">
-                    <p>HTML provides the structure of the webpage, while CSS is used to style the content.</p>
-                </div>
-            </div>
-
-            <div class="faq">
-                <div class="question">
-                    <h6>How do you write a function in JavaScript?</h6>
-                    <img src="/assets/icons/down-arrow.png" alt="Arrow Icon" class="arrow-icon">
-                </div>
-                <div class="answer">
-                    <p>A function in JavaScript is written using the function keyword, followed by its name and parameters.</p>
-                </div>
-            </div>
-        </div>
+            <% }); %>
     </div>
 
 

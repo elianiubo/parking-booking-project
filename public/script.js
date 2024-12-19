@@ -12,18 +12,44 @@ document.addEventListener("DOMContentLoaded", () => {
   const submitButton = document.getElementById('submit-btn');
   disablePastDates();  // Disable past dates for arrival date on page load
   updatePage();
+  const faqs = document.querySelectorAll(".faq");  // Select all the FAQ items
 
+    faqs.forEach(faq => {
+        const arrow = faq.querySelector(".arrow-icon");  // Get the arrow inside the FAQ
+        const answer = faq.querySelector(".answer");    // Get the answer inside the FAQ
+
+        // Add click event listener to the entire FAQ element
+        faq.addEventListener("click", function() {
+            // Toggle the 'active' class on the FAQ container to show/hide the answer
+            faq.classList.toggle("active");
+
+            // Rotate the arrow icon
+            arrow.classList.toggle("rotate");
+        });
+  })
   //FAQS text shpows up when clicked and roates icon
-  const faqs = document.querySelectorAll(".faq");
 
-  faqs.forEach(faq => {
-    const arrowIcon = faq.querySelector(".arrow-icon"); // Get the arrow icon inside each FAQ
+  // const faqs = document.querySelectorAll(".faq");
 
-    faq.addEventListener("click", () => {
-      faq.classList.toggle("active"); // Toggle the "active" class on the FAQ
-      arrowIcon.classList.toggle("rotate"); // Toggle the "rotate" class on the arrow icon
-    });
-  });
+  // // Add a click event listener to each FAQ container
+  // faqs.forEach(faq => {
+  //   const question = faq.querySelector(".question"); // The clickable question section
+  //   const answerDiv = faq.querySelector(".answer"); // The corresponding answer section
+  //   const arrowIcon = faq.querySelector(".arrow-icon"); // The arrow icon
+
+  //   question.addEventListener("click", () => {
+  //     // Toggle visibility of the answer
+  //     if (answerDiv.style.display === "none" || answerDiv.style.display === "") {
+  //       answerDiv.style.display = "block";
+  //     } else {
+  //       answerDiv.style.display = "none";
+  //     }
+
+  //     // Toggle rotation of the arrow icon
+  //     arrowIcon.classList.toggle("rotate");
+  //   });
+  // });
+
   // I save this variables in local so ig¡f page reloads are saved and user can reuse them
 
   // document.getElementById("booking-form").addEventListener('submit', () => {
