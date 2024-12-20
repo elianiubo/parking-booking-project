@@ -10,9 +10,9 @@
     font-size: 0.70rem;
     margin-top: 8px;
     /* position: absolute; Position error message below input */
-    
+
     /* width: 100%; */
-   
+
     /* Hidden by default */
 }
 
@@ -30,6 +30,9 @@ body {
 
     background-image: url(/assets/images/background-img.jpg);
     background-position: center;
+    overflow-y: auto;
+    /* Permite desplazamiento vertical en toda la página */
+
 
     /* animation: animatedBackground 1s ease-in-out; */
 }
@@ -121,9 +124,18 @@ nav a:hover::before {
 #img-container {
     position: relative;
     width: 100%;
-    height: 70vh;
+    min-height: 500px;
+    height: auto;
     /* Adjusted height for the image section */
+    display: flex;
+    /* Flexbox to center content */
+    justify-content: center;
+    /* Centers horizontally */
+    align-items: center;
+    /* Centers vertically */
     overflow: hidden;
+
+
 }
 
 .img {
@@ -149,6 +161,7 @@ nav a:hover::before {
     padding: 0 60px;
     box-sizing: border-box;
     color: #EEEEEE;
+    margin: 0px auto;
 }
 
 #img-container .left-content {
@@ -156,9 +169,11 @@ nav a:hover::before {
     font-size: 25px;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
 }
-.left-content h1{
+
+.left-content h1 {
     font-size: 2.2rem;
 }
+
 /* Right Section Layout */
 .right-content {
     display: grid;
@@ -166,6 +181,7 @@ nav a:hover::before {
     gap: 20px;
     /* max-width: 700px; */
     width: 100%;
+
     /* width: 90%;
     margin: 0 auto; */
 }
@@ -247,6 +263,7 @@ span {
     /* background-color: rgba(255, 255, 255, 0.9); */
     background-color: rgba(255, 255, 255, 0.5);
 
+
 }
 
 .why-left {
@@ -319,7 +336,7 @@ main {
     display: flex;
     flex-direction: column;
     height: auto;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 #form-box #price-display,
@@ -356,18 +373,23 @@ p {
     display: flex;
     justify-content: space-evenly;
     margin: 15px;
-    
-  
-    width: 100%; /* Ensure the row spans the full width of the container */
+
+
+    width: 100%;
+    /* Ensure the row spans the full width of the container */
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Align items to the left */
-    width: 100%; /* Take up full width of row */
-    max-width: 300px; /* Limit max width of inputs */
-    position: relative; /* Required for positioning error messages */
+    align-items: flex-start;
+    /* Align items to the left */
+    width: 100%;
+    /* Take up full width of row */
+    max-width: 300px;
+    /* Limit max width of inputs */
+    position: relative;
+    /* Required for positioning error messages */
 
 
 }
@@ -375,7 +397,7 @@ p {
 .form-group label {
     margin-bottom: 5px;
     font-size: 15px;
-    color: #555;
+    color: #000000;
 
 }
 
@@ -398,8 +420,8 @@ p {
     position: relative;
     margin-left: 172px;
     /* Add some space between the label and the icon */
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
 
 
 
@@ -422,9 +444,10 @@ p {
     display: none;
 }
 
-label {
-    font-size: 15px;
+
+::placeholder {
     color: #555;
+    font-size: 15px;
 }
 
 input {
@@ -444,6 +467,12 @@ input:focus {
 
 }
 
+input[type="date"],
+input[type="time"] {
+    font-size: 15px;
+    color: #555;
+}
+
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator {
     background-color: #00ADB5;
@@ -454,11 +483,12 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     border-radius: 5px;
 
 
+
 }
 
-input:last-of-type {
+/* input:last-of-type {
     margin-right: 15px;
-}
+} */
 
 /*submit button*/
 
@@ -546,7 +576,8 @@ input:last-of-type {
 #submit-btn:hover {
     outline: 0;
 }
-.name{
+
+.name {
     font-size: 20px;
 }
 
@@ -678,7 +709,7 @@ strong a:hover {
 
 /*width of the box of the answer*/
 .answer {
-    
+
     max-height: 0;
     overflow: hidden;
     transition: max-height 1s ease-in-out;
@@ -694,7 +725,7 @@ strong a:hover {
 /* Show answer when FAQ is active */
 .faq.active .answer {
     max-height: 300px;
-    
+
 }
 
 /*Rotate icon when clicked*/
@@ -712,21 +743,26 @@ strong a:hover {
 /*map responsive*/
 .google-map {
     position: relative;
-    width: 100%; /* Full width of the parent container */
-   margin-top: 10px;
+    width: 100%;
+    /* Full width of the parent container */
+    margin-top: 10px;
     overflow: hidden;
-    border-radius: 10px; /* Optional: Add rounded corners for a polished look */
-    margin:0px auto;
+    border-radius: 10px;
+    /* Optional: Add rounded corners for a polished look */
+    margin: 0px auto;
 }
 
 .google-map iframe {
-   
+
     top: 0;
     left: 0;
-    width: 100%; /* Responsive width */
-    height: 100%; /* Responsive height */
-    border: 0; /* Remove border */
-    margin:  0px auto;
+    width: 100%;
+    /* Responsive width */
+    height: 100%;
+    /* Responsive height */
+    border: 0;
+    /* Remove border */
+    margin: 0px auto;
 }
 
 footer {
@@ -738,7 +774,7 @@ footer {
 }
 
 #footer-box {
-    
+
     box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
     height: auto;
     display: flex;
@@ -750,11 +786,11 @@ footer {
 .footer-categories {
     text-align: center;
     padding: 10px 10px 10px 10px;
-    width: 100%;
     margin: 50px;
 
 
 }
+
 .footer-categories p {
     color: #00ADB5;
 
@@ -766,82 +802,360 @@ footer {
     line-height: 1.4;
 
 }
-.footer-categories ul{
+
+.footer-categories ul {
     list-style: none;
     margin-bottom: 18px
+}
+
+#top-btn {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    /* Fixed/sticky position */
+    bottom: 20px;
+    /* Place the button at the bottom of the page */
+    right: 6%;
+    /* Place the button 30px from the right */
+    z-index: 99;
+    /* Make sure it does not overlap */
+    border: none;
+    /* Remove borders */
+    outline: none;
+    /* Remove outline */
+    cursor: pointer;
+    /* Add a mouse pointer on hover */
+    /* width: 50px;
+    height: 50px; */
+
+
+}
+
+
+/* @media (max-width : 1426px){
     
-
-
-
-
-}
-
-
-
-
-
-
-
-@media (min-width: 768px) {
-    #submit-btn {
-        padding: 0 40px;
-    }
-}
-
-
-@media (min-width: 768px) {
-    #submit-btn {
-        padding: 16px 32px;
-    }
-}
-
-
-@media (max-width: 941px) {
-    #form-box {
-        width: 90%;
-        /* Increase width for smaller screens */
-        padding: 20px;
-
-    }
-
-    #booking-form {
-        margin: 0px auto;
-    }
-
-    .row {
-        flex-direction: column;
-        /* Stack form elements on smaller screens */
+    .right-content{
         width: 100%;
-    }
-
-    .form-group:last-child {
-        margin-top: 5px;
-    }
-
-    .div-total-price {
-        width: 90%;
-        /* Increase width for smaller screens */
-    }
-    #footer-box {
-        flex-direction: column; /* Stack categories vertically */
-        text-align: center;
-    }
-
-    .footer-categories {
-        margin: 20px; /* Adjust margins for smaller screens */
-    }
-
-    .google-map iframe {
-        width: 70%;
-        height: 70%;
         margin: 0px auto;
     }
-}
+    .left-content h1 {
+        font-size: 1.4rem;
+        text-align: center;
+        margin-top: 13px;
+        margin-bottom: 13px;
+    }
+    .right-content{
+        max-width: 70%;
+        margin: 0px auto;
+    }
+    .content-box {
+        padding: 10px
+    }
+   .content-box .content-text p, .content-box .content-text li{
+    font-size: 1rem;
+
+   }
+   .content-box .buttons a{
+    padding: 4px 8px;
+    font-size: 1rem
+   } */
 
 
-/* BOOKING FORM */
+/* .right-content{
+        display: flex;
+        flex-direction: column;
+    }
+    .content-text{
+        width: 100px;
+        height: 100px;
+    }
+    .right-content .explanation-box{
+        font-size: 0.7rem;
+    } */
 
-/* #booking-form {
+
+/* @media (max-width: 1149px){
+    #nav a {
+        font-size: 0.9rem;
+    }
+    .content-box .content-text p, .content-box .content-text li {
+        font-size: 0.8rem;
+
+    }
+    .content-box .buttons a {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+        font-weight: none;
+    }
+} */
+@media (max-width: 1308px) {
+    .left-content h1 {
+        font-size: 1.9rem;
+    }
+
+    #top-btn {
+        bottom: 20px;
+        right: 5%;
+        width: 50px;
+        height: 50px;
+    }
+
+    @media (max-width: 1089px) {
+
+        /* Adjust container layout */
+        #img-container .content {
+            flex-direction: column;
+            /* Stack elements vertically */
+            align-items: center;
+            /* Center elements horizontally */
+            padding: 20px;
+            /* Add padding for spacing */
+            text-align: center;
+            /* Center-align text */
+        }
+    }
+
+        /* Ensure title is on top */
+        #img-container .left-content {
+            order: 1;
+            /* Ensure the title comes first */
+            margin-bottom: 20px;
+            /* Add space below the title */
+            width: 100%;
+            /* Full width for the title */
+        }
+
+        #img-container .left-content h1 {
+            font-size: 1.7rem;
+            /* Adjust font size for smaller screens */
+            line-height: 1.4;
+            /* Improve readability */
+        }
+
+        /* Stack content boxes */
+        .right-content {
+            order: 2;
+            /* Ensure it comes after the title */
+            display: flex;
+            flex-direction: column;
+            /* Stack content vertically */
+            gap: 20px;
+            /* Add space between boxes */
+            width: 100%;
+            /* Take up full width */
+        }
+
+        .content-box {
+            width: 100%;
+            /* Make content boxes full width */
+            max-width: 500px;
+            /* Optional: Limit max width for better visuals */
+            margin: 0 auto;
+            /* Center content boxes */
+        }
+
+        .content-box .content-text p {
+            font-size: 1rem;
+            /* Adjust font size for smaller screens */
+        }
+
+        .content-box .buttons a {
+            font-size: 0.8rem;
+            /* Adjust button size */
+            padding: 10px 20px;
+            /* Adjust button padding */
+            display: block;
+            /* Ensure buttons stack properly */
+            margin: 10px auto;
+            /* Center align buttons */
+        }
+
+        #form-box {
+            width: 90%;
+            /* Increase width for smaller screens */
+            padding: 20px;
+
+        }
+
+        #booking-form {
+            margin: 0px auto;
+        }
+
+        .row {
+            flex-direction: column;
+            /* Stack form elements on smaller screens */
+            width: 100%;
+        }
+
+        .form-group:last-child {
+            margin-top: 5px;
+        }
+
+        .div-total-price {
+            width: 90%;
+            /* Increase width for smaller screens */
+        }
+
+        #footer-box {
+            flex-direction: column;
+            /* Stack categories vertically */
+            text-align: center;
+        }
+
+        .footer-categories {
+            margin: 20px;
+            /* Adjust margins for smaller screens */
+        }
+
+        .google-map iframe {
+            width: 70%;
+            height: 70%;
+            margin: 0px auto;
+        }
+    }
+
+
+    @media(max-width: 830px) {
+        .book-h2-form,.title {  
+            font-size: 1.7rem;
+        }
+        #nav a {
+            font-size: 14px;
+        }
+
+        .content-box .content-text p {
+            font-size: 0.9rem;
+        }
+
+    
+        .content-box {
+            padding: 15px;
+            /* Ajusta el relleno interno */
+            font-size: 0.9rem;
+            /* Reduce ligeramente el tamaño del texto */
+        }
+
+        .content-box .buttons a {
+            font-size: 0.7rem;
+            /* Reduce el tamaño de los botones */
+            padding: 8px 12px;
+            /* Ajusta el relleno de los botones */
+        }
+        /* Ajustar el contenedor principal */
+        #why-choose-us {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            /* Ajusta la posición de los elementos */
+            align-items: center;
+            min-height: auto;
+            /* Permite que crezca verticalmente */
+            flex-wrap: wrap;
+        }
+
+        .why-left,
+        .why-right {
+            max-width: 100%;
+            /* Permite que ocupen todo el ancho */
+            margin-bottom: 20px;
+            /* Añade un espacio entre ellos */
+        }
+
+        .why-right ul {
+            padding: 0 10px;
+        }
+        .why-left h2 {
+            font-size: 1.6rem;
+        }
+
+
+        .bottom-container {
+            grid-template-columns: 1fr;
+            /* Apila las cajas una debajo de otra */
+            gap: 15px;
+            /* Espacio entre las cajas */
+        }
+       
+        
+    }
+
+    /* Responsive Layout for Smaller Screens */
+    @media (max-width: 768px) {
+        #img-container .content {
+            flex-direction: column;
+            /* Stack items vertically */
+            text-align: center;
+            /* Center-align text */
+            padding: 20px;
+            /* Adjust padding */
+        }
+
+        #img-container .left-content {
+            order: 1;
+            /* Ensure title comes first */
+            margin-bottom: 20px;
+            /* Add spacing below the title */
+        }
+
+        #img-container .left-content h1 {
+            font-size: 1.8rem;
+            /* Adjust font size for smaller screens */
+        }
+
+        .right-content {
+            order: 2;
+            /* Ensure right-content is below the title */
+            width: 100%;
+            /* Take full width */
+        }
+
+        .content-box {
+            padding: 15px;
+            /* Reduce padding for better fit */
+        }
+
+        .content-box .content-text p {
+            font-size: 0.9rem;
+            /* Slightly reduce text size */
+        }
+
+        .content-box .buttons a {
+            font-size: 0.85rem;
+            /* Adjust button size */
+            padding: 8px 16px;
+            /* Reduce button padding */
+        }
+    }
+
+    @media (min-width: 768px) {
+        #submit-btn {
+            padding: 16px 32px;
+        }
+    }
+   
+
+    /* @media (max-height: 600px) {
+    #img-container {
+        min-height: auto; /* Permite que crezca según el contenido */
+    /* }
+
+    #why-choose-us {
+        padding: 10px; /* Ajusta el relleno en pantallas más bajas */
+    /* }
+
+    .right-content {
+        margin-top: 20px;
+    }
+
+} */
+
+
+
+
+
+    /* BOOKING FORM */
+/* 
+     #booking-form {
       display: flex;
       flex-direction: column;
     
@@ -871,4 +1185,4 @@ footer {
       .form-group {
         width: 100%;
       }
-    } */
+    }  */
