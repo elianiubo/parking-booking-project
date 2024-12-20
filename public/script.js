@@ -1,6 +1,8 @@
 
 
 document.addEventListener("DOMContentLoaded", () => {
+ 
+  
   // this make that once i've recieved the confrimation email, and i reload the page it goes to the main page again, to avoid sneding emails again wiht onfirmation
   if (window.performance.getEntriesByType("navigation")[0].type === 'reload') {
     window.location.href = '/';
@@ -65,10 +67,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // })
 
   // makes the button to make a new buttin go to main page
-  document.getElementById('new-booking-btn')?.addEventListener('click', () => {
-    window.location.href = '/'; // Redirect to the main page
+  // document.getElementById('new-booking-btn')?.addEventListener('click', () => {
+  //   window.location.href = '/'; // Redirect to the main page
 
-  });
+  // });
+
+  const mybutton = document.getElementById("top-btn");
+  window.onscroll = function() {scrollFunction()};
+  function scrollFunction() {
+    if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600) {
+      mybutton.style.display = "block";
+    } else {
+      mybutton.style.display = "none";
+    }
+  }
+  mybutton.addEventListener('click',()=>{
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  })
   // Create the span element for total price dynamically
   function disablePastDates() {
     const today = new Date();
@@ -92,6 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
   }
+ 
   function showTotalDays(arrivDate, depDate) {
     const arriv = new Date(arrivDate);
     const dep = new Date(depDate);
@@ -323,6 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
           console.error('Booking failed:', result.message);
           alert('Booking failed: ' + result.message);
         }
+        document.getElementById('form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
       } catch (error) {
         console.error('Error submitting form:', error);
         alert('An error occurred while processing your booking.');

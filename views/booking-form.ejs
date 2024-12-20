@@ -1,3 +1,4 @@
+
 <div id="form-box">
     <h2 class="book-h2-form">Book Your Parking Spot</h2>
     <p>Secure parking at affordable rates. Fill in your details to book!</p>
@@ -23,18 +24,6 @@
         </div>
         <div class="row">
             <div class="form-group">
-                <label for="name">Name: <span>*</span></label>
-                <input type="text" placeholder="Your Name and Surname" id="name" name="name" required>
-                <p class="error-message" id="name-error"></p>
-            </div>
-            <div class="form-group">
-                <label for="email">Email: <span>*</span></label>
-                <input type="email" placeholder="Your Email" id="email" name="email" required>
-                <p class="error-message" id="email-error"></p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="form-group">
                 <label for="arrival_time">Arrival Time: <span>*</span></label>
                 <input type="time" placeholder="Arrival Time" id="arrival_time" name="arrival_time" required>
                 <p class="error-message" id="arrival-error"></p>
@@ -46,6 +35,19 @@
                 <p class="error-message" id="departure-error"></p>
             </div>
         </div>
+        <div class="row">
+            <div class="form-group">
+                <label for="name">Name: <span>*</span></label>
+                <input type="text" placeholder="Your Name and Surname" id="name" name="name" required>
+                <p class="error-message" id="name-error"></p>
+            </div>
+            <div class="form-group">
+                <label for="email">Email: <span>*</span></label>
+                <input type="email" placeholder="Your Email" id="email" name="email" required>
+                <p class="error-message" id="email-error"></p>
+            </div>
+        </div>
+
 
         <div class="row">
             <div class="form-group">
@@ -76,7 +78,8 @@
             <div class="form-group">
                 <label for="license_plate">License Plate Number: <span>*</span></label>
                 <input type="text" placeholder="License Plate" id="license_plate" name="license_plate" required>
-                <p style="font-size: 11px;">Make sure you write the correct license plate number</p>
+                <p style="font-size: 12px; padding-top: 2px; text-align: start; color: black;">Make sure you write the
+                    correct license plate number</p>
                 <!-- <p class="error-message" id="license-error"></p> -->
             </div>
         </div>
@@ -84,6 +87,7 @@
         <button type="submit" id="submit-btn" disabled>Submit</button>
 
     </form>
+    
     <div id="confirmation-message" style="display: none;">
 
         <p id="confirmation-text"></p>
@@ -120,3 +124,4 @@
 
 
 </section>
+<img id="top-btn" src="/assets/icons/top-arrow.png" alt="">

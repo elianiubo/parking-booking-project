@@ -40,8 +40,9 @@ app.get('/', async (req, res) => {
     const query = await db.query(`Select question, answer from faq`)
     // If no rows are returned, log an empty array for debugging
     const faqs = query.rows;
-    console.log(faqs)
-    res.render('index.ejs', { totalPrice: 0, faqs });
+    const { address1, address2, address3, phone, contact_email } = await getEnvVariables();
+
+    res.render('index.ejs', { totalPrice: 0, faqs, address1, address2, address3, phone, contact_email });
   } catch (error) {
     console.error('Error fetching FAQs:', error);
     res.status(500).send('Internal Server Error');
@@ -89,20 +90,39 @@ async function getEnvVariables() {
     const passResult = await db.query(query, ['EMAIL_PASS']);
     const stripeKeyResult = await db.query(query, ['STRIPE_KEY']);
     const cancelMinutesResult = await db.query(query, ['CANCEL_MINUTES']);
-    ;
+    const address1 = await db.query(query, ['address1']);
+    const address2 = await db.query(query, ['address2'])
+    const address3 = await db.query(query, ['address3']);
+    const contact_email = await db.query(query, ['contact-email']);
+    const phone = await db.query(query, ['phone']);
+
     if (emailResult.rows.length > 0
       && passResult.rows.length > 0
       && stripeKeyResult.rows.length > 0
-      && cancelMinutesResult.rows.length > 0) {
+      && cancelMinutesResult.rows.length > 0
+      && address1.rows.length > 0
+      && address2.rows.length > 0
+      && address3.rows.length > 0
+      && phone.rows.length > 0
+      && contact_email.rows.length > 0
+
+    ) {
       // Return the value from the result
       return {
         emailOut: emailResult.rows[0].value,
         pass: passResult.rows[0].value,
         stripeKey: stripeKeyResult.rows[0].value,
-        cancel_minutes: parseInt(cancelMinutesResult.rows[0].value)
+        cancel_minutes: parseInt(cancelMinutesResult.rows[0].value),
+        address1: address1.rows[0].value,
+        address2: address2.rows[0].value,
+        address3: address3.rows[0].value,
+        phone: phone.rows[0].value,
+        contact_email: contact_email.rows[0].value,
+
+
       }
     }
-    throw new Error(`EMAIL or EMAIL_PASS not found in env_variables table.`);
+    throw new Error(`variables not found in env_variables table.`);
   } catch (error) {
     console.error('Error fetching environment variable:', error.message);
     throw error;
