@@ -37,7 +37,7 @@ app.use(express.static("public"));
 app.use(express.json());
 // Middleware for session handling
 app.use(session({
-  secret:process.env.SESSION_SECRET,  // Replace with a secure secret
+  secret: process.env.SESSION_SECRET,  // Replace with a secure secret
   resave: false,
   saveUninitialized: true,
   cookie: { secure: false }, // Set `true` if using HTTPS
@@ -233,9 +233,9 @@ async function sendMailConfirmation(data) {
   const mailOptions = {
     from: emailOut,
     to: email,
-    subject: `${isPaid ? 'Booking Confirmation' : 'Booking Pending for Payment'}(Ref: EIN${bookingId})`,
+    subject: `${isPaid ? 'Booking Confirmation ' : 'Booking Pending for Payment'}(Ref: EIN${bookingId})`,
     html: `
-        <h1>${isPaid ? 'Your Booking Confirmation' : 'Booking Pending for Payment'}</h1>
+        <h1>${isPaid ? 'Booking Confirmation' : 'Booking Pending for Payment'}</h1>
       <p>Hello, ${name}!</p>
       <p>${isPaid
         ? `Your booking has been confirmed. Here are the details:`
@@ -249,6 +249,7 @@ async function sendMailConfirmation(data) {
         <li><strong>Departure Time:</strong> ${departure_time}</li>
         <li><strong>Total Price:</strong> €${totalPrice}</li>
       </ul>
+      <p>Kind Regards</p>
       ${!isPaid
         ? `<p>Click the button below to complete your payment:</p>
            <p><strong>Please, make sure you pay within ${cancelTimeText} to confirm your booking</strong></p>
@@ -256,6 +257,9 @@ async function sendMailConfirmation(data) {
            <p>If the button does not work, you can use the following link:</p>
            <p><a href="${sessionUrl}">${sessionUrl}</a></p>`
         : `<p>Thank you for your payment. Your booking reference is <strong>EIN${bookingId}</strong>.</p>
+        <p>Check our website if you need more information on where to find your parking spot in the contact section or check our FAQ section</p>
+        <p>Kind regards</p>
+        
           `}
 
     `,
@@ -578,8 +582,8 @@ app.get('/payment-success', async (req, res) => {
       const updateQuery = `UPDATE parking_bookings SET email_sent = TRUE WHERE id = $1`;
       await db.query(updateQuery, [bookingId]);
     }
-     // Save any data you want to display in the confirmation page in the session
-     req.session.confirmationData = {
+    // Save any data you want to display in the confirmation page in the session
+    req.session.confirmationData = {
       name: booking.name,
       bookingId: bookingId,
       totalPrice: booking.total_price,
