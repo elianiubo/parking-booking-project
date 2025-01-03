@@ -7,6 +7,7 @@ import cron from "node-cron";
 import nodemailer from "nodemailer"
 import axios from "axios"
 import Stripe from "stripe"
+import session from 'express-session'
 
 
 const app = express();
@@ -34,6 +35,13 @@ db.connect();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(express.json());
+// Middleware for session handling
+app.use(session({
+  secret:process.env.SESSION_SECRET,  // Replace with a secure secret
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }, // Set `true` if using HTTPS
+}));
 // Routes
 app.get('/', async (req, res) => {
   try {
@@ -51,7 +59,28 @@ app.get('/', async (req, res) => {
   }
 
 });
+// Route for rendering confirmation.ejs
+app.get('/confirmation', async (req, res) => {
+  const confirmationData = req.session.confirmationData;
 
+  if (!confirmationData) {
+    return res.status(400).send('No confirmation data found.');
+  }
+
+  const { name, bookingId, totalPrice } = confirmationData;
+  const { address1, address2, address3, phone, contact_email } = await getEnvVariables();
+
+  res.render('confirmation.ejs', {
+    address1,
+    address2,
+    address3,
+    phone,
+    contact_email,
+    name,
+    bookingId,
+    totalPrice,
+  });
+});
 
 // app.get('/faq', async (req, res) => {
 //   try {
@@ -548,14 +577,17 @@ app.get('/payment-success', async (req, res) => {
       // Update the `email_sent` flag in the database
       const updateQuery = `UPDATE parking_bookings SET email_sent = TRUE WHERE id = $1`;
       await db.query(updateQuery, [bookingId]);
-    } else {
-      console.log('Email already sent for this booking.');
     }
-    // Fetch FAQs and other variables
+     // Save any data you want to display in the confirmation page in the session
+     req.session.confirmationData = {
+      name: booking.name,
+      bookingId: bookingId,
+      totalPrice: booking.total_price,
+    };
 
-    const { address1, address2, address3, phone, contact_email } = await getEnvVariables();
-    res.render('confirmation.ejs', { address1, address2, address3, phone, contact_email, name: booking.name, bookingId: bookingId, totalPrice: booking.total_price });
-    //res.send(`<h1>Payment Completed</h1><p>Your payment was successful. Booking ref EIN:${session.client_reference_id}</p>`);
+    // Redirect to a clean URL
+    //uses session key to save cookies
+    res.redirect('/confirmation');
   } catch (error) {
     console.error('Error retrieving session:', error);
     res.status(500).send('Error retrieving payment session');
