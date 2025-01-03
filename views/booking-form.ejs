@@ -5,19 +5,24 @@
     <form id="booking-form" action="/book" method="POST">
 
         <div class="row">
+            
             <div class="form-group">
                 <label for="arrival_date">Arrival Date: <span>*</span></label>
                 <input type="date" id="arrival_date" name="arrival_date" required>
+                <p class="error-message" ></p>
             </div>
             <div class="form-group">
                 <label for="departure_date">Departure Date: <span>*</span></label>
                 <input type="date" id="departure_date" name="departure_date" required>
+                <p class="error-message"></p>
             </div>
         </div>
         <div class="div-total-price">
+           
             <p id="price-display">
                 Total Price € 0
             </p>
+            <p id="Selected-dates"></p>
             <p id="days-display">
                 Total days reserved: 0
             </p>

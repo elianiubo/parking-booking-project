@@ -204,7 +204,7 @@ async function sendMailConfirmation(data) {
     to: email,
     subject: `${isPaid ? 'Booking Confirmation' : 'Booking Pending for Payment'}(Ref: EIN${bookingId})`,
     html: `
-        <h1>${isPaid ? 'Your Booking Confirmation' : 'Booking Pending forPayment'}</h1>
+        <h1>${isPaid ? 'Your Booking Confirmation' : 'Booking Pending for Payment'}</h1>
       <p>Hello, ${name}!</p>
       <p>${isPaid
         ? `Your booking has been confirmed. Here are the details:`
@@ -521,7 +521,7 @@ app.get('/payment-success', async (req, res) => {
 
 
 
-    // Actualiza el estado de la reserva en tu base de datos
+    // Actualiza el estado de la reserva en la base de datos
     const update = `UPDATE parking_bookings SET status = 'confirmed' WHERE id = $1`;
     await db.query(update, [bookingId]); // Asegúrate de enviar un ID correcto aquí
     if (result.rowCount === 0) {
@@ -542,8 +542,9 @@ app.get('/payment-success', async (req, res) => {
       totalPrice: booking.total_price,
       isPaid: true,
     });
-
-    res.render("confirmation.ejs", { session: bookingId })
+ // Fetch FAQs and other variables
+    
+    res.redirect('/?payment=success')
     //res.send(`<h1>Payment Completed</h1><p>Your payment was successful. Booking ref EIN:${session.client_reference_id}</p>`);
   } catch (error) {
     console.error('Error retrieving session:', error);

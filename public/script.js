@@ -1,14 +1,28 @@
 
 
 document.addEventListener("DOMContentLoaded", () => {
- 
-  
+
+
   // this make that once i've recieved the confrimation email, and i reload the page it goes to the main page again, to avoid sneding emails again wiht onfirmation
   if (window.performance.getEntriesByType("navigation")[0].type === 'reload') {
     window.location.href = '/';
   }
 
+  // setTimeout(() => {
+  //   document.getElementById('confirmation-message').style.display = 'none';
+  //   document.getElementById('booking-form').style.display = 'block';
+  // }, 5000); // Auto-hide after 5 seconds
+  // Check for the "payment=success" query parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('payment') === 'success') {
+    // Hide the confirmation message and show the booking form
+    document.getElementById('confirmation-message').style.display = 'none';
+    document.getElementById('booking-form').style.display = 'block';
 
+    // Clear the query parameter from the URL
+    const newUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, newUrl);
+  }
   const arrivalDateInput = document.getElementById('arrival_date');
   const departureDateInput = document.getElementById('departure_date');
   const submitButton = document.getElementById('submit-btn');
@@ -16,18 +30,18 @@ document.addEventListener("DOMContentLoaded", () => {
   updatePage();
   const faqs = document.querySelectorAll(".faq");  // Select all the FAQ items
 
-    faqs.forEach(faq => {
-        const arrow = faq.querySelector(".arrow-icon");  // Get the arrow inside the FAQ
-        const answer = faq.querySelector(".answer");    // Get the answer inside the FAQ
+  faqs.forEach(faq => {
+    const arrow = faq.querySelector(".arrow-icon");  // Get the arrow inside the FAQ
+    const answer = faq.querySelector(".answer");    // Get the answer inside the FAQ
 
-        // Add click event listener to the entire FAQ element
-        faq.addEventListener("click", function() {
-            // Toggle the 'active' class on the FAQ container to show/hide the answer
-            faq.classList.toggle("active");
+    // Add click event listener to the entire FAQ element
+    faq.addEventListener("click", function () {
+      // Toggle the 'active' class on the FAQ container to show/hide the answer
+      faq.classList.toggle("active");
 
-            // Rotate the arrow icon
-            arrow.classList.toggle("rotate");
-        });
+      // Rotate the arrow icon
+      arrow.classList.toggle("rotate");
+    });
   })
   //FAQS text shpows up when clicked and roates icon
 
@@ -73,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // });
 
   const mybutton = document.getElementById("top-btn");
-  window.onscroll = function() {scrollFunction()};
+  window.onscroll = function () { scrollFunction() };
   function scrollFunction() {
     if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600) {
       mybutton.style.display = "block";
@@ -81,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
       mybutton.style.display = "none";
     }
   }
-  mybutton.addEventListener('click',()=>{
+  mybutton.addEventListener('click', () => {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
   })
@@ -108,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
   }
- 
+
   function showTotalDays(arrivDate, depDate) {
     const arriv = new Date(arrivDate);
     const dep = new Date(depDate);
@@ -222,11 +236,12 @@ document.addEventListener("DOMContentLoaded", () => {
   async function checkAvailability() {
     const arrivDate = arrivalDateInput.value;
     const depDate = departureDateInput.value;
-
+    const selectedDates = document.getElementById("Selected-dates");
     const priceDisplay = document.getElementById("price-display");
     const daysDisplay = document.getElementById("days-display");
 
     // Reset price and days display initially
+    selectedDates.textContent = ""; // Clear any previous messages
     priceDisplay.textContent = "Total Price € 0"; // Ensure the initial text is correct
     daysDisplay.textContent = "Total days reserved: 0"; // Ensure the initial days display is correct
     submitButton.disabled = true; // Disable submit button by default
@@ -278,7 +293,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       } else {
         // If dates are not available
-        priceDisplay.textContent = "Selected dates are not available. Please choose different dates.";
+        selectedDates.textContent =
+        "Selected dates are not available. Please choose different dates."; // Show error in selected-dates
+        priceDisplay.textContent = "";
         daysDisplay.textContent = ""; // Reset the days display
         priceDisplay.style.color = "red"; // Change color to red for error
         submitButton.disabled = true; // Disable submit button
@@ -290,6 +307,11 @@ document.addEventListener("DOMContentLoaded", () => {
       priceDisplay.style.color = "red"; // Change color to red for error
       submitButton.disabled = true; // Disable submit button
     }
+    // Ensure text wraps and does not overflow
+    priceDisplay.style.whiteSpace = "normal"; // Allow wrapping
+    priceDisplay.style.wordWrap = "break-word"; // Break long text properly
+    priceDisplay.style.overflowWrap = "break-word"; // Modern text wrapping
+    priceDisplay.style.textAlign = "center";
   }
   //developing a confirmation booking UI response after submitting form
   document.getElementById('booking-form').addEventListener('submit', async function (event) {
@@ -344,11 +366,38 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (error) {
         console.error('Error submitting form:', error);
         alert('An error occurred while processing your booking.');
+      } finally {
+        submitButton.disabled = false; // Re-enable the button
       }
     } else {
       console.log("Form validation failed, submission prevented.");
     }
+
   });
+  // Function to handle successful payment
+  async function handlePaymentSuccess(sessionId) {
+    try {
+      const response = await fetch(`/payment-success?session_id=${sessionId}`);
+      if (response.ok) {
+        const result = await response.text();
+
+        // Clear the confirmation message and redisplay the booking form
+        document.getElementById('confirmation-message').style.display = 'none';
+        document.getElementById('booking-form').style.display = 'block';
+        document.getElementById('booking-form').reset(); // Reset the form
+
+        // Optionally, display a success message
+        alert('Payment successful! You can now make another booking.');
+      } else {
+        console.error('Failed to process payment:', await response.text());
+        alert('Failed to process payment. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error handling payment success:', error);
+      alert('An error occurred while handling the payment. Please try again.');
+    }
+  }
+
 
 
 
