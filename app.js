@@ -42,7 +42,9 @@ app.get('/', async (req, res) => {
     const faqs = query.rows;
     const { address1, address2, address3, phone, contact_email } = await getEnvVariables();
 
+
     res.render('index.ejs', { totalPrice: 0, faqs, address1, address2, address3, phone, contact_email });
+
   } catch (error) {
     console.error('Error fetching FAQs:', error);
     res.status(500).send('Internal Server Error');
@@ -511,7 +513,7 @@ app.get('/payment-success', async (req, res) => {
 
     // // Fetch booking details from the database using the booking ID
     const query = `       
-     SELECT ub.parking_spot_id, ub.name, ub.email, ub.arrival_date, ub.departure_date, ub.arrival_time,ub.departure_time, ub.fk_parking_bookings_id, pb.total_price
+     SELECT ub.parking_spot_id, ub.name, ub.email, ub.arrival_date, ub.departure_date, ub.arrival_time,ub.departure_time, ub.fk_parking_bookings_id, pb.total_price, pb.email_sent
   FROM user_bookings ub
   JOIN parking_bookings pb ON pb.id = ub.fk_parking_bookings_id
   WHERE ub.fk_parking_bookings_id = $1
@@ -530,21 +532,29 @@ app.get('/payment-success', async (req, res) => {
     //const { bookingId, name, sessionUrl, slot, email, arrival_date, departure_date, totalPrice, isPaid } = data;
     const booking = result.rows[0]
     console.log('Booking details from database:', booking);
-    sendMailConfirmation({
-      bookingId: booking.fk_parking_bookings_id,
-      name: booking.name,
-      slot: booking.parking_spot_id, // Corrected the property name
-      email: booking.email,
-      arrival_date: booking.arrival_date,
-      departure_date: booking.departure_date,
-      arrival_time: booking.arrival_time,
-      departure_time: booking.departure_time,
-      totalPrice: booking.total_price,
-      isPaid: true,
-    });
- // Fetch FAQs and other variables
-    
-    res.redirect('/?payment=success')
+    if (!booking.email_sent) {
+      sendMailConfirmation({
+        bookingId: booking.fk_parking_bookings_id,
+        name: booking.name,
+        slot: booking.parking_spot_id, // Corrected the property name
+        email: booking.email,
+        arrival_date: booking.arrival_date,
+        departure_date: booking.departure_date,
+        arrival_time: booking.arrival_time,
+        departure_time: booking.departure_time,
+        totalPrice: booking.total_price,
+        isPaid: true,
+      });
+      // Update the `email_sent` flag in the database
+      const updateQuery = `UPDATE parking_bookings SET email_sent = TRUE WHERE id = $1`;
+      await db.query(updateQuery, [bookingId]);
+    } else {
+      console.log('Email already sent for this booking.');
+    }
+    // Fetch FAQs and other variables
+
+    const { address1, address2, address3, phone, contact_email } = await getEnvVariables();
+    res.render('confirmation.ejs', { address1, address2, address3, phone, contact_email, name: booking.name, bookingId: bookingId, totalPrice: booking.total_price });
     //res.send(`<h1>Payment Completed</h1><p>Your payment was successful. Booking ref EIN:${session.client_reference_id}</p>`);
   } catch (error) {
     console.error('Error retrieving session:', error);

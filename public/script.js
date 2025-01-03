@@ -13,16 +13,16 @@ document.addEventListener("DOMContentLoaded", () => {
   //   document.getElementById('booking-form').style.display = 'block';
   // }, 5000); // Auto-hide after 5 seconds
   // Check for the "payment=success" query parameter
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('payment') === 'success') {
-    // Hide the confirmation message and show the booking form
-    document.getElementById('confirmation-message').style.display = 'none';
-    document.getElementById('booking-form').style.display = 'block';
+  // const urlParams = new URLSearchParams(window.location.search);
+  // if (urlParams.get('payment') === 'success') {
+  //   // Hide the confirmation message and show the booking form
+  //   document.getElementById('confirmation-message').style.display = 'none';
+  //   document.getElementById('booking-form').style.display = 'block';
 
     // Clear the query parameter from the URL
-    const newUrl = window.location.origin + window.location.pathname;
-    window.history.replaceState({}, document.title, newUrl);
-  }
+    // const newUrl = window.location.origin + window.location.pathname;
+    // window.history.replaceState({}, document.title, newUrl);
+  // }
   const arrivalDateInput = document.getElementById('arrival_date');
   const departureDateInput = document.getElementById('departure_date');
   const submitButton = document.getElementById('submit-btn');
@@ -344,16 +344,19 @@ document.addEventListener("DOMContentLoaded", () => {
         // Check if response contains bookingId
         if (result.bookingId) {
           // Hide the booking form and show confirmation
+          document.querySelector(".book-h2-form").textContent = "Booking pending payment"
+          document.querySelector('.book-p-form').style.display = 'none';
           document.getElementById('booking-form').style.display = 'none';
           document.getElementById('confirmation-message').style.display = 'block';
+          
 
           // Show the confirmation message
           document.getElementById("confirmation-text").innerHTML = `
           <h3 class="h3-confirm">Thank you for your booking, <span class="name">${result.name}</span></h3>
           <div class="para-confirmed-div">
             <p>You have received an email with your booking details and instructions on how to proceed.</p>
-            <p>The booking payment procees will be opened for 30 min</p>
-            <p>Your will recieve a confirmation email once the payment is completed</p>
+            <p>The booking payment process will be opened for 30 min.</p>
+            <p>Your will recieve a confirmation email once the payment is completed.</p>
             <p>Booking REF: <span>EIN${result.bookingId}</span></p>
             <p>Total € <span>${result.totalPrice}</span></p>
           </div>
@@ -375,28 +378,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   });
   // Function to handle successful payment
-  async function handlePaymentSuccess(sessionId) {
-    try {
-      const response = await fetch(`/payment-success?session_id=${sessionId}`);
-      if (response.ok) {
-        const result = await response.text();
+  // async function handlePaymentSuccess(sessionId) {
+  //   try {
+  //     const response = await fetch(`/payment-success?session_id=${sessionId}`);
+  //     if (response.ok) {
+  //       const result = await response.text();
 
-        // Clear the confirmation message and redisplay the booking form
-        document.getElementById('confirmation-message').style.display = 'none';
-        document.getElementById('booking-form').style.display = 'block';
-        document.getElementById('booking-form').reset(); // Reset the form
+  //       // Clear the confirmation message and redisplay the booking form
+  //       document.getElementById('confirmation-message').style.display = 'none';
+  //       document.getElementById('booking-form').style.display = 'block';
+  //       document.getElementById('booking-form').reset(); // Reset the form
 
-        // Optionally, display a success message
-        alert('Payment successful! You can now make another booking.');
-      } else {
-        console.error('Failed to process payment:', await response.text());
-        alert('Failed to process payment. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error handling payment success:', error);
-      alert('An error occurred while handling the payment. Please try again.');
-    }
-  }
+  //       // Optionally, display a success message
+  //       alert('Payment successful! You can now make another booking.');
+  //     } else {
+  //       console.error('Failed to process payment:', await response.text());
+  //       alert('Failed to process payment. Please try again.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error handling payment success:', error);
+  //     alert('An error occurred while handling the payment. Please try again.');
+  //   }
+  // }
 
 
 

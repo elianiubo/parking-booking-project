@@ -3,12 +3,75 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Booking Confirmation</title>
+  <title>Payment Success</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,200..800;1,200..800&family=Monda:wght@400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <h1>Booking Confirmation</h1>
-  <p>Thank you , for booking with us!</p>
-  <p>Your booking reference is EIN:<%=session%></p>
+  <header>
+    <nav>
+      <!-- Add navigation bar here -->
+       <!-- Navigation Bar -->
+<div id="title-nav-bar-container">
+    <img class="logo" src="/assets/images/logo.png" alt="Logo">
+    <nav id="nav">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="#footer-box">Contact</a></li>
+        </ul>
+    </nav>
+</div>
+    </nav>
+  </header>
+  <main>
+    <div id="confirmation-paid" class="confirmation-message">
+      <h3 class="h3-confirm">Thank you for booking with us, <span class="name"><%= name %></span>!</h3>
+      <p>Your payment was successful!</p>
+      <p>You have received an email with your booking information. </p>
+      <p>Have a look at our <span>Contact</span> details to find where the parking spot is</p>
+      <p>Your booking REF: EIN<%= bookingId %></p>
+      <p>Price: €<%= totalPrice %></p>
+      <button class="buttons" id="new-booking-btn">Make Another Booking</button>
+    </div>
+  </main>
+  <footer>
+    <!-- Add footer content -->
+    <div id="footer-box">
 
+        <div class="footer-categories">
+            <p>CONTACT US </p>
+            <ul>
+                <li><%= contact_email %></li>
+                <li><%= phone %></li>
+    
+            </ul>
+    
+        </div>
+        <div class="footer-categories">
+            <p>WHERE TO FIND YOUR SPOT </p>
+            <ul>
+                <li><%= address1 %></li>
+                <li><%= address2 %></li>
+                <li><%= address3 %></li>
+            </ul>
+            <div class="google-map">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d171.94424743675083!2d5.4029279395225105!3d51.45360870015202!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNTHCsDI3JzEzLjEiTiA1wrAyNCcxMC44IkU!5e1!3m2!1sen!2snl!4v1734434954999!5m2!1sen!2snl" width="500" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+        </div>
+    
+    
+    </div>
+  </footer>
+  <script>
+    document.getElementById('new-booking-btn').addEventListener('click', () => {
+      window.location.href = '/';
+    });
+  </script>
 </body>
 </html>

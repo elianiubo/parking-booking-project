@@ -327,7 +327,7 @@ main {
 }
 
 /*Main box from form*/
-#form-box {
+#form-box, #confirmation-paid {
     box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
     padding: 30px;
     max-width: 70%;
@@ -352,7 +352,7 @@ main {
 
 }
 
-#form-box p {
+#form-box p, #confirmation-paid p {
     text-align: center;
 }
 
@@ -863,7 +863,51 @@ footer {
 
 
 }
+/*Styles for confirmation.ejs*/
+#confirmation-paid {
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+    padding: 30px;
+    max-width: 70%;
+    margin: 0px auto;
+    background-color: rgba(255, 255, 255, 0.5);
+    height: auto;
+    margin-bottom: 30px;
+}
+.h3-confirm{
+    text-align: center;
+    font-size: 1.6rem;
+}
+.h3-confirm .name{
+    font-size: 1.4rem;
 
+}
+.h3-confirm, #confirmation-paid p{
+    margin: 5px;
+    
+}
+#confirmation-paid p{
+    font-size: 0.9rem;
+    color: #555;
+}
+#new-booking-btn{
+  
+   
+    background-color: #00ADB5;
+    color: white;
+   
+    font-weight: bold;
+    border-radius: 5px;
+    padding: 10px 20px;
+    width: 30%;
+    margin: 0px auto;
+    border: #00ADB5 1px solid;
+    margin-top: 10px;
+}
+#new-booking-btn:hover {
+    /* background-color: #F5F0CD; */
+    background-color: #2d6d7b;
+    transition: 0.3s ease;
+}
 
 /* @media (max-width : 1426px){
     
