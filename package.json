@@ -17,8 +17,10 @@
     "ejs": "^3.1.10",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
+    "fs": "^0.0.1-security",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.16",
+    "pdfkit": "^0.16.0",
     "pg": "^8.13.1",
     "session": "^0.1.0",
     "stripe": "^17.4.0"

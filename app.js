@@ -8,6 +8,8 @@ import nodemailer from "nodemailer"
 import axios from "axios"
 import Stripe from "stripe"
 import session from 'express-session'
+import PDFDocument from 'pdfkit';
+import fs from 'fs';
 
 
 const app = express();
@@ -191,7 +193,7 @@ async function getAvailableSlot(arrival_date, departure_date) {
 async function sendMailConfirmation(data) {
   console.log('Data received in sendMailConfirmation:', data);
   const { bookingId, name, sessionUrl, slot, email, arrival_date, departure_date,
-    arrival_time, departure_time, totalPrice, isPaid } = data;
+    arrival_time, departure_time, totalPrice, isPaid, invoicePath } = data;
   const formattedArrival = formatDate(arrival_date)
   const formattedDeparture = formatDate(departure_date)
   //console.log(formattedArrival + "    " + formattedDeparture)
@@ -261,8 +263,12 @@ async function sendMailConfirmation(data) {
         <p>Kind regards</p>
         
           `}
-
-    `,
+    `, attachments: [
+      {
+        filename: `Invoice-EIN${bookingId}.pdf`,
+        path: invoicePath,
+      },
+    ],
   };
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
@@ -384,6 +390,45 @@ async function createSession({ bookingId, email, name, slot, totalPrice, arrival
     console.error('Error in handlePayment:', err);
     throw new Error('Payment setup failed');
   }
+}
+function generateInvoice(data, filePath) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument();
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+
+    doc.fontSize(20).text('Invoice', { align: 'center' });
+    doc.moveDown();
+
+    // Company Information
+    doc.fontSize(14).text('Company Name: MyParking B.V.');
+    doc.text('KvK Number: 12345678');
+    doc.text('VAT Number: NL123456789B01');
+    doc.text('Address: Parking Street 1, Amsterdam, Netherlands');
+    doc.moveDown();
+
+    // Customer Information
+    doc.text(`Customer Name: ${data.name}`);
+    doc.text(`Email: ${data.email}`);
+    doc.moveDown();
+
+    // Booking Details
+    doc.text(`Invoice Number: EIN${data.bookingId}`);
+    doc.text(`Invoice Date: ${new Date().toLocaleDateString('nl-NL')}`);
+    doc.text(`Parking Slot: ${data.slot}`);
+    doc.text(`Arrival Date: ${data.arrival_date}`);
+    doc.text(`Departure Date: ${data.departure_date}`);
+    doc.moveDown();
+
+    // Price Details
+    doc.text(`Price (Excl. VAT): €${(data.totalPrice / 1.21).toFixed(2)}`);
+    doc.text(`VAT (21%): €${(data.totalPrice - data.totalPrice / 1.21).toFixed(2)}`);
+    doc.text(`Total (Incl. VAT): €${data.totalPrice}`);
+    doc.end();
+
+    stream.on('finish', () => resolve());
+    stream.on('error', (err) => reject(err));
+  });
 }
 
 //Creates events to clean processes and checks them
@@ -564,24 +609,35 @@ app.get('/payment-success', async (req, res) => {
     }
     //const { bookingId, name, sessionUrl, slot, email, arrival_date, departure_date, totalPrice, isPaid } = data;
     const booking = result.rows[0]
-    console.log('Booking details from database:', booking);
-    if (!booking.email_sent) {
-      sendMailConfirmation({
-        bookingId: booking.fk_parking_bookings_id,
-        name: booking.name,
-        slot: booking.parking_spot_id, // Corrected the property name
-        email: booking.email,
-        arrival_date: booking.arrival_date,
-        departure_date: booking.departure_date,
-        arrival_time: booking.arrival_time,
-        departure_time: booking.departure_time,
-        totalPrice: booking.total_price,
-        isPaid: true,
-      });
-      // Update the `email_sent` flag in the database
-      const updateQuery = `UPDATE parking_bookings SET email_sent = TRUE WHERE id = $1`;
-      await db.query(updateQuery, [bookingId]);
-    }
+    // console.log('Booking details from database:', booking);
+    // Generate invoice
+    const invoicePath = `./invoices/Invoice-EIN${bookingId}.pdf`;
+    await generateInvoice({
+      bookingId,
+      name: booking.name,
+      email: booking.email,
+      slot: booking.parking_spot_id,
+      arrival_date: booking.arrival_date,
+      departure_date: booking.departure_date,
+      totalPrice: booking.total_price,
+    }, invoicePath);
+    sendMailConfirmation({
+      bookingId: booking.fk_parking_bookings_id,
+      name: booking.name,
+      slot: booking.parking_spot_id, // Corrected the property name
+      email: booking.email,
+      arrival_date: booking.arrival_date,
+      departure_date: booking.departure_date,
+      arrival_time: booking.arrival_time,
+      departure_time: booking.departure_time,
+      totalPrice: booking.total_price,
+      isPaid: true,
+      invoicePath,
+    });
+    // Update the `email_sent` flag in the database
+    const updateQuery = `UPDATE parking_bookings SET email_sent = TRUE WHERE id = $1`;
+    await db.query(updateQuery, [bookingId]);
+
     // Save any data you want to display in the confirmation page in the session
     req.session.confirmationData = {
       name: booking.name,
