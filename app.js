@@ -193,15 +193,15 @@ async function getAvailableSlot(arrival_date, departure_date) {
 async function sendMailConfirmation(data) {
   console.log('Data received in sendMailConfirmation:', data);
   const { bookingId, name, sessionUrl, slot, email, arrival_date, departure_date,
-    arrival_time, departure_time, totalPrice, isPaid, invoicePath } = data;
+    arrival_time, departure_time, totalPrice, isPaid } = data;
   const formattedArrival = formatDate(arrival_date)
   const formattedDeparture = formatDate(departure_date)
   //console.log(formattedArrival + "    " + formattedDeparture)
 
   const { emailOut, pass, cancel_minutes } = await getEnvVariables(); // Fetch email and password from en variables
-  console.log("Email out in function send email is " + emailOut);
-  console.log("Pass in function send email is " + pass);
-  console.log("Time to cancel is " + cancel_minutes)
+  // console.log("Email out in function send email is " + emailOut);
+  // console.log("Pass in function send email is " + pass);
+  // console.log("Time to cancel is " + cancel_minutes)
 
   if (!email || email.trim() === '') {
     console.error('Recipient email is invalid or missing.');
@@ -209,6 +209,16 @@ async function sendMailConfirmation(data) {
   }
   console.log("Sending confirmation email to:", email);
   console.log("Booking id from mail function" + bookingId)
+  let pdfBuffer = null;
+  if (isPaid) {
+    const query = 'SELECT pdf_data FROM invoices WHERE booking_id = $1';
+    const result = await db.query(query, [bookingId]);
+    if (result.rows.length === 0) {
+      console.error(`No invoice found for booking ID: ${bookingId}`);
+      return;
+    }
+    pdfBuffer = result.rows[0].pdf_data;
+  }
   //format to add the text in minutes or hours in case of future chamnges in time in db
   //automatically adaps to minutes or hours the text
   let cancelTimeText;
@@ -251,7 +261,7 @@ async function sendMailConfirmation(data) {
         <li><strong>Departure Time:</strong> ${departure_time}</li>
         <li><strong>Total Price:</strong> €${totalPrice}</li>
       </ul>
-      <p>Kind Regards</p>
+      
       ${!isPaid
         ? `<p>Click the button below to complete your payment:</p>
            <p><strong>Please, make sure you pay within ${cancelTimeText} to confirm your booking</strong></p>
@@ -260,15 +270,15 @@ async function sendMailConfirmation(data) {
            <p><a href="${sessionUrl}">${sessionUrl}</a></p>`
         : `<p>Thank you for your payment. Your booking reference is <strong>EIN${bookingId}</strong>.</p>
         <p>Check our website if you need more information on where to find your parking spot in the contact section or check our FAQ section</p>
-        <p>Kind regards</p>
-        
           `}
-    `, attachments: [
+          <p>${isPaid ? 'Kind Regards ' : 'Kind Regards'}</p>
+    `, attachments: isPaid && pdfBuffer ? [
       {
         filename: `Invoice-EIN${bookingId}.pdf`,
-        path: invoicePath,
+        content: pdfBuffer,
+        contentType: 'application/pdf'
       },
-    ],
+    ] : [] // No attachment pending for payments
   };
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
@@ -337,7 +347,7 @@ async function createSession({ bookingId, email, name, slot, totalPrice, arrival
     }
 
     const createdDate = result.rows[0].created;
-    console.log("ID given" + bookingId + "Data created from id is" + createdDate)
+
     // https://docs.stripe.com/payment-links/api
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['ideal']['card'],
@@ -391,20 +401,39 @@ async function createSession({ bookingId, email, name, slot, totalPrice, arrival
     throw new Error('Payment setup failed');
   }
 }
-function generateInvoice(data, filePath) {
+async function generateInvoice(data) {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument();
-    const stream = fs.createWriteStream(filePath);
-    doc.pipe(stream);
+    const buffers = [];
+
+    doc.on('data', chunk => buffers.push(chunk));
+    doc.on('end', async () => {
+      const pdfBuffer = Buffer.concat(buffers);
+
+      try {
+        // Save the PDF buffer to the database
+        const query = `
+          INSERT INTO invoices (booking_id, pdf_data, created_at)
+          VALUES ($1, $2, NOW())
+          RETURNING id;
+        `;
+        const result = await db.query(query, [data.bookingId, pdfBuffer]);
+        console.log('Invoice saved in DB with ID:', result.rows[0].id);
+        resolve(result.rows[0].id); // Return the invoice ID
+      } catch (err) {
+        console.error('Error saving invoice in DB:', err);
+        reject(err);
+      }
+    });
 
     doc.fontSize(20).text('Invoice', { align: 'center' });
     doc.moveDown();
 
     // Company Information
-    doc.fontSize(14).text('Company Name: MyParking B.V.');
+    doc.fontSize(14).text('Company Name:Cheap Parking Eindhoven B.V.');
     doc.text('KvK Number: 12345678');
     doc.text('VAT Number: NL123456789B01');
-    doc.text('Address: Parking Street 1, Amsterdam, Netherlands');
+    doc.text('Address: Parking Street 1, Eindhoven, Netherlands');
     doc.moveDown();
 
     // Customer Information
@@ -416,8 +445,7 @@ function generateInvoice(data, filePath) {
     doc.text(`Invoice Number: EIN${data.bookingId}`);
     doc.text(`Invoice Date: ${new Date().toLocaleDateString('nl-NL')}`);
     doc.text(`Parking Slot: ${data.slot}`);
-    doc.text(`Arrival Date: ${data.arrival_date}`);
-    doc.text(`Departure Date: ${data.departure_date}`);
+    // doc.text(`Total days: ${data.totalDays} `)
     doc.moveDown();
 
     // Price Details
@@ -425,11 +453,9 @@ function generateInvoice(data, filePath) {
     doc.text(`VAT (21%): €${(data.totalPrice - data.totalPrice / 1.21).toFixed(2)}`);
     doc.text(`Total (Incl. VAT): €${data.totalPrice}`);
     doc.end();
-
-    stream.on('finish', () => resolve());
-    stream.on('error', (err) => reject(err));
   });
 }
+
 
 //Creates events to clean processes and checks them
 //NOT NECESSARY OFR NOW ASTHE EXPIRE SESSION WORKS ON IT OWN
@@ -609,18 +635,21 @@ app.get('/payment-success', async (req, res) => {
     }
     //const { bookingId, name, sessionUrl, slot, email, arrival_date, departure_date, totalPrice, isPaid } = data;
     const booking = result.rows[0]
+    const days = await cal
     // console.log('Booking details from database:', booking);
     // Generate invoice
-    const invoicePath = `./invoices/Invoice-EIN${bookingId}.pdf`;
+    // Generate and save invoice to the database
     await generateInvoice({
       bookingId,
       name: booking.name,
       email: booking.email,
       slot: booking.parking_spot_id,
+
       arrival_date: booking.arrival_date,
       departure_date: booking.departure_date,
       totalPrice: booking.total_price,
-    }, invoicePath);
+    });
+
     sendMailConfirmation({
       bookingId: booking.fk_parking_bookings_id,
       name: booking.name,
@@ -632,7 +661,6 @@ app.get('/payment-success', async (req, res) => {
       departure_time: booking.departure_time,
       totalPrice: booking.total_price,
       isPaid: true,
-      invoicePath,
     });
     // Update the `email_sent` flag in the database
     const updateQuery = `UPDATE parking_bookings SET email_sent = TRUE WHERE id = $1`;
