@@ -10,6 +10,9 @@ import Stripe from "stripe"
 import session from 'express-session'
 import PDFDocument from 'pdfkit';
 import fs from 'fs';
+import createInvoice from "./createInvoice.cjs"
+
+
 
 
 const app = express();
@@ -252,7 +255,7 @@ async function sendMailConfirmation(data) {
       <p>${isPaid
         ? `Your booking has been confirmed. Here are the details:`
         : `You have almost completed your booking. Please complete the payment to confirm.<br>
-        <strong>You have ${cancelTimeText} to pay your booking, otherwise it will be cancelled</strong>`}</p>
+        <strong>You have ${cancelTimeText} to pay your booking, otherwise it will be cancelled.</strong>`}</p>
       <ul>
         <li><strong>Slot:</strong> ${slot}</li>
         <li><strong>Arrival Date:</strong> ${formattedArrival}</li>
@@ -264,7 +267,7 @@ async function sendMailConfirmation(data) {
       
       ${!isPaid
         ? `<p>Click the button below to complete your payment:</p>
-           <p><strong>Please, make sure you pay within ${cancelTimeText} to confirm your booking</strong></p>
+           <p><strong>Please, make sure you pay within ${cancelTimeText} to confirm your booking.</strong></p>
            <p><a href="${sessionUrl}" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">Pay Now</a></p>
            <p>If the button does not work, you can use the following link:</p>
            <p><a href="${sessionUrl}">${sessionUrl}</a></p>`
@@ -426,34 +429,55 @@ async function generateInvoice(data) {
       }
     });
 
-    doc.fontSize(20).text('Invoice', { align: 'center' });
-    doc.moveDown();
+    // Header
+    doc.fillColor('#003366').fontSize(26).text('Invoice', { align: 'center' });
+    doc.moveDown(2);
 
     // Company Information
-    doc.fontSize(14).text('Company Name:Cheap Parking Eindhoven B.V.');
-    doc.text('KvK Number: 12345678');
-    doc.text('VAT Number: NL123456789B01');
-    doc.text('Address: Parking Street 1, Eindhoven, Netherlands');
-    doc.moveDown();
+    doc.fillColor('#000000').fontSize(14)
+      .text('Company Name: Cheap Parking Eindhoven B.V.', { align: 'left' })
+      .text('KvK Number: 12345678')
+      .text('VAT Number: NL123456789B01')
+      .text('Address: Parking Street 1, Eindhoven, Netherlands')
+      .moveDown(1);
 
     // Customer Information
-    doc.text(`Customer Name: ${data.name}`);
-    doc.text(`Email: ${data.email}`);
-    doc.moveDown();
+    doc.fontSize(14).text(`Customer Name: ${data.name}`)
+      .text(`Email: ${data.email}`)
+      .moveDown(1);
 
     // Booking Details
-    doc.text(`Invoice Number: EIN${data.bookingId}`);
-    doc.text(`Invoice Date: ${new Date().toLocaleDateString('nl-NL')}`);
-    doc.text(`Parking Slot: ${data.slot}`);
-    // doc.text(`Total days: ${data.totalDays} `)
-    doc.moveDown();
+    doc.fontSize(14).text(`Invoice Number: EIN${data.bookingId}`)
+      .text(`Invoice Date: ${new Date().toLocaleDateString('nl-NL')}`)
+      .text(`Parking Slot: ${data.slot}`)
+      .moveDown(1);
 
     // Price Details
-    doc.text(`Price (Excl. VAT): €${(data.totalPrice / 1.21).toFixed(2)}`);
-    doc.text(`VAT (21%): €${(data.totalPrice - data.totalPrice / 1.21).toFixed(2)}`);
-    doc.text(`Total (Incl. VAT): €${data.totalPrice}`);
+    doc.fillColor('#003366').fontSize(16).text('Price Details', { align: 'left' }).moveDown(1);
+
+    // Table header
+    doc.fontSize(12).fillColor('#000000').text('Description', 50, doc.y, { width: 250, align: 'left' });
+    doc.text('Amount', 350, doc.y, { width: 150, align: 'right' }).moveDown(0.5);
+
+    // Price rows
+    doc.fontSize(12).text('Price (Excl. VAT)', 50, doc.y)
+      .text(`€ ${(data.totalPrice / 1.21).toFixed(2)}`, 350, doc.y, { width: 150, align: 'right' }).moveDown(0.5);
+
+    doc.text('VAT (21%)', 50, doc.y)
+      .text(`€ ${(data.totalPrice - data.totalPrice / 1.21).toFixed(2)}`, 350, doc.y, { width: 150, align: 'right' }).moveDown(0.5);
+
+    doc.fontSize(14).text('Total (Incl. VAT)', 50, doc.y)
+      .text(`€ ${data.totalPrice}`, 350, doc.y, { width: 150, align: 'right' }).moveDown(1);
+
+    // Footer
+    doc.fillColor('#666666').fontSize(10)
+      .text('Thank you for choosing Cheap Parking Eindhoven!', { align: 'center' })
+      .moveDown(1)
+      .text('For inquiries, contact us at: info@cheapparkingeindhoven.nl', { align: 'center' });
+
     doc.end();
   });
+
 }
 
 
@@ -634,8 +658,7 @@ app.get('/payment-success', async (req, res) => {
       return res.status(404).json({ message: 'Booking not found' });
     }
     //const { bookingId, name, sessionUrl, slot, email, arrival_date, departure_date, totalPrice, isPaid } = data;
-    const booking = result.rows[0]
-    const days = await cal
+    const booking = result.rows[0];
     // console.log('Booking details from database:', booking);
     // Generate invoice
     // Generate and save invoice to the database
