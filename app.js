@@ -164,9 +164,13 @@ async function getEnvVariables() {
     throw error;
   }
 }
+function calculatetotalDays(arrival, departure){
+  const totalDays = Math.ceil((departure - arrival) / (1000 * 60 * 60 * 24)) + 1;
+  return totalDays
 
+}
 // Hcalculates total price that the price is used in 
-function calculateTotalPrice(totalDays, basePrice, extraDayPrice, maxDays) {
+function calculateTotalPrice( totalDays, basePrice, extraDayPrice, maxDays) {
   if (totalDays <= maxDays) {
     return parseFloat(basePrice.toFixed(2));
   }
@@ -196,7 +200,7 @@ async function getAvailableSlot(arrival_date, departure_date) {
 async function sendMailConfirmation(data) {
   console.log('Data received in sendMailConfirmation:', data);
   const { bookingId, name, sessionUrl, slot, email, arrival_date, departure_date,
-    arrival_time, departure_time, totalPrice, isPaid } = data;
+    arrival_time, departure_time, totalPrice, totalDays, isPaid } = data;
   const formattedArrival = formatDate(arrival_date)
   const formattedDeparture = formatDate(departure_date)
   //console.log(formattedArrival + "    " + formattedDeparture)
@@ -262,6 +266,7 @@ async function sendMailConfirmation(data) {
         <li><strong>Arrival Date:</strong> ${formattedDeparture}</li>
         <li><strong>Arrival Time:</strong> ${arrival_time}</li>
         <li><strong>Departure Time:</strong> ${departure_time}</li>
+        <li><strong>Days Booked:</strong> ${totalDays}</li>
         <li><strong>Total Price:</strong> €${totalPrice}</li>
       </ul>
       
@@ -294,16 +299,16 @@ async function sendMailConfirmation(data) {
 
 }
 
-async function createBookingAndUserDetails(bookingData, userData, totalPrice) {
+async function createBookingAndUserDetails(bookingData, userData, totalPrice, totalDays) {
   try {
 
     // Insert the booking data
     const bookingQuery = `
-    INSERT INTO parking_bookings(startdate, enddate, slot, "status", created, total_price)
-  VALUES($1, $2, $3, 'pending', NOW(), $4)
+    INSERT INTO parking_bookings(startdate, enddate, slot, "status", created, total_price, total_days)
+  VALUES($1, $2, $3, 'pending', NOW(), $4, $5)
     RETURNING id;
   `;
-    const bookingResult = await db.query(bookingQuery, [...bookingData, totalPrice]);
+    const bookingResult = await db.query(bookingQuery, [...bookingData, totalPrice, totalDays]);
     const bookingId = bookingResult.rows[0].id; // Extract the booking ID
 
     // Insert the user booking data
@@ -329,7 +334,7 @@ async function createBookingAndUserDetails(bookingData, userData, totalPrice) {
     throw error;  // Rethrow the error for handling elsewhere
   }
 }
-async function createSession({ bookingId, email, name, slot, totalPrice, arrival_date, departure_date, arrival_time, departure_time }) {
+async function createSession({ bookingId, email, name, slot, totalPrice, arrival_date, departure_date, arrival_time, departure_time, totalDays }) {
   try {
     if (!stripe) {
       throw new Error('Stripe is not initialized. Please check the setupStripe function.');
@@ -395,6 +400,7 @@ async function createSession({ bookingId, email, name, slot, totalPrice, arrival
       departure_date,
       arrival_time,
       departure_time,
+      totalDays,
       totalPrice,
     });
     console.log("session id: " + session.id)
@@ -517,7 +523,9 @@ app.post('/book', async (req, res) => {
   try {
     const arrival = new Date(arrival_date);
     const departure = new Date(departure_date);
-    const totalDays = Math.ceil((departure - arrival) / (1000 * 60 * 60 * 24)) + 1;
+    // const totalDays =
+    const totalDays = calculatetotalDays(arrival, departure)
+    console.log(totalDays)
     //AVALIABLE SLOT not FOUND
     const availableSlotResult = await getAvailableSlot(arrival_date, departure_date);
     if (availableSlotResult.rows.length === 0) {
@@ -533,7 +541,7 @@ app.post('/book', async (req, res) => {
       car_brand, car_color, car_type, license_plate,
     ];
     //calls the function to create a booking and insert users to db by the bookig id
-    const { bookingId } = await createBookingAndUserDetails(bookingData, userData, totalPrice);
+    const { bookingId } = await createBookingAndUserDetails(bookingData, userData, totalPrice, totalDays);
     console.log("Boking ID" + bookingId)
     console.log(availableSlot)
     //calls a function to make the payment
@@ -543,6 +551,7 @@ app.post('/book', async (req, res) => {
       name,
       slot: availableSlot,
       totalPrice,
+      totalDays,
       arrival_date,
       departure_date,
       arrival_time,
@@ -551,7 +560,7 @@ app.post('/book', async (req, res) => {
     });
     //mail is sent on the session payment link
     //sendMailConfirmation({ id: bookingId, name, email, arrival_date, departure_date, totalPrice, availableSlot });
-    res.json({ bookingId, sessionUrl, parking_spot_id: availableSlot, totalPrice, name });
+    res.json({ bookingId, sessionUrl, parking_spot_id: availableSlot, totalPrice, name, totalDays });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error checking availability or booking');
@@ -571,10 +580,10 @@ app.post('/check-availability', async (req, res) => {
     const { base_price, extra_day_price, max_days } = availableSlotResult.rows[0];
     const arrival = new Date(arrival_date);
     const departure = new Date(departure_date);
-    const totalDays = Math.ceil((departure - arrival) / (1000 * 60 * 60 * 24)) + 1;
+    const totalDays = calculatetotalDays(arrival, departure)
 
     const totalPrice = calculateTotalPrice(totalDays, parseFloat(base_price), parseFloat(extra_day_price), parseInt(max_days, 10));
-    res.json({ available: true, totalPrice });
+    res.json({ available: true, totalPrice, totalDays });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error checking availability' });
@@ -641,7 +650,7 @@ app.get('/payment-success', async (req, res) => {
 
     // // Fetch booking details from the database using the booking ID
     const query = `       
-     SELECT ub.parking_spot_id, ub.name, ub.email, ub.arrival_date, ub.departure_date, ub.arrival_time,ub.departure_time, ub.fk_parking_bookings_id, pb.total_price, pb.email_sent
+     SELECT ub.parking_spot_id, ub.name, ub.email, ub.arrival_date, ub.departure_date, ub.arrival_time,ub.departure_time, ub.fk_parking_bookings_id, pb.total_price, pb.email_sent, pb.total_days
   FROM user_bookings ub
   JOIN parking_bookings pb ON pb.id = ub.fk_parking_bookings_id
   WHERE ub.fk_parking_bookings_id = $1
@@ -667,9 +676,9 @@ app.get('/payment-success', async (req, res) => {
       name: booking.name,
       email: booking.email,
       slot: booking.parking_spot_id,
-
       arrival_date: booking.arrival_date,
       departure_date: booking.departure_date,
+      totalDays: booking.totalDays,
       totalPrice: booking.total_price,
     });
 
@@ -682,6 +691,7 @@ app.get('/payment-success', async (req, res) => {
       departure_date: booking.departure_date,
       arrival_time: booking.arrival_time,
       departure_time: booking.departure_time,
+      totalDays: booking.totalDays,
       totalPrice: booking.total_price,
       isPaid: true,
     });

@@ -123,27 +123,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   }
 
-  function showTotalDays(arrivDate, depDate) {
-    const arriv = new Date(arrivDate);
-    const dep = new Date(depDate);
+  // function showTotalDays(arrivDate, depDate) {
+  //   const arriv = new Date(arrivDate);
+  //   const dep = new Date(depDate);
 
-    if (isNaN(arriv) || isNaN(dep)) {
-      console.error("Invalid dates provided to showTotalDays:", arrivDate, depDate);
-      return 0; // Return 0 if dates are invalid
-    }
+  //   if (isNaN(arriv) || isNaN(dep)) {
+  //     console.error("Invalid dates provided to showTotalDays:", arrivDate, depDate);
+  //     return 0; // Return 0 if dates are invalid
+  //   }
 
-    // Calculate the difference in time between the two dates
-    let differenceInTime = dep - arriv;
+  //   // Calculate the difference in time between the two dates
+  //   let differenceInTime = dep - arriv;
 
-    // Calculate the number of days between the two dates
-    let differenceInDays = Math.round(differenceInTime / (1000 * 3600 * 24) + 1);
+  //   // Calculate the number of days between the two dates
+  //   let differenceInDays = Math.round(differenceInTime / (1000 * 3600 * 24) + 1);
 
-    console.log(`Total days: ${differenceInDays}`);
-    return differenceInDays;
+  //   console.log(`Total days: ${differenceInDays}`);
+  //   return differenceInDays;
 
 
 
-  }
+  // }
   //VAlidate input formatiing
   function validateForm() {
     let isValid = true;
@@ -245,7 +245,8 @@ document.addEventListener("DOMContentLoaded", () => {
     priceDisplay.textContent = "Total Price € 0"; // Ensure the initial text is correct
     daysDisplay.textContent = "Total days reserved: 0"; // Ensure the initial days display is correct
     submitButton.disabled = true; // Disable submit button by default
-
+    priceDisplay.style.color = '#555'; // Reset the price display
+    daysDisplay.style.color = '#555';
     console.log("Arrival Date:", arrivDate, "Departure Date:", depDate);
 
     // Ensure departure date is after arrival date by setting the min value for departure
@@ -261,6 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
         daysDisplay.textContent = "Total days reserved: 0"; // Reset days display
         submitButton.disabled = true; // Disable submit button
         priceDisplay.style.color = '#555'; // Reset the price display
+        daysDisplay.style.color = '#555';
         departureDateInput.setAttribute("min", arrivDate); // Ensure departure date can't be before arrival date
         return; // Exit early
       }
@@ -270,6 +272,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!arrivDate || !depDate) {
       priceDisplay.textContent = "Total Price € 0"; // Reset the price display
       daysDisplay.textContent = "Total days reserved: 0"; // Reset days display
+      priceDisplay.style.color = '#555'; // Reset the price display
+        daysDisplay.style.color = '#555';
+      
       submitButton.disabled = true; // Disable submit button
       return; // Exit early
     }
@@ -285,10 +290,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await response.json();
 
       if (result.available) {
-        const totalDays = showTotalDays(arrivDate, depDate); // Calculate total days
-        priceDisplay.style.color = ""
+       // const totalDays = showTotalDays(arrivDate, depDate); // Calculate total days
+        priceDisplay.style.color = "#555"
         priceDisplay.textContent = `Total Price € ${result.totalPrice}`; // Update the price display
-        daysDisplay.textContent = `Total days reserved: ${totalDays}`; // Update the days display
+        daysDisplay.textContent = `Total days reserved: ${result.totalDays}`; // Update the days display
         submitButton.disabled = false; // Enable the submit button
 
       } else {
@@ -297,7 +302,6 @@ document.addEventListener("DOMContentLoaded", () => {
         "Selected dates are not available. Please choose different dates."; // Show error in selected-dates
         priceDisplay.textContent = "";
         daysDisplay.textContent = ""; // Reset the days display
-        priceDisplay.style.color = "red"; // Change color to red for error
         submitButton.disabled = true; // Disable submit button
       }
     } catch (error) {
@@ -308,10 +312,10 @@ document.addEventListener("DOMContentLoaded", () => {
       submitButton.disabled = true; // Disable submit button
     }
     // Ensure text wraps and does not overflow
-    priceDisplay.style.whiteSpace = "normal"; // Allow wrapping
-    priceDisplay.style.wordWrap = "break-word"; // Break long text properly
-    priceDisplay.style.overflowWrap = "break-word"; // Modern text wrapping
-    priceDisplay.style.textAlign = "center";
+    selectedDates.style.whiteSpace = "normal"; // Allow wrapping
+    selectedDates.style.wordWrap = "break-word"; // Break long text properly
+    selectedDates.style.overflowWrap = "break-word"; // Modern text wrapping
+    selectedDates.style.textAlign = "center";
   }
   //developing a confirmation booking UI response after submitting form
   document.getElementById('booking-form').addEventListener('submit', async function (event) {
@@ -355,7 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <h3 class="h3-confirm">Thank you for your booking, <span class="name">${result.name}</span></h3>
           <div class="para-confirmed-div">
             <p>You have received an email with your booking details and instructions on how to proceed.</p>
-            <p>The booking payment process will be opened for 30 min.</p>
+            <p>The booking payment process will be opened for  30 min.</p>
             <p>Your will recieve a confirmation email once the payment is completed.</p>
             <p>Booking REF: <span>EIN${result.bookingId}</span></p>
             <p>Total € <span>${result.totalPrice}</span></p>
