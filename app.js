@@ -8,9 +8,10 @@ import nodemailer from "nodemailer"
 import axios from "axios"
 import Stripe from "stripe"
 import session from 'express-session'
-import PDFDocument from 'pdfkit';
-import fs from 'fs';
-import createInvoice from "./createInvoice.cjs"
+
+import {createInvoice }from "./createInvoice.js"
+
+
 
 
 
@@ -30,13 +31,28 @@ const db = new pg.Client({
   password: process.env.PG_PASSWORD,
   port: process.env.PG_PORT,
 });
-db.connect();
+
+// Function to connect to the database
+async function connectDb() {
+  try {
+    await db.connect(); // Connect to PostgreSQL
+    console.log('Connected to PostgreSQL');
+  } catch (error) {
+    console.error('Error connecting to PostgreSQL:', error);
+    process.exit(1); // Exit if connection fails
+  }
+}
+
+// Initialize connection before calling createInvoice
+connectDb();
+
+// Export dbClient to make it available for other modules
+export {db};
 //const stripe = new Stripe(process.env.STRIPE_KEY);
 
 //onsole.log('Stripe Key:', process.env.STRIPE_KEY);
 
 // Middleware
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(express.json());
@@ -410,81 +426,82 @@ async function createSession({ bookingId, email, name, slot, totalPrice, arrival
     throw new Error('Payment setup failed');
   }
 }
-async function generateInvoice(data) {
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument();
-    const buffers = [];
 
-    doc.on('data', chunk => buffers.push(chunk));
-    doc.on('end', async () => {
-      const pdfBuffer = Buffer.concat(buffers);
+// async function generateInvoice(data) {
+//   return new Promise((resolve, reject) => {
+//     const doc = new PDFDocument();
+//     const buffers = [];
 
-      try {
-        // Save the PDF buffer to the database
-        const query = `
-          INSERT INTO invoices (booking_id, pdf_data, created_at)
-          VALUES ($1, $2, NOW())
-          RETURNING id;
-        `;
-        const result = await db.query(query, [data.bookingId, pdfBuffer]);
-        console.log('Invoice saved in DB with ID:', result.rows[0].id);
-        resolve(result.rows[0].id); // Return the invoice ID
-      } catch (err) {
-        console.error('Error saving invoice in DB:', err);
-        reject(err);
-      }
-    });
+//     doc.on('data', chunk => buffers.push(chunk));
+//     doc.on('end', async () => {
+//       const pdfBuffer = Buffer.concat(buffers);
 
-    // Header
-    doc.fillColor('#003366').fontSize(26).text('Invoice', { align: 'center' });
-    doc.moveDown(2);
+//       try {
+//         // Save the PDF buffer to the database
+//         const query = `
+//           INSERT INTO invoices (booking_id, pdf_data, created_at)
+//           VALUES ($1, $2, NOW())
+//           RETURNING id;
+//         `;
+//         const result = await db.query(query, [data.bookingId, pdfBuffer]);
+//         console.log('Invoice saved in DB with ID:', result.rows[0].id);
+//         resolve(result.rows[0].id); // Return the invoice ID
+//       } catch (err) {
+//         console.error('Error saving invoice in DB:', err);
+//         reject(err);
+//       }
+//     });
 
-    // Company Information
-    doc.fillColor('#000000').fontSize(14)
-      .text('Company Name: Cheap Parking Eindhoven B.V.', { align: 'left' })
-      .text('KvK Number: 12345678')
-      .text('VAT Number: NL123456789B01')
-      .text('Address: Parking Street 1, Eindhoven, Netherlands')
-      .moveDown(1);
+//     // Header
+//     doc.fillColor('#003366').fontSize(26).text('Invoice', { align: 'center' });
+//     doc.moveDown(2);
 
-    // Customer Information
-    doc.fontSize(14).text(`Customer Name: ${data.name}`)
-      .text(`Email: ${data.email}`)
-      .moveDown(1);
+//     // Company Information
+//     doc.fillColor('#000000').fontSize(14)
+//       .text('Company Name: Cheap Parking Eindhoven B.V.', { align: 'left' })
+//       .text('KvK Number: 12345678')
+//       .text('VAT Number: NL123456789B01')
+//       .text('Address: Parking Street 1, Eindhoven, Netherlands')
+//       .moveDown(1);
 
-    // Booking Details
-    doc.fontSize(14).text(`Invoice Number: EIN${data.bookingId}`)
-      .text(`Invoice Date: ${new Date().toLocaleDateString('nl-NL')}`)
-      .text(`Parking Slot: ${data.slot}`)
-      .moveDown(1);
+//     // Customer Information
+//     doc.fontSize(14).text(`Customer Name: ${data.name}`)
+//       .text(`Email: ${data.email}`)
+//       .moveDown(1);
 
-    // Price Details
-    doc.fillColor('#003366').fontSize(16).text('Price Details', { align: 'left' }).moveDown(1);
+//     // Booking Details
+//     doc.fontSize(14).text(`Invoice Number: EIN${data.bookingId}`)
+//       .text(`Invoice Date: ${new Date().toLocaleDateString('nl-NL')}`)
+//       .text(`Parking Slot: ${data.slot}`)
+//       .moveDown(1);
 
-    // Table header
-    doc.fontSize(12).fillColor('#000000').text('Description', 50, doc.y, { width: 250, align: 'left' });
-    doc.text('Amount', 350, doc.y, { width: 150, align: 'right' }).moveDown(0.5);
+//     // Price Details
+//     doc.fillColor('#003366').fontSize(16).text('Price Details', { align: 'left' }).moveDown(1);
 
-    // Price rows
-    doc.fontSize(12).text('Price (Excl. VAT)', 50, doc.y)
-      .text(`€ ${(data.totalPrice / 1.21).toFixed(2)}`, 350, doc.y, { width: 150, align: 'right' }).moveDown(0.5);
+//     // Table header
+//     doc.fontSize(12).fillColor('#000000').text('Description', 50, doc.y, { width: 250, align: 'left' });
+//     doc.text('Amount', 350, doc.y, { width: 150, align: 'right' }).moveDown(0.5);
 
-    doc.text('VAT (21%)', 50, doc.y)
-      .text(`€ ${(data.totalPrice - data.totalPrice / 1.21).toFixed(2)}`, 350, doc.y, { width: 150, align: 'right' }).moveDown(0.5);
+//     // Price rows
+//     doc.fontSize(12).text('Price (Excl. VAT)', 50, doc.y)
+//       .text(`€ ${(data.totalPrice / 1.21).toFixed(2)}`, 350, doc.y, { width: 150, align: 'right' }).moveDown(0.5);
 
-    doc.fontSize(14).text('Total (Incl. VAT)', 50, doc.y)
-      .text(`€ ${data.totalPrice}`, 350, doc.y, { width: 150, align: 'right' }).moveDown(1);
+//     doc.text('VAT (21%)', 50, doc.y)
+//       .text(`€ ${(data.totalPrice - data.totalPrice / 1.21).toFixed(2)}`, 350, doc.y, { width: 150, align: 'right' }).moveDown(0.5);
 
-    // Footer
-    doc.fillColor('#666666').fontSize(10)
-      .text('Thank you for choosing Cheap Parking Eindhoven!', { align: 'center' })
-      .moveDown(1)
-      .text('For inquiries, contact us at: info@cheapparkingeindhoven.nl', { align: 'center' });
+//     doc.fontSize(14).text('Total (Incl. VAT)', 50, doc.y)
+//       .text(`€ ${data.totalPrice}`, 350, doc.y, { width: 150, align: 'right' }).moveDown(1);
 
-    doc.end();
-  });
+//     // Footer
+//     doc.fillColor('#666666').fontSize(10)
+//       .text('Thank you for choosing Cheap Parking Eindhoven!', { align: 'center' })
+//       .moveDown(1)
+//       .text('For inquiries, contact us at: info@cheapparkingeindhoven.nl', { align: 'center' });
 
-}
+//     doc.end();
+//   });
+
+// }
 
 
 //Creates events to clean processes and checks them
@@ -671,16 +688,20 @@ app.get('/payment-success', async (req, res) => {
     // console.log('Booking details from database:', booking);
     // Generate invoice
     // Generate and save invoice to the database
-    await generateInvoice({
+    await createInvoice({
       bookingId,
       name: booking.name,
       email: booking.email,
       slot: booking.parking_spot_id,
-      arrival_date: booking.arrival_date,
-      departure_date: booking.departure_date,
-      totalDays: booking.totalDays,
-      totalPrice: booking.total_price,
-    });
+      bookings: [
+        {
+          description: 'Parking Reservation',
+          totalDays: booking.total_days,
+          totalAmount: booking.total_price,
+        }
+      ],
+      totalPrice: booking.total_price
+    }, db);
 
     sendMailConfirmation({
       bookingId: booking.fk_parking_bookings_id,
