@@ -8,8 +8,7 @@ import nodemailer from "nodemailer"
 import axios from "axios"
 import Stripe from "stripe"
 import session from 'express-session'
-
-import {createInvoice }from "./createInvoice.js"
+import { createInvoice } from "./public/createInvoice.js"
 
 
 
@@ -47,22 +46,32 @@ async function connectDb() {
 connectDb();
 
 // Export dbClient to make it available for other modules
-export {db};
+export { db };
 //const stripe = new Stripe(process.env.STRIPE_KEY);
 
 //onsole.log('Stripe Key:', process.env.STRIPE_KEY);
 
 // Middleware
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(express.json());
 // Middleware for session handling
+
+
 app.use(session({
-  secret: process.env.SESSION_SECRET,  // Replace with a secure secret
+  secret: process.env.SESSION_SECRET, // Use the retrieved session secret
   resave: false,
   saveUninitialized: true,
   cookie: { secure: false }, // Set `true` if using HTTPS
 }));
+
+// app.use(session({
+//   secret: process.env.SESSION_SECRET,  // Replace with a secure secret
+//   resave: false,
+//   saveUninitialized: true,
+//   cookie: { secure: false }, // Set `true` if using HTTPS
+// }));
 // Routes
 app.get('/', async (req, res) => {
   try {
@@ -134,59 +143,57 @@ app.get('/confirmation', async (req, res) => {
 //function that gets the env var from the database
 async function getEnvVariables() {
   try {
-    const query = 'SELECT value FROM env_variables WHERE key_name = $1';
-    //const passQuery = 'SELECT value FROM env_variables WHERE key_name = $1';
 
-    // Fetch both values in parallel
-    const emailResult = await db.query(query, ['EMAIL']);
-    const passResult = await db.query(query, ['EMAIL_PASS']);
-    const stripeKeyResult = await db.query(query, ['STRIPE_KEY']);
-    const cancelMinutesResult = await db.query(query, ['CANCEL_MINUTES']);
-    const address1 = await db.query(query, ['address1']);
-    const address2 = await db.query(query, ['address2'])
-    const address3 = await db.query(query, ['address3']);
-    const contact_email = await db.query(query, ['contact-email']);
-    const phone = await db.query(query, ['phone']);
+    const query = `
+        SELECT key_name, value 
+        FROM env_variables 
+        WHERE key_name = ANY($1)
+      `;
+    const requiredKeys = [
+      'EMAIL', 'EMAIL_PASS', 'STRIPE_KEY', 'CANCEL_MINUTES',
+      'address1', 'address2', 'address3', 'contact-email',
+      'phone', 'SESSION_SECRET', 'kvk', 'vat_number'
+    ];
 
-    if (emailResult.rows.length > 0
-      && passResult.rows.length > 0
-      && stripeKeyResult.rows.length > 0
-      && cancelMinutesResult.rows.length > 0
-      && address1.rows.length > 0
-      && address2.rows.length > 0
-      && address3.rows.length > 0
-      && phone.rows.length > 0
-      && contact_email.rows.length > 0
+    const result = await db.query(query, [requiredKeys]);
 
-    ) {
-      // Return the value from the result
-      return {
-        emailOut: emailResult.rows[0].value,
-        pass: passResult.rows[0].value,
-        stripeKey: stripeKeyResult.rows[0].value,
-        cancel_minutes: parseInt(cancelMinutesResult.rows[0].value),
-        address1: address1.rows[0].value,
-        address2: address2.rows[0].value,
-        address3: address3.rows[0].value,
-        phone: phone.rows[0].value,
-        contact_email: contact_email.rows[0].value,
-
-
-      }
+    if (result.rows.length === 0) {
+      throw new Error(`No environment variables found in the database.`);
     }
-    throw new Error(`variables not found in env_variables table.`);
+    // Transform results into a key-value object
+    const envVariables = {};
+    result.rows.forEach(row => {
+      envVariables[row.key_name] = row.value;
+    });
+
+    // Return the variables with defaults if necessary
+    return {
+      emailOut: envVariables['EMAIL'],
+      pass: envVariables['EMAIL_PASS'],
+      stripeKey: envVariables['STRIPE_KEY'],
+      cancel_minutes: parseInt(envVariables['CANCEL_MINUTES']),
+      address1: envVariables['address1'],
+      address2: envVariables['address2'],
+      address3: envVariables['address3'],
+      phone: envVariables['phone'],
+      contact_email: envVariables['contact-email'],
+      session_secret: envVariables['SESSION_SECRET'],
+      kvk: envVariables['kvk'],
+      vat_number: envVariables['vat_number'],
+    }
+
   } catch (error) {
     console.error('Error fetching environment variable:', error.message);
     throw error;
   }
 }
-function calculatetotalDays(arrival, departure){
+function calculatetotalDays(arrival, departure) {
   const totalDays = Math.ceil((departure - arrival) / (1000 * 60 * 60 * 24)) + 1;
   return totalDays
 
 }
 // Hcalculates total price that the price is used in 
-function calculateTotalPrice( totalDays, basePrice, extraDayPrice, maxDays) {
+function calculateTotalPrice(totalDays, basePrice, extraDayPrice, maxDays) {
   if (totalDays <= maxDays) {
     return parseFloat(basePrice.toFixed(2));
   }
@@ -298,7 +305,7 @@ async function sendMailConfirmation(data) {
           <p>${isPaid ? 'Kind Regards ' : 'Kind Regards'}</p>
     `, attachments: isPaid && pdfBuffer ? [
       {
-        filename: `Invoice-EIN${bookingId}.pdf`,
+        filename: `INV${bookingId}.pdf`,
         content: pdfBuffer,
         contentType: 'application/pdf'
       },
@@ -308,7 +315,7 @@ async function sendMailConfirmation(data) {
     if (error) {
       console.error('Error sending email:', error);
     } else {
-      console.log('Stripe session URL:', session.url);
+      //console.log('Stripe session URL:', session.url);
       console.log('Email sent:', info.response);
     }
   });
@@ -350,7 +357,7 @@ async function createBookingAndUserDetails(bookingData, userData, totalPrice, to
     throw error;  // Rethrow the error for handling elsewhere
   }
 }
-async function createSession({ bookingId, email, name, slot, totalPrice, arrival_date, departure_date, arrival_time, departure_time, totalDays }) {
+async function createSession({ bookingId, email, name, slot, totalPrice, totalDays, arrival_date, departure_date, arrival_time, departure_time, }) {
   try {
     if (!stripe) {
       throw new Error('Stripe is not initialized. Please check the setupStripe function.');
@@ -685,9 +692,19 @@ app.get('/payment-success', async (req, res) => {
     }
     //const { bookingId, name, sessionUrl, slot, email, arrival_date, departure_date, totalPrice, isPaid } = data;
     const booking = result.rows[0];
+    const totalPrice = parseFloat(result.rows[0].total_price);
     // console.log('Booking details from database:', booking);
     // Generate invoice
     // Generate and save invoice to the database
+    console.log("Booking Data:", booking); // Log the full booking object
+    console.log("Total Price:", booking.total_price); // Log total_price specifically
+
+    //getEnvVariables like address and kvk vat number
+    const { address1, address2, address3, kvk, vat_number } = await getEnvVariables();
+    // Generate a new unique invoice number
+    
+
+
     await createInvoice({
       bookingId,
       name: booking.name,
@@ -697,10 +714,21 @@ app.get('/payment-success', async (req, res) => {
         {
           description: 'Parking Reservation',
           totalDays: booking.total_days,
-          totalAmount: booking.total_price,
-        }
+          totalAmount: totalPrice,
+        },
+
       ],
-      totalPrice: booking.total_price
+      address1,
+      address2,
+      address3,
+      kvk,
+      vat_number,
+      totalPrice,
+      invoiceNumber: `INV${bookingId}`, // Example invoice number, could be a generated value
+      invoiceDate: new Date().toISOString().split('T')[0], // Use current date for invoice date
+      customerName: booking.name,
+      customerEmail: booking.email,
+      grandTotal: totalPrice, // Assuming grandTotal is same as totalPrice
     }, db);
 
     sendMailConfirmation({
@@ -712,7 +740,7 @@ app.get('/payment-success', async (req, res) => {
       departure_date: booking.departure_date,
       arrival_time: booking.arrival_time,
       departure_time: booking.departure_time,
-      totalDays: booking.totalDays,
+      totalDays: booking.total_days,
       totalPrice: booking.total_price,
       isPaid: true,
     });
@@ -723,8 +751,8 @@ app.get('/payment-success', async (req, res) => {
     // Save any data you want to display in the confirmation page in the session
     req.session.confirmationData = {
       name: booking.name,
-      bookingId: bookingId,
-      totalPrice: booking.total_price,
+      bookingId,
+      totalPrice,
     };
 
     // Redirect to a clean URL
@@ -736,41 +764,7 @@ app.get('/payment-success', async (req, res) => {
   }
 });
 
-//NOT NECESSARY FOR NOW AS IT IS NOT NEDED TO HANLD ECANCEL_PAYMENTE
-//2H EXPIRE OTHERWISE USER IS ALLOWED TO STILL PAY
-//You can also choose to redirect your customers to your website instead of providing a confirmation page. If you redirect your customers to your own confirmation page, you can include {CHECKOUT_SESSION_ID} in the redirect URL to dynamically pass the customer’s current Checkout Session ID. 
-// This is helpful if you want to tailor the success message on your website based on the information in the Checkout Session. 
-// You can also add UTM codes as parameters in the query string of the payment link URL.
-//  The UTM codes are automatically added to your redirect URL when your customer completes a payment.
-// app.get('/payment-cancelled', async (req, res) => {
 
-//   const sessionId = req.query.session_id;
-
-//   if (!sessionId) {
-//     return res.status(400).json({ error: 'Session ID is missing' });
-//   }
-
-//   try {
-//     const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-//     if (!session) {
-//       return res.status(404).json({ error: 'Session not found' });
-//     }
-
-//     const bookingId = session.client_reference_id;
-
-//     // Update the booking status to "cancelled"
-//     await db.query('UPDATE parking_bookings SET status = $1 WHERE id = $2', ['cancelled', bookingId]);
-
-//     console.log(`Booking ${bookingId} marked as cancelled.`);
-
-//     return res.status(200).json({ status: 'cancelled', message: 'Payment has been cancelled.' });
-//   } catch (error) {
-//     console.error('Error handling payment cancellation:', error);
-//     return res.status(500).json({ error: 'Failed to handle cancellation' });
-//   }
-
-// })
 function formatDate(date) {
   //It shows full date which is more user frendly
   const options = { dateStyle: 'full' }
@@ -787,6 +781,7 @@ cron.schedule('*/5 * * * *', async () => {
     console.error('Error running scheduled task:', error);
   }
 });
+
 
 // Start Server
 app.listen(PORT, () => {
