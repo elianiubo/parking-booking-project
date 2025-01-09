@@ -47,9 +47,9 @@ function generateHeader(doc, invoice) {
     .text("Cheap Parking Eindhoven", 90, 57, { align: "center" })
     .fontSize(10)
     .text(invoice.address1, 200, 100, { align: "right" })
-    .text(invoice.address2, 210, 115, { align: "right" })
-    .text(invoice.address3, 220, 125, { align: "right" })
-    .text(`KVK: ${invoice.kvk} VAT Number: ${invoice.vat_number}`, 230, 135, { align: "right" })
+    .text(invoice.address2, 210, 100, { align: "right" })
+    .text(invoice.address3, 220, 100, { align: "right" })
+    .text(`KVK: ${invoice.kvk} VAT Number: ${invoice.vat_number}`, 230, 100, { align: "right" })
     .moveDown();
 }
 
@@ -159,12 +159,12 @@ function generateFooter(doc) {
 }
 async function savePdfToDatabase(db, bookingId, pdfBuffer, invoice) {
   const insert = `
-    INSERT INTO invoices (booking_id, pdf_data, created_at)
-    VALUES ($1, $2, NOW())
+    INSERT INTO invoices (booking_id, pdf_data, created_at, invoice_number)
+    VALUES ($1, $2, NOW(), $3)
     RETURNING id;
   `;
 
-  const values = [bookingId, pdfBuffer];
+  const values = [bookingId, pdfBuffer, invoice.invoiceNumber];
 
   try {
     const res = await db.query(insert, values); // db.query should be used here

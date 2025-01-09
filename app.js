@@ -94,7 +94,8 @@ app.get('/confirmation', async (req, res) => {
   const confirmationData = req.session.confirmationData;
 
   if (!confirmationData) {
-    return res.status(400).send('No confirmation data found.');
+    // return res.status(400).send('No confirmation data found.');
+    return res.redirect('/')
   }
 
   const { name, bookingId, totalPrice } = confirmationData;
@@ -110,6 +111,8 @@ app.get('/confirmation', async (req, res) => {
     bookingId,
     totalPrice,
   });
+   // After rendering, clear the session confirmationData
+   delete req.session.confirmationData;
 });
 
 // app.get('/faq', async (req, res) => {
@@ -704,7 +707,7 @@ app.get('/payment-success', async (req, res) => {
     // Generate a new unique invoice number
     
 
-
+    const invoiceNumber = `INV${bookingId}`;
     await createInvoice({
       bookingId,
       name: booking.name,
@@ -724,7 +727,7 @@ app.get('/payment-success', async (req, res) => {
       kvk,
       vat_number,
       totalPrice,
-      invoiceNumber: `INV${bookingId}`, // Example invoice number, could be a generated value
+      invoiceNumber, // Example invoice number, could be a generated value
       invoiceDate: new Date().toISOString().split('T')[0], // Use current date for invoice date
       customerName: booking.name,
       customerEmail: booking.email,
