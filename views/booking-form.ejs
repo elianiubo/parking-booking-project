@@ -1,15 +1,14 @@
-
 <div id="form-box">
     <h2 class="book-h2-form">Book Your Parking Spot</h2>
     <p class="book-p-form">Secure parking at affordable rates. Fill in your details to book!</p>
     <form id="booking-form" action="/book" method="POST">
 
         <div class="row">
-            
+
             <div class="form-group">
                 <label for="arrival_date">Arrival Date: <span>*</span></label>
                 <input type="date" id="arrival_date" name="arrival_date" required>
-                <p class="error-message" ></p>
+                <p class="error-message"></p>
             </div>
             <div class="form-group">
                 <label for="departure_date">Departure Date: <span>*</span></label>
@@ -18,7 +17,7 @@
             </div>
         </div>
         <div class="div-total-price">
-           
+
             <p id="price-display">
                 Total Price € 0
             </p>
@@ -83,16 +82,67 @@
             <div class="form-group">
                 <label for="license_plate">License Plate Number: <span>*</span></label>
                 <input type="text" placeholder="License Plate" id="license_plate" name="license_plate" required>
-                <p class="below-lisence" >Make sure you write the
+                <p class="below-lisence">Make sure you write the
                     correct license plate number</p>
                 <!-- <p class="error-message" id="license-error"></p> -->
             </div>
         </div>
+        <div class="row">
+            <div class="form-group">
+                <label for="select-invoice">Are you business or legal entity? <br>Please choose, yes or no
+                    <span>*</span></label>
 
+                <select for="select-option" name="choice" id="select-option" required>
+                    <option value="0">---</option>
+                    <option value="1">Yes</option>
+                    <option value="2">No</option>
+                </select>
+
+            </div>
+        </div>
+        <div id="company-section" hidden>
+            <!-- Explanation paragraph -->
+            <p id="selection-info"  class="hidden-text">
+            </p>
+            <div class="row">
+                <div class="form-group ">
+                    <label for="companyName">Company Name</label>
+                    <input type="text" id="companyName" name="companyName" required>
+                </div>
+                <div class="form-group ">
+                    <label for="companyAddress">Company Address</label>
+                    <input type="text" id="companyAddress" name="companyAddress"
+                        placeholder="Street Name and Number, postalCode, city" required>
+                    <input type="text" id="postalCode" name="postalCode" placeholder="Postal Code" required>
+                    <input type="text" id="city" name="city" placeholder="City" required>
+                    <input type="text" id="country" name="country" placeholder="Country" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group ">
+                    <label for="vatNumber">VAT Number (if applicable)</label>
+                    <input type="text" id="vatNumber" name="vatNumber">
+                </div>
+                <div class="form-group ">
+                    <label for="kvkNumber">KVK Number (optional)</label>
+                    <input type="text" id="kvkNumber" name="kvkNumber">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group ">
+                    <label for="contactName">Contact Name</label>
+                    <input type="text" id="contactName" name="contactName">
+                </div>
+                <!-- <div class="form-group ">
+                <label for="notes">Additional Notes/Reference Number</label>
+                <textarea id="notes" name="notes"></textarea>
+            </div> -->
+            </div>
+        </div>
         <button type="submit" id="submit-btn" disabled>Submit</button>
 
     </form>
-    
+
     <div id="confirmation-message" style="display: none;">
 
         <p id="confirmation-text"></p>

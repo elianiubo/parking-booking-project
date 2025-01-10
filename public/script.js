@@ -1,5 +1,6 @@
 
 
+
 document.addEventListener("DOMContentLoaded", () => {
 
 
@@ -19,9 +20,9 @@ document.addEventListener("DOMContentLoaded", () => {
   //   document.getElementById('confirmation-message').style.display = 'none';
   //   document.getElementById('booking-form').style.display = 'block';
 
-    // Clear the query parameter from the URL
-    // const newUrl = window.location.origin + window.location.pathname;
-    // window.history.replaceState({}, document.title, newUrl);
+  // Clear the query parameter from the URL
+  // const newUrl = window.location.origin + window.location.pathname;
+  // window.history.replaceState({}, document.title, newUrl);
   // }
   const arrivalDateInput = document.getElementById('arrival_date');
   const departureDateInput = document.getElementById('departure_date');
@@ -144,6 +145,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // }
+  const selection = document.getElementById('select-option');
+  const infoParagraph = document.getElementById('selection-info');
+  selection.addEventListener('change', () => {
+
+    if (selection.value === "1") {
+      console.log(' Values yes')
+      document.getElementById("company-section").hidden = false;
+      infoParagraph.textContent = "You have selected Yes. Please fill out the company details below to include them in the invoice.";
+      
+    } else {
+      document.getElementById("company-section").hidden = true;
+      console.log('value none or no')
+    }
+  })
+
+
   //VAlidate input formatiing
   function validateForm() {
     let isValid = true;
@@ -273,8 +290,8 @@ document.addEventListener("DOMContentLoaded", () => {
       priceDisplay.textContent = "Total Price € 0"; // Reset the price display
       daysDisplay.textContent = "Total days reserved: 0"; // Reset days display
       priceDisplay.style.color = '#555'; // Reset the price display
-        daysDisplay.style.color = '#555';
-      
+      daysDisplay.style.color = '#555';
+
       submitButton.disabled = true; // Disable submit button
       return; // Exit early
     }
@@ -290,7 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await response.json();
 
       if (result.available) {
-       // const totalDays = showTotalDays(arrivDate, depDate); // Calculate total days
+        // const totalDays = showTotalDays(arrivDate, depDate); // Calculate total days
         priceDisplay.style.color = "#555"
         priceDisplay.textContent = `Total Price € ${result.totalPrice}`; // Update the price display
         daysDisplay.textContent = `Total days reserved: ${result.totalDays}`; // Update the days display
@@ -299,7 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         // If dates are not available
         selectedDates.textContent =
-        "Selected dates are not available. Please choose different dates."; // Show error in selected-dates
+          "Selected dates are not available. Please choose different dates."; // Show error in selected-dates
         priceDisplay.textContent = "";
         daysDisplay.textContent = ""; // Reset the days display
         submitButton.disabled = true; // Disable submit button
@@ -352,7 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
           document.querySelector('.book-p-form').style.display = 'none';
           document.getElementById('booking-form').style.display = 'none';
           document.getElementById('confirmation-message').style.display = 'block';
-          
+
 
           // Show the confirmation message
           document.getElementById("confirmation-text").innerHTML = `
