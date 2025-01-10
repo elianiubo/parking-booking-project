@@ -97,17 +97,19 @@
                     <option value="1">Yes</option>
                     <option value="2">No</option>
                 </select>
+                <p class="error-message" id="type-error"></p>
 
             </div>
         </div>
         <div id="company-section" hidden>
             <!-- Explanation paragraph -->
-            <p id="selection-info"  class="hidden-text">
+            <p id="selection-info" class="hidden-text">
             </p>
             <div class="row">
                 <div class="form-group ">
                     <label for="companyName">Company Name</label>
                     <input type="text" id="companyName" name="companyName" required>
+                    <p class="error-message" id="type-error"></p>
                 </div>
                 <div class="form-group ">
                     <label for="companyAddress">Company Address</label>
@@ -116,6 +118,7 @@
                     <input type="text" id="postalCode" name="postalCode" placeholder="Postal Code" required>
                     <input type="text" id="city" name="city" placeholder="City" required>
                     <input type="text" id="country" name="country" placeholder="Country" required>
+                    <p class="error-message" id="type-error"></p>
                 </div>
             </div>
             <div class="row">

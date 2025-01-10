@@ -145,6 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // }
+  //Code to show ro hide the company section inputs to add in invoice
   const selection = document.getElementById('select-option');
   const infoParagraph = document.getElementById('selection-info');
   selection.addEventListener('change', () => {
@@ -236,6 +237,8 @@ document.addEventListener("DOMContentLoaded", () => {
       showErrors(typeError, "Car type isn't correct");
       isValid = false; // Invalid car type
     }
+    //Company section
+    
 
     return isValid;
   }
