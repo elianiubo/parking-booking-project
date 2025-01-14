@@ -111,8 +111,8 @@ app.get('/confirmation', async (req, res) => {
     bookingId,
     totalPrice,
   });
-   // After rendering, clear the session confirmationData
-   delete req.session.confirmationData;
+  // After rendering, clear the session confirmationData
+  delete req.session.confirmationData;
 });
 
 // app.get('/faq', async (req, res) => {
@@ -338,18 +338,35 @@ async function createBookingAndUserDetails(bookingData, userData, totalPrice, to
     const bookingId = bookingResult.rows[0].id; // Extract the booking ID
 
     // Insert the user booking data
-    const userBookingQuery = `
-    INSERT INTO user_bookings(
-    parking_spot_id, name, email, arrival_date, departure_date,
-    arrival_time, departure_time, car_brand, car_color, car_type, license_plate, fk_parking_bookings_id
-  )
-  VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-    RETURNING id;
-  `;
-    const userBookingResult = await db.query(userBookingQuery, [
+    //   const userBookingQuery = `
+    //   INSERT INTO user_bookings(
+    //   parking_spot_id, name, email, arrival_date, departure_date,
+    //   arrival_time, departure_time, car_brand, car_color, car_type, license_plate, fk_parking_bookings_id
+    // )
+    // VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+    //   RETURNING id;
+    // `;
+
+    // Step 2: Add bookingId to the userData array
+    const userDataWithBookingId = [
       ...userData,
-      bookingId  // Pass the correct bookingId here
-    ]);
+      bookingId // Append booking ID to userData
+    ];
+    console.log('User data with bookingId:', userDataWithBookingId);
+
+    // Insert the user booking data
+    const userBookingQuery = `
+     INSERT INTO user_bookings (
+        parking_spot_id, name, email, arrival_date, departure_date, arrival_time, departure_time,
+        car_brand, car_color, car_type, license_plate, 
+        company_name, company_address, postal_code, city, country, vat_number, kvk_number, contact_name,fk_parking_bookings_id
+     ) VALUES (
+       $1, $2, $3, $4, $5, $6, $7, 
+       $8, $9, $10, $11, $12, 
+       $13, $14, $15, $16, $17, $18, $19, $20
+     )RETURNING id;
+   `;
+    const userBookingResult = await db.query(userBookingQuery,  userDataWithBookingId);
 
     return {
       bookingId,  // Return the actual booking ID
@@ -437,116 +454,17 @@ async function createSession({ bookingId, email, name, slot, totalPrice, totalDa
   }
 }
 
-// async function generateInvoice(data) {
-//   return new Promise((resolve, reject) => {
-//     const doc = new PDFDocument();
-//     const buffers = [];
-
-//     doc.on('data', chunk => buffers.push(chunk));
-//     doc.on('end', async () => {
-//       const pdfBuffer = Buffer.concat(buffers);
-
-//       try {
-//         // Save the PDF buffer to the database
-//         const query = `
-//           INSERT INTO invoices (booking_id, pdf_data, created_at)
-//           VALUES ($1, $2, NOW())
-//           RETURNING id;
-//         `;
-//         const result = await db.query(query, [data.bookingId, pdfBuffer]);
-//         console.log('Invoice saved in DB with ID:', result.rows[0].id);
-//         resolve(result.rows[0].id); // Return the invoice ID
-//       } catch (err) {
-//         console.error('Error saving invoice in DB:', err);
-//         reject(err);
-//       }
-//     });
-
-//     // Header
-//     doc.fillColor('#003366').fontSize(26).text('Invoice', { align: 'center' });
-//     doc.moveDown(2);
-
-//     // Company Information
-//     doc.fillColor('#000000').fontSize(14)
-//       .text('Company Name: Cheap Parking Eindhoven B.V.', { align: 'left' })
-//       .text('KvK Number: 12345678')
-//       .text('VAT Number: NL123456789B01')
-//       .text('Address: Parking Street 1, Eindhoven, Netherlands')
-//       .moveDown(1);
-
-//     // Customer Information
-//     doc.fontSize(14).text(`Customer Name: ${data.name}`)
-//       .text(`Email: ${data.email}`)
-//       .moveDown(1);
-
-//     // Booking Details
-//     doc.fontSize(14).text(`Invoice Number: EIN${data.bookingId}`)
-//       .text(`Invoice Date: ${new Date().toLocaleDateString('nl-NL')}`)
-//       .text(`Parking Slot: ${data.slot}`)
-//       .moveDown(1);
-
-//     // Price Details
-//     doc.fillColor('#003366').fontSize(16).text('Price Details', { align: 'left' }).moveDown(1);
-
-//     // Table header
-//     doc.fontSize(12).fillColor('#000000').text('Description', 50, doc.y, { width: 250, align: 'left' });
-//     doc.text('Amount', 350, doc.y, { width: 150, align: 'right' }).moveDown(0.5);
-
-//     // Price rows
-//     doc.fontSize(12).text('Price (Excl. VAT)', 50, doc.y)
-//       .text(`€ ${(data.totalPrice / 1.21).toFixed(2)}`, 350, doc.y, { width: 150, align: 'right' }).moveDown(0.5);
-
-//     doc.text('VAT (21%)', 50, doc.y)
-//       .text(`€ ${(data.totalPrice - data.totalPrice / 1.21).toFixed(2)}`, 350, doc.y, { width: 150, align: 'right' }).moveDown(0.5);
-
-//     doc.fontSize(14).text('Total (Incl. VAT)', 50, doc.y)
-//       .text(`€ ${data.totalPrice}`, 350, doc.y, { width: 150, align: 'right' }).moveDown(1);
-
-//     // Footer
-//     doc.fillColor('#666666').fontSize(10)
-//       .text('Thank you for choosing Cheap Parking Eindhoven!', { align: 'center' })
-//       .moveDown(1)
-//       .text('For inquiries, contact us at: info@cheapparkingeindhoven.nl', { align: 'center' });
-
-//     doc.end();
-//   });
-
-// }
-
-
-//Creates events to clean processes and checks them
-//NOT NECESSARY OFR NOW ASTHE EXPIRE SESSION WORKS ON IT OWN
-// app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-//   const event = req.body; // Directly use the payload
-//   console.log("Received event:", JSON.stringify(event, null, 2));
-
-//   try {
-//     if (event.type === 'checkout.session.expired') {
-//       const session = event.data.object;
-//       const bookingId = session.client_reference_id;
-//       console.log(`Session expired for booking ID: ${bookingId}`);
-
-//       // Update your database or handle expired booking
-//       const query = `UPDATE parking_bookings SET status = 'expired' WHERE booking_id = $1`;
-//       await db.query(query, [bookingId]);
-
-//       res.status(200).send('Event processed');
-//     } else {
-//       res.status(200).send('Event processed from else');
-//     }
-//   } catch (err) {
-//     console.error('Error processing webhook:', err);
-//     res.status(500).send('Internal Server Error');
-//   }
-// });
-
 
 // Routes
 //GETS THE USER DATA AND CHECKS IF THE'RS AN AVALIABLE SLOT ON SELECTED INPUTS AND DATES
 //IF THERE IS A BOOKING PROCEES IS MADE
 app.post('/book', async (req, res) => {
-  const { arrival_date, departure_date, arrival_time, departure_time, name, email, car_brand, car_color, car_type, license_plate } = req.body;
-
+  // const { arrival_date, departure_date, arrival_time, departure_time, name, email, car_brand, car_color, car_type, license_plate } = req.body;
+  const {
+    arrival_date, departure_date, arrival_time, departure_time,
+    name, email, car_brand, car_color, car_type, license_plate,
+    company_name, company_address, postal_code, city, country, vat_number, kvk_number, contact_name
+  } = req.body;
   try {
     const arrival = new Date(arrival_date);
     const departure = new Date(departure_date);
@@ -558,6 +476,7 @@ app.post('/book', async (req, res) => {
     if (availableSlotResult.rows.length === 0) {
       return res.status(400).json({ message: 'No spots available for the selected dates' });
     }
+   
     //avaliable slot found and save it to calculate total price
     const { slot: availableSlot, base_price, extra_day_price, max_days } = availableSlotResult.rows[0];
     const totalPrice = calculateTotalPrice(totalDays, parseFloat(base_price), parseFloat(extra_day_price), parseInt(max_days, 10));
@@ -565,12 +484,13 @@ app.post('/book', async (req, res) => {
     const bookingData = [`${arrival_date} 00:00:00`, `${departure_date} 23:59:59`, availableSlot];
     const userData = [
       availableSlot, name, email, arrival_date, departure_date, arrival_time, departure_time,
-      car_brand, car_color, car_type, license_plate,
+      car_brand, car_color, car_type, license_plate, // Ensure bookingId is added here
+      company_name, company_address, postal_code, city, country, vat_number, kvk_number, contact_name
     ];
+    
     //calls the function to create a booking and insert users to db by the bookig id
     const { bookingId } = await createBookingAndUserDetails(bookingData, userData, totalPrice, totalDays);
-    console.log("Boking ID" + bookingId)
-    console.log(availableSlot)
+
     //calls a function to make the payment
     const { sessionUrl } = await createSession({
       bookingId,
@@ -705,7 +625,7 @@ app.get('/payment-success', async (req, res) => {
     //getEnvVariables like address and kvk vat number
     const { address1, address2, address3, kvk, vat_number } = await getEnvVariables();
     // Generate a new unique invoice number
-    
+
 
     const invoiceNumber = `INV${bookingId}`;
     await createInvoice({

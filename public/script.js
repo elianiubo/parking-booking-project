@@ -312,6 +312,18 @@ document.addEventListener("DOMContentLoaded", () => {
         car_type: document.getElementById('car_type').value,
         license_plate: document.getElementById('license_plate').value
       };
+      //COMPANY INVOICE EXTRA INFORMATION
+       // Include company details if "Yes" is selected
+    if (document.getElementById('select-option').value === '1') {
+      formData.company_name = document.getElementById('companyName').value || null;
+      formData.company_address = document.getElementById('companyAddress').value || null;
+      formData.postal_code = document.getElementById('postalCode').value || null;
+      formData.city = document.getElementById('city').value || null;
+      formData.country = document.getElementById('country').value || null;
+      formData.vat_number = document.getElementById('vatNumber').value || null; // Optional
+      formData.kvk_number = document.getElementById('kvkNumber').value || null; // Optional
+      formData.contact_name = document.getElementById('contactName').value || null; // Optional
+    }
 
       try {
         const response = await fetch("/book", {
