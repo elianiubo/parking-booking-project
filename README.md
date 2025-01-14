@@ -1,5 +1,5 @@
 # parking-booking-project
-Parking Booking System
+Parking Booking Project
 A full-stack web application for managing parking bookings with features like real-time spot availability, Stripe payment integration, and automated booking confirmations.
 
 Features
