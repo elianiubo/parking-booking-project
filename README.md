@@ -16,8 +16,13 @@ Responsive Design: Dynamic front-end built with EJS for a seamless user experien
 
 
 Technologies Used
+
 Front-End: EJS, CSS, JavaScript
+
 Back-End: Node.js, Express.js
+
 Database: PostgreSQL
+
 Payment Integration: Stripe API
+
 PDF Generation: PDFKit
