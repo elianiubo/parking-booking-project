@@ -8,22 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.performance.getEntriesByType("navigation")[0].type === 'reload') {
     window.location.href = '/';
   }
-
-  // setTimeout(() => {
-  //   document.getElementById('confirmation-message').style.display = 'none';
-  //   document.getElementById('booking-form').style.display = 'block';
-  // }, 5000); // Auto-hide after 5 seconds
-  // Check for the "payment=success" query parameter
-  // const urlParams = new URLSearchParams(window.location.search);
-  // if (urlParams.get('payment') === 'success') {
-  //   // Hide the confirmation message and show the booking form
-  //   document.getElementById('confirmation-message').style.display = 'none';
-  //   document.getElementById('booking-form').style.display = 'block';
-
-  // Clear the query parameter from the URL
-  // const newUrl = window.location.origin + window.location.pathname;
-  // window.history.replaceState({}, document.title, newUrl);
-  // }
   const arrivalDateInput = document.getElementById('arrival_date');
   const departureDateInput = document.getElementById('departure_date');
   const submitButton = document.getElementById('submit-btn');
@@ -33,8 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   faqs.forEach(faq => {
     const arrow = faq.querySelector(".arrow-icon");  // Get the arrow inside the FAQ
-    const answer = faq.querySelector(".answer");    // Get the answer inside the FAQ
-
     // Add click event listener to the entire FAQ element
     faq.addEventListener("click", function () {
       // Toggle the 'active' class on the FAQ container to show/hide the answer
@@ -44,48 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
       arrow.classList.toggle("rotate");
     });
   })
-  //FAQS text shpows up when clicked and roates icon
 
-  // const faqs = document.querySelectorAll(".faq");
-
-  // // Add a click event listener to each FAQ container
-  // faqs.forEach(faq => {
-  //   const question = faq.querySelector(".question"); // The clickable question section
-  //   const answerDiv = faq.querySelector(".answer"); // The corresponding answer section
-  //   const arrowIcon = faq.querySelector(".arrow-icon"); // The arrow icon
-
-  //   question.addEventListener("click", () => {
-  //     // Toggle visibility of the answer
-  //     if (answerDiv.style.display === "none" || answerDiv.style.display === "") {
-  //       answerDiv.style.display = "block";
-  //     } else {
-  //       answerDiv.style.display = "none";
-  //     }
-
-  //     // Toggle rotation of the arrow icon
-  //     arrowIcon.classList.toggle("rotate");
-  //   });
-  // });
-
-  // I save this variables in local so ig¡f page reloads are saved and user can reuse them
-
-  // document.getElementById("booking-form").addEventListener('submit', () => {
-
-  //   const arrivDate = arrivalDateInput.value;
-  //   const depDate = departureDateInput.value;
-  //   const totalPrice = totalPriceElement.textContent;
-
-  //   localStorage.setItem('arrivalDate', arrivDate);
-  //   localStorage.setItem('departureDate', depDate);
-  //   localStorage.setItem('totalPrice', totalPrice);
-
-  // })
-
-  // makes the button to make a new buttin go to main page
-  // document.getElementById('new-booking-btn')?.addEventListener('click', () => {
-  //   window.location.href = '/'; // Redirect to the main page
-
-  // });
 
   const mybutton = document.getElementById("top-btn");
   window.onscroll = function () { scrollFunction() };
@@ -124,44 +65,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   }
 
-  // function showTotalDays(arrivDate, depDate) {
-  //   const arriv = new Date(arrivDate);
-  //   const dep = new Date(depDate);
-
-  //   if (isNaN(arriv) || isNaN(dep)) {
-  //     console.error("Invalid dates provided to showTotalDays:", arrivDate, depDate);
-  //     return 0; // Return 0 if dates are invalid
-  //   }
-
-  //   // Calculate the difference in time between the two dates
-  //   let differenceInTime = dep - arriv;
-
-  //   // Calculate the number of days between the two dates
-  //   let differenceInDays = Math.round(differenceInTime / (1000 * 3600 * 24) + 1);
-
-  //   console.log(`Total days: ${differenceInDays}`);
-  //   return differenceInDays;
-
-
-
-  // }
-  //Code to show ro hide the company section inputs to add in invoice
-  const selection = document.getElementById('select-option');
-  const infoParagraph = document.getElementById('selection-info');
-  selection.addEventListener('change', () => {
-
-    if (selection.value === "1") {
-      console.log(' Values yes')
-      document.getElementById("company-section").hidden = false;
-      infoParagraph.textContent = "You have selected Yes. Please fill out the company details below to include them in the invoice.";
-      
-    } else {
-      document.getElementById("company-section").hidden = true;
-      console.log('value none or no')
-    }
-  })
-
-
+  const selectElement = document.getElementById('select-option');
+  const companySection = document.getElementById('company-section');
+  const errorMessage = document.getElementById('select-error');
+  const formInputs = document.querySelectorAll('input[required]'); // All required input fields
   //VAlidate input formatiing
   function validateForm() {
     let isValid = true;
@@ -237,21 +144,71 @@ document.addEventListener("DOMContentLoaded", () => {
       showErrors(typeError, "Car type isn't correct");
       isValid = false; // Invalid car type
     }
-    //Company section
-    
+    // Dropdown validation
+    if (selectElement.value === '0') {
+      showErrors(errorMessage, "Please choose an option.");
+      isValid = false;
+    } else {
+      showErrors(errorMessage, "");
+    }
+
+    // Validate company inputs only if "Yes" is selected
+    if (selectElement.value === '1') {
+      const companyInputs = document.querySelectorAll("#company-section input[required]");
+      companyInputs.forEach((input) => {
+        if (!input.value.trim()) {
+          showErrors(input.nextElementSibling, `${input.placeholder} is required`);
+          isValid = false;
+        } else {
+          showErrors(input.nextElementSibling, "");
+        }
+      });
+    }
+
 
     return isValid;
   }
+ 
 
-  // Listen for the form submit event
-  const form = document.querySelector("form");
-  form.addEventListener("submit", (event) => {
-    // Validate the form before submitting
-    if (!validateForm()) {
-      event.preventDefault(); // Prevent form submission if the form is invalid
-      return false;
+  // Function to validate all inputs
+  const validateInputs = () => {
+    let allInputsValid = true;
+
+    // Check each input field
+    formInputs.forEach((input) => {
+      if (!input.value.trim()) {
+        allInputsValid = false; // At least one input is invalid
+      }
+    });
+
+    return allInputsValid;
+  };
+
+  // Function to validate the dropdown selection and overall form state
+  const validateFormInputs = () => {
+    const isDropdownValid = selectElement.value !== '0'; // Check if a valid option is selected
+    const areInputsValid = validateInputs(); // Check if all inputs are valid
+
+    // Update the submit button state and other UI elements
+    if (isDropdownValid && areInputsValid) {
+      submitButton.disabled = false; // Enable the submit button
+    } else {
+      submitButton.disabled = true; // Disable the submit button
+      if (!isDropdownValid) {
+        errorMessage.style.display = 'block'; // Show the dropdown error
+      }
     }
-  });
+  };
+
+  // Function to handle dropdown-specific behavior
+  const handleDropdownChange = () => {
+    if (selectElement.value === '1') { // 'Yes' selected
+      companySection.style.display = 'block'; // Show the company inputs
+    } else { // 'No' or invalid selection
+      companySection.style.display = 'none'; // Hide the company inputs
+    }
+    validateFormInputs(); // Revalidate the form
+  }
   //checks avaliability of parking slots when selected
   async function checkAvailability() {
     const arrivDate = arrivalDateInput.value;
@@ -401,35 +358,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
   });
-  // Function to handle successful payment
-  // async function handlePaymentSuccess(sessionId) {
-  //   try {
-  //     const response = await fetch(`/payment-success?session_id=${sessionId}`);
-  //     if (response.ok) {
-  //       const result = await response.text();
-
-  //       // Clear the confirmation message and redisplay the booking form
-  //       document.getElementById('confirmation-message').style.display = 'none';
-  //       document.getElementById('booking-form').style.display = 'block';
-  //       document.getElementById('booking-form').reset(); // Reset the form
-
-  //       // Optionally, display a success message
-  //       alert('Payment successful! You can now make another booking.');
-  //     } else {
-  //       console.error('Failed to process payment:', await response.text());
-  //       alert('Failed to process payment. Please try again.');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error handling payment success:', error);
-  //     alert('An error occurred while handling the payment. Please try again.');
-  //   }
-  // }
-
-
-
-
-
-
 
   //chanckes the pending status on rout /check-pending everytime user loads the page
   async function updatePage() {
@@ -453,6 +381,11 @@ document.addEventListener("DOMContentLoaded", () => {
   arrivalDateInput.addEventListener('change', checkAvailability);
   departureDateInput.addEventListener('change', checkAvailability);
 
+  // Add event listeners
+  selectElement.addEventListener('change', handleDropdownChange); // Validate on dropdown change
+  formInputs.forEach((input) => input.addEventListener('input', validateFormInputs)); // Validate on input changes
+
+
   //SHow question mark or hide it 
   const questionMark = document.getElementById('question-mark');
   const questionDiv = document.getElementById('question-div');
@@ -464,20 +397,6 @@ document.addEventListener("DOMContentLoaded", () => {
   questionMark.addEventListener('mouseleave', () => {
     questionDiv.style.display = 'none'; // Hide the explanation text when mouse leaves
   });
-
-
-  // const savedArrivalDate = localStorage.getItem('arrivalDate');
-  // const savedDepartureDate = localStorage.getItem('departureDate');
-  // const savedTotalPrice = localStorage.getItem('totalPrice');
-
-  // if (savedArrivalDate) {
-  //   arrivalDateInput.value = savedArrivalDate;
-  // }
-  // if (savedDepartureDate) {
-  //   departureDateInput.value = savedDepartureDate;
-  // }
-  // if (savedTotalPrice) {
-  //   totalPriceElement.textContent = savedTotalPrice;
-  //   document.getElementById('price-display').textContent = `Total Price: EUR ${ savedTotalPrice } `;
-  // }     // Run any other updates like checking pending bookings
+  // Call the validation function on page load to ensure proper state
+  handleDropdownChange(); // Set the correct initial state
 });

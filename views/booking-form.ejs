@@ -84,32 +84,32 @@
                 <input type="text" placeholder="License Plate" id="license_plate" name="license_plate" required>
                 <p class="below-lisence">Make sure you write the
                     correct license plate number</p>
-                <!-- <p class="error-message" id="license-error"></p> -->
+                <p class="error-message" id="license-error"></p>
             </div>
         </div>
         <div class="row">
             <div class="form-group">
-                <label for="select-invoice">Are you business or legal entity? <br>Please choose, yes or no
+                <label for="select-option">Are you business or legal entity? <br>Please choose, yes or no
                     <span>*</span></label>
 
-                <select for="select-option" name="choice" id="select-option" required>
+                <select  name="selece-option" id="select-option" required>
                     <option value="0">---</option>
                     <option value="1">Yes</option>
                     <option value="2">No</option>
                 </select>
-                <p class="error-message" id="type-error"></p>
+                <p class="error-message" id="select-error" style="display: none; color: red;"></p>
 
             </div>
         </div>
-        <div id="company-section" hidden>
+        <div id="company-section" style="display:none;">
             <!-- Explanation paragraph -->
-            <p id="selection-info" class="hidden-text">
+            <p id="selection-info" class="hidden-text">You have selected Yes. Please fill out the company details below to include them in the invoice.
             </p>
             <div class="row">
                 <div class="form-group ">
                     <label for="companyName">Company Name</label>
-                    <input type="text" id="companyName" name="companyName" required>
-                    <p class="error-message" id="type-error"></p>
+                    <input type="text" id="companyName" name="companyName" required >
+                    <p class="error-message" id="company-name-error"></p>
                 </div>
                 <div class="form-group ">
                     <label for="companyAddress">Company Address</label>
@@ -118,7 +118,7 @@
                     <input type="text" id="postalCode" name="postalCode" placeholder="Postal Code" required>
                     <input type="text" id="city" name="city" placeholder="City" required>
                     <input type="text" id="country" name="country" placeholder="Country" required>
-                    <p class="error-message" id="type-error"></p>
+                    <p class="error-message" id="company-address-error"></p>
                 </div>
             </div>
             <div class="row">
