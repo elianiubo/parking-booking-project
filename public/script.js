@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Validate company inputs only if "Yes" is selected
-    if (selectElement.value === '1') {
+    if (selectElement.value === '1') { // Only validate when 'Yes' is chosen
       const companyInputs = document.querySelectorAll("#company-section input[required]");
       companyInputs.forEach((input) => {
         if (!input.value.trim()) {
@@ -163,20 +163,26 @@ document.addEventListener("DOMContentLoaded", () => {
           showErrors(input.nextElementSibling, "");
         }
       });
+    } else {
+      // Clear any errors and ignore validation for company fields when "No" is selected
+      const companyInputs = document.querySelectorAll("#company-section input[required]");
+      companyInputs.forEach((input) => {
+        showErrors(input.nextElementSibling, ""); // Clear errors
+      });
     }
 
 
     return isValid;
   }
- 
+
 
   // Function to validate all inputs
   const validateInputs = () => {
     let allInputsValid = true;
 
-    // Check each input field
+    // Check each visible, enabled input field
     formInputs.forEach((input) => {
-      if (!input.value.trim()) {
+      if (!input.value.trim() && !input.disabled) {
         allInputsValid = false; // At least one input is invalid
       }
     });
@@ -204,8 +210,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const handleDropdownChange = () => {
     if (selectElement.value === '1') { // 'Yes' selected
       companySection.style.display = 'block'; // Show the company inputs
+      companySection.querySelectorAll('input').forEach(input => input.removeAttribute('disabled'));
     } else { // 'No' or invalid selection
       companySection.style.display = 'none'; // Hide the company inputs
+      companySection.querySelectorAll('input').forEach(input => input.setAttribute('disabled', 'disabled'));
     }
     validateFormInputs(); // Revalidate the form
   }
@@ -313,17 +321,17 @@ document.addEventListener("DOMContentLoaded", () => {
         license_plate: document.getElementById('license_plate').value
       };
       //COMPANY INVOICE EXTRA INFORMATION
-       // Include company details if "Yes" is selected
-    if (document.getElementById('select-option').value === '1') {
-      formData.company_name = document.getElementById('companyName').value || null;
-      formData.company_address = document.getElementById('companyAddress').value || null;
-      formData.postal_code = document.getElementById('postalCode').value || null;
-      formData.city = document.getElementById('city').value || null;
-      formData.country = document.getElementById('country').value || null;
-      formData.vat_number = document.getElementById('vatNumber').value || null; // Optional
-      formData.kvk_number = document.getElementById('kvkNumber').value || null; // Optional
-      formData.contact_name = document.getElementById('contactName').value || null; // Optional
-    }
+      // Include company details if "Yes" is selected
+      if (document.getElementById('select-option').value === '1') {
+        formData.company_name = document.getElementById('companyName').value || null;
+        formData.company_address = document.getElementById('companyAddress').value || null;
+        formData.postal_code = document.getElementById('postalCode').value || null;
+        formData.city = document.getElementById('city').value || null;
+        formData.country = document.getElementById('country').value || null;
+        formData.vat_number = document.getElementById('vatNumber').value || null; // Optional
+        formData.kvk_number = document.getElementById('kvkNumber').value || null; // Optional
+        formData.contact_name = document.getElementById('contactName').value || null; // Optional
+      }
 
       try {
         const response = await fetch("/book", {
@@ -393,9 +401,9 @@ document.addEventListener("DOMContentLoaded", () => {
   arrivalDateInput.addEventListener('change', checkAvailability);
   departureDateInput.addEventListener('change', checkAvailability);
 
-  // Add event listeners
-  selectElement.addEventListener('change', handleDropdownChange); // Validate on dropdown change
-  formInputs.forEach((input) => input.addEventListener('input', validateFormInputs)); // Validate on input changes
+  // Add event listeners to revalidate on input changes
+selectElement.addEventListener('change', handleDropdownChange);
+formInputs.forEach((input) => input.addEventListener('input', validateFormInputs))
 
 
   //SHow question mark or hide it 
