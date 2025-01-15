@@ -44,12 +44,13 @@ function generateHeader(doc, invoice) {
     //.image("/assets/images/logo.png", 50, 45, { width: 50 })
     .fillColor("#444444")
     .fontSize(20)
-    .text("Cheap Parking Eindhoven", 90, 57, { align: "center" })
+    .text("Cheap Parking Eindhoven", 90, 50, { align: "center" })
     .fontSize(10)
     .text(invoice.address1, 200, 100, { align: "right" })
-    .text(invoice.address2, 210, 100, { align: "right" })
-    .text(invoice.address3, 220, 100, { align: "right" })
-    .text(`KVK: ${invoice.kvk} VAT Number: ${invoice.vat_number}`, 230, 100, { align: "right" })
+    .text(invoice.address2, 200, 112, { align: "right" })
+    .text(invoice.address3, 200, 124, { align: "right" })
+    .text(`KVK: ${invoice.kvk}`, 200, 136, { align: "right" })
+    .text(`VAT Number: ${invoice.vat_number}`, 200, 148, { align: "right" })
     .moveDown();
 }
 
@@ -71,25 +72,43 @@ function generateCustomerInformation(doc, invoice) {
     .font("Helvetica")
     .text("Invoice Date:", 50, customerInformationTop + 15)
     .text(invoice.invoiceDate, 150, customerInformationTop + 15)
-    .text("Customer Name:", 50, customerInformationTop + 30)
+    .text("Name:", 50, customerInformationTop + 30)
     .text(invoice.customerName, 150, customerInformationTop + 30)
     .text("Email:", 50, customerInformationTop + 45)
-    .text(invoice.customerEmail, 150, customerInformationTop + 45)
-    .moveDown();
+    .text(invoice.customerEmail, 150, customerInformationTop + 45);
+  //.moveDown();
+  let rulePosition = customerInformationTop + 60; // Default position for the rule
+  if (invoice.companyName) {
+    doc
+      .fontSize(10)
+      .text("Company Name:", 50, customerInformationTop + 60) // Moved to the left
+      .text(invoice.companyName || "", 150, customerInformationTop + 60) // Adjusted value position
+      .text("Company Address:", 50, customerInformationTop + 75) // Moved to the left
+      .text(invoice.companyAddress || "", 150, customerInformationTop + 75) // Adjusted value position
+      .text("VAT Number:", 50, customerInformationTop + 90) // Moved to the left
+      .text(invoice.companyVatNumber || "", 150, customerInformationTop + 90) // Adjusted value position
+      .text("KVK Number:", 50, customerInformationTop + 105) // Moved to the left
+      .text(invoice.companyKVK || "", 150, customerInformationTop + 105); // Adjusted value position
+      
+      // .moveDown();
+      rulePosition = customerInformationTop + 120;
+  }
 
-  generateHr(doc, 267);
+  generateHr(doc, rulePosition);
 }
 
 function generateCustomInvoiceTable(doc, invoice) {
-  const invoiceTableTop = 320;
+  const invoiceTableTop = 350;
 
   doc
     .fontSize(12)
-    .text("Description", 50, invoiceTableTop, { bold: true })
-    .text(" Days reserved", 100, invoiceTableTop, { bold: true, align: "center" })
-    .text("Total ", 150, invoiceTableTop, { bold: true, align: "right" });
+    .text("Description", 50, invoiceTableTop) // Left-aligned
+    .text("Days Reserved", 200, invoiceTableTop, { align: "left" }) // Centered
+    .text("VAT", 270, invoiceTableTop, { align: "center" }) // Centered
+    .text("Total Price", 450, invoiceTableTop, { align: "right" }); // Right-aligned
 
   generateHr(doc, invoiceTableTop + 15);
+
   let position = invoiceTableTop + 30
   // Check if invoice.items is defined and is an array
   // Check if invoice.items is an array and has items
@@ -98,9 +117,10 @@ function generateCustomInvoiceTable(doc, invoice) {
       const totalAmount = parseFloat(item.totalAmount); // Ensure it is a number
       doc
         .fontSize(10)
-        .text(item.description, 50, position)
-        .text(item.totalDays, 100, position, { align: "center" })
-        .text(`€ ${totalAmount.toFixed(2)}`, 150, position, { align: "right" });
+        .text(item.description, 50, position) // Left-aligned
+        .text(item.totalDays, 230, position, { align: "left" }) // Centered
+        .text("21%", 270, position, { align: "center" }) // VAT centered
+        .text(`€ ${totalAmount.toFixed(2)}`, 450, position, { align: "right" }); // Right-aligned
       position += 20; // Update position for the next row
     });
   } else {
@@ -122,7 +142,7 @@ function generateCustomInvoiceTable(doc, invoice) {
   console.log("VAT (21%):", vatAmount.toFixed(2));
   console.log("Grand Total:", grandTotal.toFixed(2));
   // Show the VAT breakdown
-  position += 10; // Add spacing before VAT breakdown
+  position += 20; // Add spacing before VAT breakdown
   doc
     .fontSize(12)
     .text('Price (Excl. VAT)', 50, position)

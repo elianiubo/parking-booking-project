@@ -366,7 +366,7 @@ async function createBookingAndUserDetails(bookingData, userData, totalPrice, to
        $13, $14, $15, $16, $17, $18, $19, $20
      )RETURNING id;
    `;
-    const userBookingResult = await db.query(userBookingQuery,  userDataWithBookingId);
+    const userBookingResult = await db.query(userBookingQuery, userDataWithBookingId);
 
     return {
       bookingId,  // Return the actual booking ID
@@ -476,7 +476,7 @@ app.post('/book', async (req, res) => {
     if (availableSlotResult.rows.length === 0) {
       return res.status(400).json({ message: 'No spots available for the selected dates' });
     }
-   
+
     //avaliable slot found and save it to calculate total price
     const { slot: availableSlot, base_price, extra_day_price, max_days } = availableSlotResult.rows[0];
     const totalPrice = calculateTotalPrice(totalDays, parseFloat(base_price), parseFloat(extra_day_price), parseInt(max_days, 10));
@@ -487,7 +487,7 @@ app.post('/book', async (req, res) => {
       car_brand, car_color, car_type, license_plate, // Ensure bookingId is added here
       company_name, company_address, postal_code, city, country, vat_number, kvk_number, contact_name
     ];
-    
+
     //calls the function to create a booking and insert users to db by the bookig id
     const { bookingId } = await createBookingAndUserDetails(bookingData, userData, totalPrice, totalDays);
 
@@ -597,7 +597,9 @@ app.get('/payment-success', async (req, res) => {
 
     // // Fetch booking details from the database using the booking ID
     const query = `       
-     SELECT ub.parking_spot_id, ub.name, ub.email, ub.arrival_date, ub.departure_date, ub.arrival_time,ub.departure_time, ub.fk_parking_bookings_id, pb.total_price, pb.email_sent, pb.total_days
+     SELECT ub.parking_spot_id, ub.name, ub.email, ub.arrival_date, ub.departure_date, ub.arrival_time,ub.departure_time, 
+     ub.fk_parking_bookings_id, pb.total_price, pb.email_sent, pb.total_days, ub.company_name, ub.company_address, ub.postal_code, ub.city,
+ub.country
   FROM user_bookings ub
   JOIN parking_bookings pb ON pb.id = ub.fk_parking_bookings_id
   WHERE ub.fk_parking_bookings_id = $1
@@ -648,10 +650,18 @@ app.get('/payment-success', async (req, res) => {
       vat_number,
       totalPrice,
       invoiceNumber, // Example invoice number, could be a generated value
-      invoiceDate: new Date().toISOString().split('T')[0], // Use current date for invoice date
+      invoiceDate: formatDate(new Date), // Use current date for invoice date
       customerName: booking.name,
       customerEmail: booking.email,
+      kvk: booking.company_kvk || null, // Include only if available
+      vat_number: booking.company_vat_number || null, // Include only if available
+      companyName: booking.company_name || null, // Include only if available
+      companyAddress: [booking.company_address, booking.postal_code, booking.city, booking.country]
+        .filter(Boolean) // Remove any `null`, `undefined`, or empty values
+        .join(", ") || null, 
+      // contactName: booking.contact_name || null,
       grandTotal: totalPrice, // Assuming grandTotal is same as totalPrice
+
     }, db);
 
     sendMailConfirmation({
