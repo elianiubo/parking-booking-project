@@ -56,18 +56,15 @@ document.addEventListener("DOMContentLoaded", () => {
   //SHows error when function is called the message is writtten 
   //in when the function is called to a nother function
   function showErrors(element, message) {
-    if (message) {
-      element.style.display = 'block'; // Show the error message
-      element.innerText = message;
-    } else {
-      element.style.display = 'none'; // Hide the error message
+    if (element) {
+      element.style.display = message ? 'block' : 'none';
+      element.innerText = message || '';
     }
 
   }
 
   const selectElement = document.getElementById('select-option');
   const companySection = document.getElementById('company-section');
-  const errorMessage = document.getElementById('select-error');
   const formInputs = document.querySelectorAll('input[required]'); // All required input fields
   //VAlidate input formatiing
   function validateForm() {
@@ -144,30 +141,27 @@ document.addEventListener("DOMContentLoaded", () => {
       showErrors(typeError, "Car type isn't correct");
       isValid = false; // Invalid car type
     }
-    // Dropdown validation
-    if (selectElement.value === '0') {
-      showErrors(errorMessage, "Please choose an option.");
-      isValid = false;
-    } else {
-      showErrors(errorMessage, "");
-    }
 
-    // Validate company inputs only if "Yes" is selected
-    if (selectElement.value === '1') { // Only validate when 'Yes' is chosen
-      const companyInputs = document.querySelectorAll("#company-section input[required]");
-      companyInputs.forEach((input) => {
+    // Dropdown validation
+    const optionError = document.getElementById("option-error");
+    if (selectElement.value === '0') { // No option selected
+      showErrors(optionError, "Please choose an option.");
+      isValid = false;
+     } else if (selectElement.value === '1' || selectElement.value === '2') { // "Yes" or "No" selected
+      showErrors(optionError, ""); // Clear the error
+    }
+  
+
+    // Validate company section only if "Yes" is selected
+    if (selectElement.value === '1') { // "Yes" selected
+      companySection.querySelectorAll('input[required]').forEach(input => {
+        const errorElement = input.nextElementSibling;
         if (!input.value.trim()) {
-          showErrors(input.nextElementSibling, `${input.placeholder} is required`);
+          showErrors(errorElement, `${input.placeholder} is required`);
           isValid = false;
         } else {
-          showErrors(input.nextElementSibling, "");
+          showErrors(errorElement, "");
         }
-      });
-    } else {
-      // Clear any errors and ignore validation for company fields when "No" is selected
-      const companyInputs = document.querySelectorAll("#company-section input[required]");
-      companyInputs.forEach((input) => {
-        showErrors(input.nextElementSibling, ""); // Clear errors
       });
     }
 
@@ -180,11 +174,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const validateInputs = () => {
     let allInputsValid = true;
 
-    // Check each visible, enabled input field
-    formInputs.forEach((input) => {
-      if (!input.value.trim() && !input.disabled) {
-        allInputsValid = false; // At least one input is invalid
-      }
+    formInputs.forEach(input => {
+      input.addEventListener('input', () => {
+        const errorElement = input.nextElementSibling;
+        if (errorElement) {
+          showErrors(errorElement, ""); // Clear errors dynamically
+        }
+      });
     });
 
     return allInputsValid;
@@ -206,17 +202,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Function to handle dropdown-specific behavior
+  // // Function to handle dropdown-specific behavior
+  // const handleDropdownChange = () => {
+  //   if (selectElement.value === '1') { // 'Yes' selected
+  //     companySection.style.display = 'block'; // Show the company inputs
+  //     companySection.querySelectorAll('input').forEach(input => input.removeAttribute('disabled'));
+  //   } else { // 'No' or invalid selection
+  //     companySection.style.display = 'none'; // Hide the company inputs
+  //     companySection.querySelectorAll('input').forEach(input => input.setAttribute('disabled', 'disabled'));
+  //   }
+  //   validateFormInputs(); // Revalidate the form
+  // }
   const handleDropdownChange = () => {
-    if (selectElement.value === '1') { // 'Yes' selected
-      companySection.style.display = 'block'; // Show the company inputs
+    if (selectElement.value === '1') { // "Yes" selected
+      companySection.style.display = 'block'; // Show company section
       companySection.querySelectorAll('input').forEach(input => input.removeAttribute('disabled'));
-    } else { // 'No' or invalid selection
-      companySection.style.display = 'none'; // Hide the company inputs
-      companySection.querySelectorAll('input').forEach(input => input.setAttribute('disabled', 'disabled'));
+    } else { // "No" selected
+      companySection.style.display = 'none'; // Hide company section
+      companySection.querySelectorAll('input').forEach(input => {
+        input.setAttribute('disabled', 'disabled');
+        const errorElement = input.nextElementSibling;
+        if (errorElement) {
+          showErrors(errorElement, ""); // Clear errors
+        }
+      });
     }
-    validateFormInputs(); // Revalidate the form
-  }
+  };
   //checks avaliability of parking slots when selected
   async function checkAvailability() {
     const arrivDate = arrivalDateInput.value;
@@ -289,6 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
         daysDisplay.textContent = ""; // Reset the days display
         submitButton.disabled = true; // Disable submit button
       }
+      // validateFormInputs();
     } catch (error) {
       console.error("Error checking availability:", error);
       priceDisplay.textContent = "Error checking availability"; // Show error message
@@ -330,7 +342,7 @@ document.addEventListener("DOMContentLoaded", () => {
         formData.country = document.getElementById('country').value || null;
         formData.vat_number = document.getElementById('vatNumber').value || null; // Optional
         formData.kvk_number = document.getElementById('kvkNumber').value || null; // Optional
-        formData.contact_name = document.getElementById('contactName').value || null; // Optional
+        // formData.contact_name = document.getElementById('contactName').value || null; // Optional
       }
 
       try {
@@ -364,7 +376,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         } else {
           console.error('Booking failed:', result.message);
-          alert('Booking failed: ' + result.message);
+          alert(result.message);
         }
         document.getElementById('form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
       } catch (error) {
@@ -402,8 +414,8 @@ document.addEventListener("DOMContentLoaded", () => {
   departureDateInput.addEventListener('change', checkAvailability);
 
   // Add event listeners to revalidate on input changes
-selectElement.addEventListener('change', handleDropdownChange);
-formInputs.forEach((input) => input.addEventListener('input', validateFormInputs))
+  selectElement.addEventListener('change', handleDropdownChange);
+  // formInputs.forEach((input) => input.addEventListener('input', validateFormInputs))
 
 
   //SHow question mark or hide it 

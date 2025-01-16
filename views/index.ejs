@@ -19,56 +19,12 @@
     <%- include('partials/header.ejs') %>
   </header>
   <main>
-
-
     <%- include('booking-form.ejs',{faqs}) %>
-
-
-    
   </main>
   <footer>
     <%- include('partials/footer.ejs',{address1, address2, address3,phone, contact_email}) %>
 
   </footer>
-
-
-  <!-- <form id="booking-form" action="/book" method="POST">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required>
-  
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
-  
-    <label for="arrival_date">Arrival Date:</label>
-    <input type="date" id="arrival_date" name="arrival_date" required>
-  
-    <label for="departure_date">Departure Date:</label>
-    <input type="date" id="departure_date" name="departure_date" required>
-
-    <div id="price-display">Total Price: $<span id="total-price">0</span></div>
-
-    <label for="arrival_time">Arrival Time:</label>
-    <input type="time" id="arrival_time" name="arrival_time" required>
-  
-    <label for="departure_time">Departure Time:</label>
-    <input type="time" id="departure_time" name="departure_time" required>
-  
-    <label for="car_brand">Car Brand:</label>
-    <input type="text" id="car_brand" name="car_brand" required>
-  
-    <label for="car_color">Car Color:</label>
-    <input type="text" id="car_color" name="car_color" required>
-  
-    <label for="car_type">Car Type:</label>
-    <input type="text" id="car_type" name="car_type" required>
-  
-    <label for="license_plate">License Plate Number:</label>
-    <input type="text" id="license_plate" name="license_plate" required>
-
-    <button type="submit">Book Now</button>
-    <p id="error-message" style="color: red;"></p>
-  </form> -->
-
   <script src="/script.js"></script>
 </body>
 

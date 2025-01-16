@@ -49,8 +49,9 @@ function generateHeader(doc, invoice) {
     .text(invoice.address1, 200, 100, { align: "right" })
     .text(invoice.address2, 200, 112, { align: "right" })
     .text(invoice.address3, 200, 124, { align: "right" })
-    .text(`KVK: ${invoice.kvk}`, 200, 136, { align: "right" })
     .text(`VAT Number: ${invoice.vat_number}`, 200, 148, { align: "right" })
+    .text(`KVK: ${invoice.kvk_number}`, 200, 136, { align: "right" })
+    
     .moveDown();
 }
 
