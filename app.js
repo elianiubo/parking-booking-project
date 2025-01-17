@@ -155,7 +155,7 @@ async function getEnvVariables() {
     const requiredKeys = [
       'EMAIL', 'EMAIL_PASS', 'STRIPE_KEY', 'CANCEL_MINUTES',
       'address1', 'address2', 'address3', 'contact-email',
-      'phone', 'SESSION_SECRET', 'kvk', 'vat_number'
+      'phone', 'SESSION_SECRET', 'kvk_number', 'vat_number'
     ];
 
     const result = await db.query(query, [requiredKeys]);
@@ -181,7 +181,7 @@ async function getEnvVariables() {
       phone: envVariables['phone'],
       contact_email: envVariables['contact-email'],
       session_secret: envVariables['SESSION_SECRET'],
-      kvk: envVariables['kvk'],
+      kvk_number: envVariables['kvk_number'],
       vat_number: envVariables['vat_number'],
     }
 
@@ -303,7 +303,7 @@ async function sendMailConfirmation(data) {
            <p>If the button does not work, you can use the following link:</p>
            <p><a href="${sessionUrl}">${sessionUrl}</a></p>`
         : `<p>Thank you for your payment. Your booking reference is <strong>EIN${bookingId}</strong>.</p>
-        <p>Check our website if you need more information on where to find your parking spot in the contact section or check our FAQ section</p>
+        <p>Check our website if you need more information on where to find your parking spot in the contact section or check our FAQ section.</p>
           `}
           <p>${isPaid ? 'Kind Regards ' : 'Kind Regards'}</p>
     `, attachments: isPaid && pdfBuffer ? [
@@ -359,11 +359,11 @@ async function createBookingAndUserDetails(bookingData, userData, totalPrice, to
      INSERT INTO user_bookings (
         parking_spot_id, name, email, arrival_date, departure_date, arrival_time, departure_time,
         car_brand, car_color, car_type, license_plate, 
-        company_name, company_address, postal_code, city, country, vat_number, kvk_number, contact_name,fk_parking_bookings_id
+        company_name, company_address, postal_code, city, country,kvk_number, vat_number ,fk_parking_bookings_id
      ) VALUES (
        $1, $2, $3, $4, $5, $6, $7, 
        $8, $9, $10, $11, $12, 
-       $13, $14, $15, $16, $17, $18, $19, $20
+       $13, $14, $15, $16, $17, $18, $19
      )RETURNING id;
    `;
     const userBookingResult = await db.query(userBookingQuery, userDataWithBookingId);
@@ -433,19 +433,19 @@ async function createSession({ bookingId, email, name, slot, totalPrice, totalDa
     //https://docs.stripe.com/payments/checkout/managing-limited-inventory#setting-an-expiration-time
     console.log(bookingId + "and slot" + slot)
     // Send email confirmation with payment link
-    sendMailConfirmation({
-      bookingId,
-      email,
-      name,
-      sessionUrl: session.url,
-      slot,
-      arrival_date,
-      departure_date,
-      arrival_time,
-      departure_time,
-      totalDays,
-      totalPrice,
-    });
+    // sendMailConfirmation({
+    //   bookingId,
+    //   email,
+    //   name,
+    //   sessionUrl: session.url,
+    //   slot,
+    //   arrival_date,
+    //   departure_date,
+    //   arrival_time,
+    //   departure_time,
+    //   totalDays,
+    //   totalPrice,
+    // });
     console.log("session id: " + session.id)
     return { sessionUrl: session.url };
   } catch (err) {
@@ -463,7 +463,7 @@ app.post('/book', async (req, res) => {
   const {
     arrival_date, departure_date, arrival_time, departure_time,
     name, email, car_brand, car_color, car_type, license_plate,
-    company_name, company_address, postal_code, city, country, vat_number, kvk_number, contact_name
+    company_name, company_address, postal_code, city, country,kvk_number, vat_number
   } = req.body;
   try {
     const arrival = new Date(arrival_date);
@@ -485,7 +485,7 @@ app.post('/book', async (req, res) => {
     const userData = [
       availableSlot, name, email, arrival_date, departure_date, arrival_time, departure_time,
       car_brand, car_color, car_type, license_plate, // Ensure bookingId is added here
-      company_name, company_address, postal_code, city, country, vat_number, kvk_number, contact_name
+      company_name, company_address, postal_code, city, country, kvk_number, vat_number
     ];
 
     //calls the function to create a booking and insert users to db by the bookig id
@@ -597,12 +597,12 @@ app.get('/payment-success', async (req, res) => {
 
     // // Fetch booking details from the database using the booking ID
     const query = `       
-     SELECT ub.parking_spot_id, ub.name, ub.email, ub.arrival_date, ub.departure_date, ub.arrival_time,ub.departure_time, 
-     ub.fk_parking_bookings_id, pb.total_price, pb.email_sent, pb.total_days, ub.company_name, ub.company_address, ub.postal_code, ub.city,
-ub.country
-  FROM user_bookings ub
-  JOIN parking_bookings pb ON pb.id = ub.fk_parking_bookings_id
-  WHERE ub.fk_parking_bookings_id = $1
+      SELECT ub.parking_spot_id, ub.name, ub.email, ub.arrival_date, ub.departure_date, ub.arrival_time,ub.departure_time, 
+      ub.fk_parking_bookings_id, pb.total_price, pb.email_sent, pb.total_days, ub.company_name, ub.company_address, ub.postal_code, ub.city, ub.country,
+      ub.kvk_number, ub.vat_number
+      FROM user_bookings ub
+      JOIN parking_bookings pb ON pb.id = ub.fk_parking_bookings_id
+      WHERE ub.fk_parking_bookings_id = $1
         `;
 
     const result = await db.query(query, [bookingId]);
@@ -621,20 +621,33 @@ ub.country
     // console.log('Booking details from database:', booking);
     // Generate invoice
     // Generate and save invoice to the database
-    console.log("Booking Data:", booking); // Log the full booking object
+    console.log("Booking Data booking:", booking); // Log the full booking object
     console.log("Total Price:", booking.total_price); // Log total_price specifically
 
     //getEnvVariables like address and kvk vat number
-    const { address1, address2, address3, kvk, vat_number } = await getEnvVariables();
+    const { address1, address2, address3, kvk_number, vat_number } = await getEnvVariables();
     // Generate a new unique invoice number
+    console.log('Environment Variables:', {
+      address1,
+      address2,
+      address3,
+      kvk_number,
+      vat_number
 
+
+    });
 
     const invoiceNumber = `INV${bookingId}`;
     await createInvoice({
       bookingId,
       name: booking.name,
       email: booking.email,
-      slot: booking.parking_spot_id,
+      address1,
+      address2,
+      address3,
+      kvk_number,
+      vat_number,
+      //slot: booking.parking_spot_id,
       bookings: [
         {
           description: 'Parking Reservation',
@@ -643,26 +656,30 @@ ub.country
         },
 
       ],
-      address1,
-      address2,
-      address3,
-      kvk,
-      vat_number,
       totalPrice,
       invoiceNumber, // Example invoice number, could be a generated value
       invoiceDate: formatDate(new Date), // Use current date for invoice date
-      customerName: booking.name,
-      customerEmail: booking.email,
-      kvk: booking.company_kvk || null, // Include only if available
-      vat_number: booking.company_vat_number || null, // Include only if available
+      // customerName: booking.name,
+      // customerEmail: booking.email,
+      companyKvk: booking.kvk_number || null, // Include only if available
+      companyVat: booking.vat_number || null, // Include only if available
       companyName: booking.company_name || null, // Include only if available
       companyAddress: [booking.company_address, booking.postal_code, booking.city, booking.country]
         .filter(Boolean) // Remove any `null`, `undefined`, or empty values
-        .join(", ") || null, 
+        .join(", ") || null,
       // contactName: booking.contact_name || null,
       grandTotal: totalPrice, // Assuming grandTotal is same as totalPrice
 
     }, db);
+    console.log('Invoice Data: after craete invoice dirst Vat company second vat user', {
+      vat_number,
+      kvk_number,
+      address1,
+      address2,
+      address3,
+      companyKvk: booking.kvk_number,
+      companyVat: booking.vat_number
+    });
 
     sendMailConfirmation({
       bookingId: booking.fk_parking_bookings_id,
@@ -680,6 +697,7 @@ ub.country
     // Update the `email_sent` flag in the database
     const updateQuery = `UPDATE parking_bookings SET email_sent = TRUE WHERE id = $1`;
     await db.query(updateQuery, [bookingId]);
+    console.log("Confirmation Data in session: ", req.session.confirmationData);
 
     // Save any data you want to display in the confirmation page in the session
     req.session.confirmationData = {
@@ -714,6 +732,7 @@ cron.schedule('*/5 * * * *', async () => {
     console.error('Error running scheduled task:', error);
   }
 });
+
 
 
 // Start Server

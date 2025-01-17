@@ -1,4 +1,4 @@
-
+location
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.performance.getEntriesByType("navigation")[0].type === 'reload') {
     window.location.href = '/';
   }
+  
   const arrivalDateInput = document.getElementById('arrival_date');
   const departureDateInput = document.getElementById('departure_date');
   const submitButton = document.getElementById('submit-btn');
@@ -62,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
   }
-
+  const optionError = document.getElementById("option-error");
   const selectElement = document.getElementById('select-option');
   const companySection = document.getElementById('company-section');
   const formInputs = document.querySelectorAll('input[required]'); // All required input fields
@@ -143,14 +144,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Dropdown validation
-    const optionError = document.getElementById("option-error");
+
     if (selectElement.value === '0') { // No option selected
       showErrors(optionError, "Please choose an option.");
       isValid = false;
-     } else if (selectElement.value === '1' || selectElement.value === '2') { // "Yes" or "No" selected
+    }
+    if (selectElement.value === '1' || selectElement.value === '2') { // "Yes" or "No" selected
       showErrors(optionError, ""); // Clear the error
     }
-  
+
 
     // Validate company section only if "Yes" is selected
     if (selectElement.value === '1') { // "Yes" selected
@@ -216,6 +218,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const handleDropdownChange = () => {
     if (selectElement.value === '1') { // "Yes" selected
       companySection.style.display = 'block'; // Show company section
+      if (selectElement.value === '1' || selectElement.value === '2') { // "Yes" or "No" selected
+        showErrors(optionError, ""); // Clear the error
+      }
       companySection.querySelectorAll('input').forEach(input => input.removeAttribute('disabled'));
     } else { // "No" selected
       companySection.style.display = 'none'; // Hide company section
@@ -340,8 +345,9 @@ document.addEventListener("DOMContentLoaded", () => {
         formData.postal_code = document.getElementById('postalCode').value || null;
         formData.city = document.getElementById('city').value || null;
         formData.country = document.getElementById('country').value || null;
-        formData.vat_number = document.getElementById('vatNumber').value || null; // Optional
         formData.kvk_number = document.getElementById('kvkNumber').value || null; // Optional
+        formData.vat_number = document.getElementById('vatNumber').value || null; // Optional
+
         // formData.contact_name = document.getElementById('contactName').value || null; // Optional
       }
 
@@ -367,18 +373,41 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("confirmation-text").innerHTML = `
           <h3 class="h3-confirm">Thank you for your booking, <span class="name">${result.name}</span></h3>
           <div class="para-confirmed-div">
-            <p>You have received an email with your booking details and instructions on how to proceed.</p>
-            <p>The booking payment process will be opened for  30 min.</p>
-            <p>Your will recieve a confirmation email once the payment is completed.</p>
+            <p>You have received an email with your booking details and instructions on how to proceed with the payment.</p>
+            <p>You will only have your spot fully reserved once the payment is done<br>
+            <p>The booking payment process will be opened for 30 min.</p>
+            <p>You will recieve a confirmation email once the payment is completed.</p>
             <p>Booking REF: <span>EIN${result.bookingId}</span></p>
             <p>Total € <span>${result.totalPrice}</span></p>
+             <button class="buttons" id="new-booking-btn">Make Another Booking</button>
           </div>
         `;
+          // Add "Book Your Spot" behavior after response is processed
+          // document.getElementById("book-spot").addEventListener('click', () => {
+          //   // Reload the page with the hash for smooth scrolling to the form
+          //   window.location.href = '/';
+          // });
+
         } else {
           console.error('Booking failed:', result.message);
           alert(result.message);
         }
+        //Scroll whgen response shows to the form where repsonse appered
         document.getElementById('form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        
+        document.getElementById('new-booking-btn').addEventListener('click', () => {
+          window.location.href = '/';
+          // After the page reloads, scroll to the form-box section
+          
+
+        });
+
+        // //scroll to form when make booking
+        // document.getElementById("book-spot").addEventListener('click', () => {
+        //   // Recargar la página con el hash para desplazarse automáticamente al formulario
+        //   window.location.href = '/';
+        // });
       } catch (error) {
         console.error('Error submitting form:', error);
         alert('An error occurred while processing your booking.');

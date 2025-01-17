@@ -74,9 +74,9 @@ function generateCustomerInformation(doc, invoice) {
     .text("Invoice Date:", 50, customerInformationTop + 15)
     .text(invoice.invoiceDate, 150, customerInformationTop + 15)
     .text("Name:", 50, customerInformationTop + 30)
-    .text(invoice.customerName, 150, customerInformationTop + 30)
+    .text(invoice.name, 150, customerInformationTop + 30)
     .text("Email:", 50, customerInformationTop + 45)
-    .text(invoice.customerEmail, 150, customerInformationTop + 45);
+    .text(invoice.email, 150, customerInformationTop + 45);
   //.moveDown();
   let rulePosition = customerInformationTop + 60; // Default position for the rule
   if (invoice.companyName) {
@@ -86,10 +86,11 @@ function generateCustomerInformation(doc, invoice) {
       .text(invoice.companyName || "", 150, customerInformationTop + 60) // Adjusted value position
       .text("Company Address:", 50, customerInformationTop + 75) // Moved to the left
       .text(invoice.companyAddress || "", 150, customerInformationTop + 75) // Adjusted value position
-      .text("VAT Number:", 50, customerInformationTop + 90) // Moved to the left
-      .text(invoice.companyVatNumber || "", 150, customerInformationTop + 90) // Adjusted value position
       .text("KVK Number:", 50, customerInformationTop + 105) // Moved to the left
-      .text(invoice.companyKVK || "", 150, customerInformationTop + 105); // Adjusted value position
+      .text(invoice.companyKvk || "", 150, customerInformationTop + 105) // Adjusted value position
+      .text("VAT Number:", 50, customerInformationTop + 90) // Moved to the left
+      .text(invoice.companyVat || "", 150, customerInformationTop + 90);// Adjusted value position
+      
       
       // .moveDown();
       rulePosition = customerInformationTop + 120;
