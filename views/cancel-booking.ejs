@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,200..800;1,200..800&family=Monda:wght@400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+    <header>
+        <%- include('partials/header.ejs') %>
+    </header>
+    <main>
+        <div id="cancel-box">
+            <h2 class="book-h2-form book-h2-cancel">Cancel your booking</h2>
+            <div class="paragraph">
+                <p> We understand that plans may change, so you can cancel your booking up to <strong>2
+                        days</strong>before your arrival
+                    date without any extra charge.
+                <p>If the system doesn’t let you cancel it, unfortunately, it means it’s
+                    already too late.</p>
+                <p> We hope you understand that we need this time as a guarantee for your booking.</p>
+                <p>In the REF number you need to write the full number including the EIN</p>
+            </div>
+            <form id="cancel-booking-form" action="/cancel-booking" method="POST">
+
+                <div class="row">
+                    <div class="form-group">
+                        <label for="ref_number">REF number: <span>*</span></label>
+                        <input type="text" id="ref_number" name="ref_number" required>
+                        <p class="error-message"></p>
+                    </div>
+                    <!-- <div class="form-group">
+                        <label for="arrival_date">Arrival Date <span>*</span></label>
+                        <input type="date" id="arrival_date" name="arrival_date" required>
+                        <p class="error-message"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="departure_date">Departure Date <span>*</span></label>
+                        <input type="date" id="departure_date" name="departure_date" required>
+                        <p class="error-message"></p>
+                    </div> -->
+                </div>
+                <button type="submit" id="submit-btn-cancel">Submit</button>
+            </form>
+        </div>
+    </main>
+    <footer>
+        <%- include('partials/footer.ejs',{address1, address2, address3,phone, contact_email}) %>
+
+    </footer>
+    <script src="/script.js">
+        
+
+    </script>
+</body>
+
+</html>
