@@ -89,6 +89,7 @@ app.get('/', async (req, res) => {
   }
 
 });
+
 // Route for rendering confirmation.ejs
 app.get('/confirmation', async (req, res) => {
   const confirmationData = req.session.confirmationData;
@@ -114,6 +115,7 @@ app.get('/confirmation', async (req, res) => {
   // After rendering, clear the session confirmationData
   delete req.session.confirmationData;
 });
+
 
 // app.get('/faq', async (req, res) => {
 //   try {
@@ -142,7 +144,10 @@ app.get('/confirmation', async (req, res) => {
     process.exit(1); // Exit if initialization fails
   }
 })();
-
+app.get('/cancel-booking', async (req, res) => {
+  const { address1, address2, address3, phone, contact_email } = await getEnvVariables();
+  res.render('cancel-booking.ejs', { address1, address2, address3, phone, contact_email });
+})
 //function that gets the env var from the database
 async function getEnvVariables() {
   try {
@@ -325,6 +330,59 @@ async function sendMailConfirmation(data) {
 
 }
 
+app.post('/cancel-booking', async (req, res) => {
+
+  let { ref_number } = req.body;
+  console.log("Request body:", req.body);
+
+  if (!ref_number) {
+    console.error("REF number is required but not provided");
+    return res.status(400).json({ message: 'REF number is required' });
+  }
+  const idMatch = ref_number.match(/\d+/); // Match one or more digits
+  if (!idMatch) {
+    return res.status(400).json({ message: 'Invalid booking ID format' });
+  }
+  const bookingId = idMatch[0]; // Use numeric part
+  console.log("Extracted numeric booking ID:", bookingId);
+
+
+  try {
+    // Update booking status and retrieve total_price and payment_intent
+    const query = `
+      UPDATE parking_bookings 
+      SET status = 'cancelled' 
+      WHERE id = $1 
+      AND startdate > NOW() + INTERVAL '2 days'
+      RETURNING total_price, payment_intent;
+    `;
+    const result = await db.query(query, [bookingId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Booking not found or cannot be cancelled' });
+    }
+
+    const { total_price, payment_intent } = result.rows[0];
+    console.log("Total price:", total_price, "Payment intent:", payment_intent);
+    if (total_price > 0 && payment_intent) {
+      const refund = await stripe.refunds.create({
+        payment_intent: payment_intent, // Use the stored payment intent
+        amount: Math.round(total_price * 100),
+      });
+      console.log("Refund successful:", refund.id);
+    }
+    else {
+      console.log("No payment to refund");
+    }
+
+    res.status(200).json({ message: 'Booking cancelled successfully' });
+  } catch (error) {
+    console.error('Error cancelling booking:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+
+});
+
 async function createBookingAndUserDetails(bookingData, userData, totalPrice, totalDays) {
   try {
 
@@ -433,19 +491,19 @@ async function createSession({ bookingId, email, name, slot, totalPrice, totalDa
     //https://docs.stripe.com/payments/checkout/managing-limited-inventory#setting-an-expiration-time
     console.log(bookingId + "and slot" + slot)
     // Send email confirmation with payment link
-    // sendMailConfirmation({
-    //   bookingId,
-    //   email,
-    //   name,
-    //   sessionUrl: session.url,
-    //   slot,
-    //   arrival_date,
-    //   departure_date,
-    //   arrival_time,
-    //   departure_time,
-    //   totalDays,
-    //   totalPrice,
-    // });
+    sendMailConfirmation({
+      bookingId,
+      email,
+      name,
+      sessionUrl: session.url,
+      slot,
+      arrival_date,
+      departure_date,
+      arrival_time,
+      departure_time,
+      totalDays,
+      totalPrice,
+    });
     console.log("session id: " + session.id)
     return { sessionUrl: session.url };
   } catch (err) {
@@ -463,7 +521,7 @@ app.post('/book', async (req, res) => {
   const {
     arrival_date, departure_date, arrival_time, departure_time,
     name, email, car_brand, car_color, car_type, license_plate,
-    company_name, company_address, postal_code, city, country,kvk_number, vat_number
+    company_name, company_address, postal_code, city, country, kvk_number, vat_number
   } = req.body;
   try {
     const arrival = new Date(arrival_date);
@@ -593,7 +651,9 @@ app.get('/payment-success', async (req, res) => {
     }
 
     const bookingId = session.client_reference_id;
+    const paymentIntentId = session.payment_intent;
     console.log("booking id" + bookingId)
+    console.log("payment_intent" + paymentIntentId)
 
     // // Fetch booking details from the database using the booking ID
     const query = `       
@@ -610,8 +670,10 @@ app.get('/payment-success', async (req, res) => {
 
 
     // Actualiza el estado de la reserva en la base de datos
-    const update = `UPDATE parking_bookings SET status = 'confirmed' WHERE id = $1`;
-    await db.query(update, [bookingId]); // Asegúrate de enviar un ID correcto aquí
+    const update = ` UPDATE parking_bookings 
+      SET payment_intent = $1, status = 'confirmed' 
+      WHERE id = $2;`;
+    await db.query(update, [paymentIntentId, bookingId]); // Asegúrate de enviar un ID correcto aquí
     if (result.rowCount === 0) {
       return res.status(404).json({ message: 'Booking not found' });
     }

@@ -262,8 +262,6 @@ span {
     padding: 40px 80px;
     /* background-color: rgba(255, 255, 255, 0.9); */
     background-color: rgba(255, 255, 255, 0.5);
-
-
 }
 
 .why-left {
@@ -303,7 +301,7 @@ main {
 
 
 #form-box,
-#confirmation-paid {
+#confirmation-paid, #cancel-box, #faqs-box {
     box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
     padding: 80px;
     max-width: 70%;
@@ -629,7 +627,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 
 /*FAQS styls and layout*/
-#faqs-box {
+/* #faqs-box {
     box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
     max-width: 70%;
     margin: 0px auto;
@@ -638,9 +636,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     height: auto;
     padding: 18px 10px 10px 10px;
     margin-bottom: 40px;
-}
+} */
 
-#faqs-box p {
+#faqs-box .paragraph, #cancel-box .paragraph{
     padding: 20px 20px 20px 20px;
     font-size: 14px;
 

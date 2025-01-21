@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.performance.getEntriesByType("navigation")[0].type === 'reload') {
     window.location.href = '/';
   }
-  
+
   const arrivalDateInput = document.getElementById('arrival_date');
   const departureDateInput = document.getElementById('departure_date');
   const submitButton = document.getElementById('submit-btn');
@@ -394,12 +394,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         //Scroll whgen response shows to the form where repsonse appered
         document.getElementById('form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        
-        
+
+
         document.getElementById('new-booking-btn').addEventListener('click', () => {
           window.location.href = '/';
           // After the page reloads, scroll to the form-box section
-          
+
 
         });
 
@@ -437,6 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error('Error checking pending bookings:', error);
     }
   }
+ 
 
   // Add event listeners to check availability when the dates are changed
   arrivalDateInput.addEventListener('change', checkAvailability);
@@ -460,4 +461,31 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   // Call the validation function on page load to ensure proper state
   handleDropdownChange(); // Set the correct initial state
+  document.getElementById('submit-btn-cancel').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const bookingId = document.getElementById('ref_number').value;
+    console.log("Booking ID submitted:", bookingId);
+
+    try {
+      const response = await fetch('/cancel-booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        console.log("Booking cancelled successfully");
+        alert(result.message);
+      } else {
+        console.error("Error cancelling booking:", result.message);
+        alert(result.message);
+      }
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      alert('An error occurred. Please try again later.');
+    }
+  });
 });
