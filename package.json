@@ -20,10 +20,12 @@
     "fs": "^0.0.1-security",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.16",
+    "nodemon": "^3.1.9",
     "pdfkit": "^0.16.0",
     "pg": "^8.13.1",
     "session": "^0.1.0",
     "stream": "^0.0.3",
-    "stripe": "^17.4.0"
+    "stripe": "^17.4.0",
+    "uuid": "^11.0.4"
   }
 }

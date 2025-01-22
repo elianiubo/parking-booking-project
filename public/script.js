@@ -29,19 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
   })
 
 
-  const mybutton = document.getElementById("top-btn");
-  window.onscroll = function () { scrollFunction() };
-  function scrollFunction() {
-    if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600) {
-      mybutton.style.display = "block";
-    } else {
-      mybutton.style.display = "none";
-    }
-  }
-  mybutton.addEventListener('click', () => {
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
-  })
+
   // Create the span element for total price dynamically
   function disablePastDates() {
     const today = new Date();
@@ -437,7 +425,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error('Error checking pending bookings:', error);
     }
   }
- 
+
 
   // Add event listeners to check availability when the dates are changed
   arrivalDateInput.addEventListener('change', checkAvailability);
@@ -461,31 +449,19 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   // Call the validation function on page load to ensure proper state
   handleDropdownChange(); // Set the correct initial state
-  document.getElementById('submit-btn-cancel').addEventListener('submit', async (event) => {
-    event.preventDefault();
 
-    const bookingId = document.getElementById('ref_number').value;
-    console.log("Booking ID submitted:", bookingId);
-
-    try {
-      const response = await fetch('/cancel-booking', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bookingId }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        console.log("Booking cancelled successfully");
-        alert(result.message);
-      } else {
-        console.error("Error cancelling booking:", result.message);
-        alert(result.message);
-      }
-    } catch (error) {
-      console.error("Error cancelling booking:", error);
-      alert('An error occurred. Please try again later.');
+  
+  const mybutton = document.getElementById("top-btn");
+  window.onscroll = function () { scrollFunction() };
+  function scrollFunction() {
+    if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600) {
+      mybutton.style.display = "block";
+    } else {
+      mybutton.style.display = "none";
     }
-  });
+  }
+  mybutton.addEventListener('click', () => {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  })
 });

@@ -331,56 +331,138 @@ async function sendMailConfirmation(data) {
 }
 
 app.post('/cancel-booking', async (req, res) => {
-
-  let { ref_number } = req.body;
-  console.log("Request body:", req.body);
-
-  if (!ref_number) {
-    console.error("REF number is required but not provided");
-    return res.status(400).json({ message: 'REF number is required' });
+  const { ref_number: refNumber } = req.body;
+  console.log("Request body received:", req.body);
+  if (!/^EIN\d+$/.test(refNumber)) {
+    console.log("Invalid REF number format:", refNumber);
+    return res.status(400).json({ message: "Invalid REF number format. Use format 'EIN123'." });
   }
-  const idMatch = ref_number.match(/\d+/); // Match one or more digits
-  if (!idMatch) {
-    return res.status(400).json({ message: 'Invalid booking ID format' });
-  }
-  const bookingId = idMatch[0]; // Use numeric part
-  console.log("Extracted numeric booking ID:", bookingId);
 
+  const bookingId = parseInt(refNumber.replace('EIN', ''), 10);
 
   try {
-    // Update booking status and retrieve total_price and payment_intent
-    const query = `
-      UPDATE parking_bookings 
-      SET status = 'cancelled' 
-      WHERE id = $1 
-      AND startdate > NOW() + INTERVAL '2 days'
-      RETURNING total_price, payment_intent;
-    `;
-    const result = await db.query(query, [bookingId]);
+    // Recuperar detalles de la reserva
+    const result = await db.query(`
+          SELECT id, status, payment_intent, total_price, startdate 
+          FROM parking_bookings 
+          WHERE id = $1
+      `, [bookingId]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Booking not found or cannot be cancelled' });
+      return res.status(404).json({ message: "Booking not found." });
     }
 
-    const { total_price, payment_intent } = result.rows[0];
-    console.log("Total price:", total_price, "Payment intent:", payment_intent);
-    if (total_price > 0 && payment_intent) {
-      const refund = await stripe.refunds.create({
-        payment_intent: payment_intent, // Use the stored payment intent
-        amount: Math.round(total_price * 100),
+    const booking = result.rows[0];
+    console.log(booking)
+    const startDate = new Date(booking.startdate); // Objeto Date
+    const today = new Date();
+
+    // Calcular días restantes hasta la llegada
+    const timeDifference = startDate - today;
+    const daysUntilArrival = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+    console.log("Days until arrival:", daysUntilArrival);
+    // Validar estado de la reserva
+    if (booking.status === 'cancelled') {
+      return res.status(400).json({ message: "This booking has already been cancelled." });
+    }
+
+    // Validar si faltan menos de 2 días
+    if (daysUntilArrival < 2) {
+      return res.status(400).json({
+        message: "You can only cancel a booking up to 2 days before the arrival date.",
       });
-      console.log("Refund successful:", refund.id);
-    }
-    else {
-      console.log("No payment to refund");
     }
 
-    res.status(200).json({ message: 'Booking cancelled successfully' });
+    // Manejar reservas pendientes sin `payment_intent`
+    if (booking.status === 'pending' && !booking.payment_intent) {
+      await db.query(`UPDATE parking_bookings SET status = 'cancelled' WHERE id = $1`, [bookingId]);
+      return res.json({ status: 'cancelled', message: "Pending booking successfully cancelled. No refund needed." });
+    }
+
+
+    // // Verificar si la cancelación es posible (2 días antes)
+    // if ((startDate - today) / (1000 * 60 * 60 * 24) < 2) {
+    //   if (booking.status === 'pending' && !booking.payment_intent) {
+    //     await db.query(`UPDATE parking_bookings SET status = 'cancelled' WHERE id = $1`, [bookingId]);
+    //     return res.json({ status: 'cancelled', message: "Pending booking successfully cancelled. No refund needed." });
+    //   }
+    // }
+
+    // Manejar reservas pendientes sin `payment_intent`
+    // if (booking.status === 'pending' && !booking.payment_intent) {
+    //   await db.query(`UPDATE parking_bookings SET status = 'cancelled' WHERE id = $1`, [bookingId]);
+    //   return res.json({ status: 'cancelled', message: "Pending booking successfully cancelled. No refund needed." });
+    // }
+
+    const paymentIntent = await stripe.paymentIntents.retrieve(booking.payment_intent);
+    console.log("Retrieved Payment Intent:", paymentIntent);
+
+    if (!paymentIntent.latest_charge) {
+      console.error("No charge associated with this payment intent:", booking.payment_intent);
+      return res.status(400).json({ message: "No charges found for this booking's payment intent." });
+    }
+
+    // Recuperar el cargo usando el campo latest_charge
+    const charge = await stripe.charges.retrieve(paymentIntent.latest_charge);
+    console.log("Retrieved Charge:", charge);
+
+    if (charge.refunded) {
+      return res.status(400).json({ message: "Payment already refunded." });
+    }
+
+    // Crear reembolso basado en el cargo
+    await stripe.refunds.create({ charge: charge.id });
+    console.log("Refund successful for charge:", charge.id);
+
+    // Actualizar estado de la reserva
+    await db.query(`UPDATE parking_bookings SET status = 'cancelled' WHERE id = $1`, [bookingId]);
+
+    return res.json({ status: 'cancelled', message: "Booking cancelled and payment refunded successfully." });
   } catch (error) {
-    console.error('Error cancelling booking:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error cancelling booking:", error);
+    return res.status(500).json({ message: "Internal server error. Please try again later." });
   }
+  // const { payment_intent, total_price, startdate } = checkResult.rows[0];
+  // const arrivalDate = new Date(startdate);
+  // const currentDate = new Date();
 
+  // // Calcular la diferencia en días
+  // const timeDifference = arrivalDate - currentDate;
+  // const daysDifference = timeDifference / (1000 * 3600 * 24); // Convertir milisegundos a días
+
+  // if (daysDifference <= 2) {
+  //   return res.status(400).json({ message: "Unfortunately, booking cannot be cancelled as it's within 2 days of arrival." });
+  // }
+
+  // // Recuperar detalles de pago desde Stripe
+  // const paymentDetails = await stripe.paymentIntents.retrieve(payment_intent);
+
+  // // Verificar si los detalles de pago son correctos y si ya fue reembolsado
+  // if (!paymentDetails || !paymentDetails.charges || !paymentDetails.charges.data || paymentDetails.charges.data.length === 0) {
+  //   return res.status(400).json({ message: 'No charge found for this payment intent, or charge data is unavailable.' });
+  // }
+
+  // // if (paymentDetails.charges.data[0].refunded) {
+  // //   return res.status(400).json({ message: 'Booking already cancelled' });
+  // // }
+
+  // Realizar el reembolso
+  //   await stripe.refunds.create({
+  //     payment_intent,
+  //     amount: Math.round(total_price * 100), // Convertir el precio total a centavos
+  //   });
+
+  //   // Actualizar el estado de la reserva a 'cancelada'
+  //   await db.query(`UPDATE parking_bookings SET status = 'cancelled' WHERE id = $1`, [bookingId]);
+
+  //   // Enviar respuesta de éxito
+  //   return res.status(200).json({ message: 'Booking cancelled and refunded successfully.' });
+  // } catch (error) {
+  //   console.error('Error cancelling booking:', error);
+  //   if (!res.headersSent) {
+  //     return res.status(500).json({ message: "Booking not possible to cancel as it's past the period time" });
+  //   }
+  // }
 });
 
 async function createBookingAndUserDetails(bookingData, userData, totalPrice, totalDays) {

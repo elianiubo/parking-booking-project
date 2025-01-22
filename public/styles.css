@@ -301,9 +301,11 @@ main {
 
 
 #form-box,
-#confirmation-paid, #cancel-box, #faqs-box {
+#confirmation-paid,
+#cancel-box,
+#faqs-box {
     box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
-    padding: 80px;
+    padding: 70px;
     max-width: 70%;
     margin: 0px auto;
     background-color: rgba(255, 255, 255, 0.5);
@@ -316,12 +318,13 @@ main {
 
 
 /*title from contact form box*/
-.book-h2-form {
+.book-h2-form,
+.title {
     color: #000000;
     align-content: center;
     text-align: center;
-    font-size: 2.2rem;
-    padding: 20px 10px 20px 10px;
+    font-size: 2rem;
+    padding: 0px 10px 25px 10px;
     text-shadow: 0px 2px 0px rgba(101, 255, 242, 0.28);
 
 }
@@ -389,7 +392,8 @@ main {
     text-align: center;
 }
 
-.paragraph {
+.paragraph,
+.paragraph-cancel-text {
     align-content: center;
     padding-top: 10px;
     padding-bottom: 10px;
@@ -595,7 +599,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 }
 
-#confirmation-text h3 {
+.h3-confirm {
     font-size: 1.6rem;
 }
 
@@ -638,7 +642,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     margin-bottom: 40px;
 } */
 
-#faqs-box .paragraph, #cancel-box .paragraph{
+#faqs-box .paragraph,
+#cancel-box .paragraph {
     padding: 20px 20px 20px 20px;
     font-size: 14px;
 
@@ -659,15 +664,12 @@ strong a:hover {
 }
 
 /*FAQ title*/
-.title {
+/* .title {
     font-size: 2.2rem;
     text-align: center;
     text-shadow: 0px 2px 0px rgba(101, 255, 242, 0.28);
-
-
-
-    padding: 30px 10px 35px 10px;
-}
+    padding: 25px 10px 35px 10px;
+} */
 
 #faqs-div {
     min-height: auto;
@@ -895,6 +897,14 @@ footer {
     transition: 0.3s ease;
 }
 
+/**cancel-booking.ejs/*/
+
+#cancel-text {
+    text-align: center;
+    margin-top: 23px;
+    font-size: 1rem;
+}
+
 @media (max-width: 1308px) {
     .left-content h1 {
         font-size: 1.9rem;
@@ -986,7 +996,9 @@ footer {
         /* Center align buttons */
     }
 
-    #form-box {
+    #form-box,
+    #faq-box,
+    #cancel-box {
         width: 90%;
         /* Increase width for smaller screens */
         padding: 20px;
@@ -1112,6 +1124,11 @@ footer {
         font-size: 1.5rem;
     }
 
+    /*faqs container*/
+    #faqs-box,
+    #cancel-box {
+        padding: 40px;
+    }
 
     .bottom-container {
         grid-template-columns: 1fr;
@@ -1253,11 +1270,25 @@ footer {
     /*FAQ*/
     .question h6 {
 
-        font-size: 1.2rem;
+        font-size: 0.9rem;
 
 
     }
 
+    #faqs-box .paragraph,
+    #cancel-box .paragraph {
+        padding: 20px 10px 20px 20px;
+    }
+
+    #faqs-div {
+
+        width: 100%;
+    }
+
+    .paragraph,
+    .paragraph-cancel-text {
+        width: auto;
+    }
 
 }
 
@@ -1291,6 +1322,7 @@ footer {
     .book-h2-form,
     .title {
         font-size: 1.5rem;
+
     }
 
     .div-total-price {
@@ -1317,6 +1349,7 @@ footer {
         padding: 0px;
         margin-bottom: 0px;
     }
+
     #confirmation-text h3 {
         font-size: 1.2rem;
     }
@@ -1478,7 +1511,8 @@ footer {
 
 
 
-    #faqs-box p {
+    #faqs-box .paragraph,
+    #cancel-box .paragraph {
         font-size: 10px;
         padding: 8px;
         text-align: center;
@@ -1492,7 +1526,7 @@ footer {
     strong a {
         font-size: 10px
     }
-    
+
     /*UI RESPONSIVE PAID BOOKING*/
 
     .h3-confirm,
