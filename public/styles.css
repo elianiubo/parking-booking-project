@@ -398,7 +398,7 @@ main {
     padding-top: 10px;
     padding-bottom: 10px;
     background-color: #EEEEEE;
-    width: 70%;
+    width: 80%;
     margin: 0px auto;
 }
 
@@ -629,6 +629,12 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     margin: 15px 0;
 }
 
+/*Response CANCEL_BOOKING*/
+
+#response-message {
+    text-align: center;
+    margin-top: 20px;
+}
 
 /*FAQS styls and layout*/
 /* #faqs-box {
@@ -673,7 +679,7 @@ strong a:hover {
 
 #faqs-div {
     min-height: auto;
-    width: 70%;
+    width: 80%;
     /* Ensures the FAQ section takes up the full width */
     margin: 0 auto;
     margin-bottom: 30px;
@@ -899,10 +905,10 @@ footer {
 
 /**cancel-booking.ejs/*/
 
-#cancel-text {
-    text-align: center;
+.paragraph-cancel-text {
+    text-align: justify;
     margin-top: 23px;
-    font-size: 1rem;
+    font-size: 1.1rem;
 }
 
 @media (max-width: 1308px) {
@@ -1077,6 +1083,7 @@ footer {
     .book-h2-form,
     .title {
         font-size: 1.7rem;
+        padding: 0px 10px 15px 10px;
     }
 
 
@@ -1277,7 +1284,8 @@ footer {
 
     #faqs-box .paragraph,
     #cancel-box .paragraph {
-        padding: 20px 10px 20px 20px;
+        padding: 20px 20px 20px 20px;
+        font-size: 0.8rem;
     }
 
     #faqs-div {
@@ -1288,6 +1296,13 @@ footer {
     .paragraph,
     .paragraph-cancel-text {
         width: auto;
+    }
+
+    /*Response CANCEL_BOOKING*/
+
+    #response-message {
+        font-size: 0.8rem;
+        margin-top: 10px;
     }
 
 }
@@ -1352,6 +1367,20 @@ footer {
 
     #confirmation-text h3 {
         font-size: 1.2rem;
+    }
+
+    /*UI RESPONSE PENDING*/
+    /* span {
+        color: #00ADB5;
+        font-size: 12px;
+    } */
+    #confirmation-message p {
+        font-size: 11px;
+        margin: 7px auto;
+    }
+
+    .h3-confirm .name {
+        font-size: 1.1rem;
     }
 
     /* UI RESPONSE CONFIRMATION PENDING BOOKING
