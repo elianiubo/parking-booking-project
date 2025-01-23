@@ -464,4 +464,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
   })
+  //  // Toggle Menu Visibility
+  //   const toggleButton = document.getElementById('menu-toggle');
+  //   const menu = document.getElementById('menu');
+
+  //   toggleButton.addEventListener('click', () => {
+  //       menu.classList.toggle('active');
+  //   });
 });

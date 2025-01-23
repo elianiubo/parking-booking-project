@@ -72,9 +72,18 @@ p {
     /* Add a background color */
     border-bottom: 2px solid #000000;
     background-image: url(assets/images/dark-concrete-textured-wall.jpg);
+    z-index: 1000;
+    /* Ensure it stays above other elements */
     background-position: bottom;
     transform: animatedBackground ease-in-out 1s;
     background-size: cover;
+}
+
+.navbar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
 }
 
 /*Puts the nav on the cengter of the container*/
@@ -305,7 +314,7 @@ main {
 #cancel-box,
 #faqs-box {
     box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
-    padding: 70px;
+    padding: 50px 60px 60px 60px;
     max-width: 70%;
     margin: 0px auto;
     background-color: rgba(255, 255, 255, 0.5);
@@ -420,7 +429,7 @@ main {
 #question-mark {
     cursor: pointer;
     position: relative;
-    margin-left: 172px;
+
     /* Add some space between the label and the icon */
     width: 18px;
     height: 18px;
@@ -651,7 +660,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 #faqs-box .paragraph,
 #cancel-box .paragraph {
     padding: 20px 20px 20px 20px;
-    font-size: 14px;
+    font-size: 15px;
 
 }
 
@@ -738,7 +747,7 @@ strong a:hover {
 .answer p {
     padding-top: 1rem;
     line-height: 1.6;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
 }
 
 /* Show answer when FAQ is active */
@@ -1133,8 +1142,9 @@ footer {
 
     /*faqs container*/
     #faqs-box,
-    #cancel-box {
-        padding: 40px;
+    #cancel-box,
+    #form-box {
+        padding: 30px 25px 20px 25px
     }
 
     .bottom-container {
@@ -1179,6 +1189,15 @@ footer {
 
 /* Responsive Layout for Smaller Screens */
 @media (max-width: 768px) {
+    .logo {
+        width: 60px;
+        height: 60px;
+    }
+
+    #nav ul {
+        align-items: center;
+    }
+
     #img-container .content {
         flex-direction: column;
         /* Stack items vertically */
@@ -1313,14 +1332,38 @@ footer {
     }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 678px) {
     #title-nav-bar-container {
         flex-direction: column;
 
     }
 
     #nav ul {
-        display: flex;
+
+        gap: 15px;
+    }
+
+    #nav li {
+        margin-left: 0px;
+        font-size: 11px;
+
+    }
+
+    .book-p-form {
+        font-size: 0.9rem;
+    }
+
+}
+
+@media (max-width: 500px) {
+
+    /* #title-nav-bar-container {
+        flex-direction: column;
+
+    }
+
+    #nav ul {
+       
         gap: 20px;
     }
 
@@ -1328,10 +1371,13 @@ footer {
         margin-left: 0px;
         margin-bottom: 20px;
 
+    } */
+    #nav a {
+        font-size: 10px;
     }
 
     #why-choose-us {
-        padding: 30px 35px;
+        padding: 20px 25px;
     }
 
     .book-h2-form,
@@ -1340,12 +1386,30 @@ footer {
 
     }
 
+    .book-p-form {
+        font-size: 0.8rem;
+    }
+
     .div-total-price {
         font-size: 0.9rem;
     }
 
+    /*BOPOKING FORM*/
+
+    .form-group label {
+        font-size: 13px;
+
+    }
+
+    /*FAQ*/
+    #faqs-box,
+    #cancel-box,
+    #form-box {
+        padding: 30px 25px 20px 25px;
+    }
+
     #question-mark {
-        margin-left: 110px;
+
         width: 16px;
         height: 16px;
     }
@@ -1383,6 +1447,13 @@ footer {
         font-size: 1.1rem;
     }
 
+    /*CANCEL ENDPOINT*/
+
+    .paragraph-cancel-text {
+
+        margin-top: 10px;
+    }
+
     /* UI RESPONSE CONFIRMATION PENDING BOOKING
     #confirmation-message {
         padding: 10px;
@@ -1407,7 +1478,30 @@ footer {
 
 
     } */
+    /*SUBMIT BUTTON*/
+    #submit-btn {
+        margin-bottom: 15px;
+        margin-top: 20px;
+        width: 100px;
+        height: 40px;
+        font-size: 14px;
+    }
 
+    #submit-btn:disabled {
+        background-image: linear-gradient(144deg, #B3B3B3, #8F8F8F 50%, #B3B3B3);
+    }
+
+    #submit-btn:after {
+        top: 0px;
+        left: 0px;
+        height: 100%;
+
+    }
+
+    #submit-btn:hover:after {
+        transform: translate(1px, 2px);
+        /* Keep shadow below button */
+    }
 
 }
 
@@ -1509,7 +1603,7 @@ footer {
         font-size: 0.65rem;
     }
 
-    #submit-btn {
+    /* #submit-btn {
         margin-bottom: 15px;
         margin-top: 20px;
         width: 100px;
@@ -1531,8 +1625,8 @@ footer {
     #submit-btn:hover:after {
         transform: translate(1px, 2px);
         /* Keep shadow below button */
-    }
-
+    /* } 
+*/
     .faq {
         padding: 5px;
         margin-top: 0.8rem;
@@ -1706,22 +1800,9 @@ footer {
 
 
 
-@media (max-width: 386px) {
-    #question-mark {
-        margin-left: 60px;
-    }
 
-}
 
-@media (max-width: 307px) {
-    #question-mark {
-        margin-left: 30px;
-        width: 12px;
-        height: 12px;
 
-    }
-
-}
 
 
 
