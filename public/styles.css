@@ -634,7 +634,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 #confirmation-message p {
-    font-size: 13px;
+    font-size: 0.8rem;
     margin: 15px 0;
 }
 
@@ -660,7 +660,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 #faqs-box .paragraph,
 #cancel-box .paragraph {
     padding: 20px 20px 20px 20px;
-    font-size: 15px;
+    font-size: 1rem;
 
 }
 
@@ -668,7 +668,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 strong a {
     color: #00ADB5;
     text-decoration: underline;
-    font-size: 14px;
+    font-size: 0.8rem;
 
 }
 
@@ -828,7 +828,12 @@ footer {
 .footer-categories ul li {
     list-style: none;
     line-height: 1.4;
+    
 
+}
+.footer-categories ul li a{
+    
+    color: #8e8d8d;
 }
 
 .footer-categories ul {
@@ -860,7 +865,7 @@ footer {
 }
 
 /*Styles for confirmation.ejs*/
-#confirmation-paid {
+/* #confirmation-paid {
     box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
     padding: 80px;
     max-width: 70%;
@@ -868,7 +873,7 @@ footer {
     background-color: rgba(255, 255, 255, 0.5);
     height: auto;
     margin-bottom: 30px;
-}
+} */
 
 .h3-confirm {
     text-align: center;
@@ -934,6 +939,10 @@ footer {
 }
 
 @media (max-width: 1089px) {
+    span {
+        
+        font-size: 13px;
+    }
     .logo {
         width: 70px;
         height: 70px;
@@ -1143,7 +1152,7 @@ footer {
     /*faqs container*/
     #faqs-box,
     #cancel-box,
-    #form-box {
+    #form-box,#confirmation.paid {
         padding: 30px 25px 20px 25px
     }
 
@@ -1304,7 +1313,7 @@ footer {
     #faqs-box .paragraph,
     #cancel-box .paragraph {
         padding: 20px 20px 20px 20px;
-        font-size: 0.8rem;
+        font-size: 0.9rem;
     }
 
     #faqs-div {
@@ -1404,7 +1413,7 @@ footer {
     /*FAQ*/
     #faqs-box,
     #cancel-box,
-    #form-box {
+    #form-box,#confirmation-paid {
         padding: 30px 25px 20px 25px;
     }
 
@@ -1444,9 +1453,12 @@ footer {
     }
 
     .h3-confirm .name {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
     }
-
+    span {
+        
+        font-size: 11px;
+    }
     /*CANCEL ENDPOINT*/
 
     .paragraph-cancel-text {
@@ -1636,7 +1648,7 @@ footer {
 
     #faqs-box .paragraph,
     #cancel-box .paragraph {
-        font-size: 10px;
+        font-size: 0.8rem;
         padding: 8px;
         text-align: center;
         line-height: 1.3;

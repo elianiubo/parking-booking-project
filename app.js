@@ -9,6 +9,7 @@ import axios from "axios"
 import Stripe from "stripe"
 import session from 'express-session'
 import { createInvoice } from "./public/createInvoice.js"
+import { send } from "process";
 
 
 
@@ -145,8 +146,8 @@ app.get('/confirmation', async (req, res) => {
   }
 })();
 app.get('/cancel-booking', async (req, res) => {
-  const { address1, address2, address3, phone, contact_email } = await getEnvVariables();
-  res.render('cancel-booking.ejs', { address1, address2, address3, phone, contact_email });
+  const { address1, address2, address3, phone, contact_email, cancelation_days } = await getEnvVariables();
+  res.render('cancel-booking.ejs', { address1, address2, address3, phone, contact_email, cancelation_days });
 })
 //function that gets the env var from the database
 async function getEnvVariables() {
@@ -160,7 +161,7 @@ async function getEnvVariables() {
     const requiredKeys = [
       'EMAIL', 'EMAIL_PASS', 'STRIPE_KEY', 'CANCEL_MINUTES',
       'address1', 'address2', 'address3', 'contact-email',
-      'phone', 'SESSION_SECRET', 'kvk_number', 'vat_number'
+      'phone', 'SESSION_SECRET', 'kvk_number', 'vat_number', 'cancelation_days',
     ];
 
     const result = await db.query(query, [requiredKeys]);
@@ -188,6 +189,7 @@ async function getEnvVariables() {
       session_secret: envVariables['SESSION_SECRET'],
       kvk_number: envVariables['kvk_number'],
       vat_number: envVariables['vat_number'],
+      cancelation_days: parseInt(envVariables['cancelation_days']),
     }
 
   } catch (error) {
@@ -228,7 +230,7 @@ async function getAvailableSlot(arrival_date, departure_date) {
 }
 //Funtion that gets user data and sned the email wether is pending or confirmed booking
 //the email format is also developed
-async function sendMailConfirmation(data) {
+async function sendMailConfirmation(data, action = 'confirmation') {
   console.log('Data received in sendMailConfirmation:', data);
   const { bookingId, name, sessionUrl, slot, email, arrival_date, departure_date,
     arrival_time, departure_time, totalPrice, totalDays, isPaid } = data;
@@ -240,51 +242,41 @@ async function sendMailConfirmation(data) {
   // console.log("Email out in function send email is " + emailOut);
   // console.log("Pass in function send email is " + pass);
   // console.log("Time to cancel is " + cancel_minutes)
-
   if (!email || email.trim() === '') {
     console.error('Recipient email is invalid or missing.');
     return;
   }
   console.log("Sending confirmation email to:", email);
-  console.log("Booking id from mail function" + bookingId)
-  let pdfBuffer = null;
-  if (isPaid) {
-    const query = 'SELECT pdf_data FROM invoices WHERE booking_id = $1';
-    const result = await db.query(query, [bookingId]);
-    if (result.rows.length === 0) {
-      console.error(`No invoice found for booking ID: ${bookingId}`);
-      return;
+  let pdfBuffer, subject, htmlCOntent = null;
+  if (action === 'confirmation') {
+
+    if (isPaid) {
+      const query = 'SELECT pdf_data FROM invoices WHERE booking_id = $1';
+      const result = await db.query(query, [bookingId]);
+      if (result.rows.length === 0) {
+        console.error(`No invoice found for booking ID: ${bookingId}`);
+        return;
+      }
+      pdfBuffer = result.rows[0].pdf_data;
     }
-    pdfBuffer = result.rows[0].pdf_data;
-  }
-  //format to add the text in minutes or hours in case of future chamnges in time in db
-  //automatically adaps to minutes or hours the text
-  let cancelTimeText;
-  //checks wether is hours or minutes
-  if (cancel_minutes >= 60) {
-    const hours = Math.floor(cancel_minutes / 60);
-    const minutes = cancel_minutes % 60;
-    //Makes the text adding an s depending if is 1 or more hours and the same with minutes
-    cancelTimeText = `${hours} hour${hours > 1 ? 's' : ''}${minutes > 0 ? ` and ${minutes} minute${minutes > 1 ? 's' : ''}` : ''}`;
-  } else {
-    cancelTimeText = `${cancel_minutes} minute${cancel_minutes > 1 ? 's' : ''}`;
-  }
+    //format to add the text in minutes or hours in case of future chamnges in time in db
+    //automatically adaps to minutes or hours the text
+    let cancelTimeText;
+    //checks wether is hours or minutes
+    if (cancel_minutes >= 60) {
+      const hours = Math.floor(cancel_minutes / 60);
+      const minutes = cancel_minutes % 60;
+      //Makes the text adding an s depending if is 1 or more hours and the same with minutes
+      cancelTimeText = `${hours} hour${hours > 1 ? 's' : ''}${minutes > 0 ? ` and ${minutes} minute${minutes > 1 ? 's' : ''}` : ''}`;
+    } else {
+      cancelTimeText = `${cancel_minutes} minute${cancel_minutes > 1 ? 's' : ''}`;
+    }
 
-  console.log("Formatted cancel time:", cancelTimeText);
+    console.log("Formatted cancel time:", cancelTimeText);
 
-  const transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-      user: emailOut,//'elia.nibu@gmail.com', //process.env.MAIL_USER,
-      pass: pass//process.env.MAIL_PASS,
-    },
-  });
 
-  const mailOptions = {
-    from: emailOut,
-    to: email,
-    subject: `${isPaid ? 'Booking Confirmation ' : 'Booking Pending for Payment'}(Ref: EIN${bookingId})`,
-    html: `
+    subject = `${isPaid ? 'Booking Confirmation ' : 'Booking Pending for Payment'}(Ref: EIN${bookingId})`;
+    htmlCOntent = `
         <h1>${isPaid ? 'Booking Confirmation' : 'Booking Pending for Payment'}</h1>
       <p>Hello, ${name}!</p>
       <p>${isPaid
@@ -311,7 +303,40 @@ async function sendMailConfirmation(data) {
         <p>Check our website if you need more information on where to find your parking spot in the contact section or check our FAQ section.</p>
           `}
           <p>${isPaid ? 'Kind Regards ' : 'Kind Regards'}</p>
-    `, attachments: isPaid && pdfBuffer ? [
+    `;
+  } else if (action === 'cancellation') {
+
+    subject = `Booking Cancellation Confirmation for (Ref: EIN${bookingId})`
+    htmlCOntent = `<h1>Booking Cancellation </h1>
+        <p>Hello ${name},</p>
+        <p> We confirm that your booking reference <strong> EIN${bookingId}</strong> has been successfully cancelled.</p>
+        <p>You will recieve your money back between 3-5 business days.</p>
+        <p>If you have any questions, please feel free to contact our support team.</p>
+        <p>King regards</p>`
+  } else if (action === 'pending-cancellation') {
+    subject = `Pending Booking Cancellation Confirmation (Ref: EIN${bookingId})`;
+    htmlCOntent = `
+      <h1>Pending Booking Cancelled</h1>
+      <p>Hello ${name},</p>
+      <p>Your booking with reference <strong>EIN${bookingId}</strong> has been successfully cancelled.</p>
+      <p>Since this booking was not yet confirmed with payment, no refund is required.</p>
+      <p>If you have any questions, feel free to contact our support team.</p>
+      <p>Kind regards,</p>
+    `;
+  }
+  const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: emailOut,//'elia.nibu@gmail.com', //process.env.MAIL_USER,
+      pass: pass//process.env.MAIL_PASS,
+    },
+  });
+  const mailOptions = {
+    from: emailOut,
+    to: email,
+    subject: subject,
+    html: htmlCOntent,
+    attachments: action === 'confirmation' && isPaid && pdfBuffer ? [
       {
         filename: `INV${bookingId}.pdf`,
         content: pdfBuffer,
@@ -343,9 +368,22 @@ app.post('/cancel-booking', async (req, res) => {
   try {
     // Recuperar detalles de la reserva
     const result = await db.query(`
-          SELECT id, status, payment_intent, total_price, startdate 
-          FROM parking_bookings 
-          WHERE id = $1
+           SELECT 
+        pb.id, 
+        pb.status, 
+        pb.payment_intent, 
+        pb.total_price, 
+        pb.startdate, 
+        ub.name, 
+        ub.email 
+    FROM 
+        parking_bookings pb
+    INNER JOIN 
+        user_bookings ub 
+    ON 
+        pb.id = ub.fk_parking_bookings_id 
+    WHERE 
+        pb.id = $1
       `, [bookingId]);
 
     if (result.rows.length === 0) {
@@ -376,7 +414,12 @@ app.post('/cancel-booking', async (req, res) => {
     // Manejar reservas pendientes sin `payment_intent`
     if (booking.status === 'pending' && !booking.payment_intent) {
       await db.query(`UPDATE parking_bookings SET status = 'cancelled' WHERE id = $1`, [bookingId]);
-      return res.json({ status: 'cancelled', message: "Pending booking successfully cancelled. No refund needed." });
+      await sendMailConfirmation({
+        bookingId: booking.id,
+        name: booking.name,
+        email: booking.email,
+      }, 'pending-cancellation')
+      return res.json({ status: 'cancelled', message: "Pending booking successfully cancelled. No refund needed, a confirmation email has been sent." });
     }
 
 
@@ -417,7 +460,13 @@ app.post('/cancel-booking', async (req, res) => {
     // Actualizar estado de la reserva
     await db.query(`UPDATE parking_bookings SET status = 'cancelled' WHERE id = $1`, [bookingId]);
 
-    return res.json({ status: 'cancelled', message: "Booking cancelled and payment refunded successfully." });
+    await sendMailConfirmation({
+      bookingId: booking.id,
+      name: booking.name,
+      email: booking.email,
+    }, 'cancellation')
+
+    return res.json({ status: 'cancelled', message: "Booking cancelled and payment refunded successfully. A confirmation email has been sent." });
   } catch (error) {
     console.error("Error cancelling booking:", error);
     return res.status(500).json({ message: "Internal server error. Please try again later." });
@@ -861,12 +910,18 @@ app.get('/payment-success', async (req, res) => {
 
 
 function formatDate(date) {
+  if (!date || isNaN(new Date(date).getTime())) {
+    console.error('Invalid date passed to formatDate:', date);
+    return '';
+  }
   //It shows full date which is more user frendly
   const options = { dateStyle: 'full' }
   //It shows DD/MM/YY
   // const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
   return new Intl.DateTimeFormat('en-GB', options).format(new Date(date));
 }
+
+//every 5 min updates and checks endpoint check-bookings to update bookings
 // Scheduled Task
 cron.schedule('*/5 * * * *', async () => {
   try {
