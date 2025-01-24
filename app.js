@@ -9,7 +9,6 @@ import axios from "axios"
 import Stripe from "stripe"
 import session from 'express-session'
 import { createInvoice } from "./public/createInvoice.js"
-import { send } from "process";
 
 
 
@@ -24,13 +23,26 @@ let stripe; // Declare globally to make it accessible across the application
 
 
 env.config();
-const db = new pg.Client({
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
-  database: process.env.PG_DATABASE,
-  password: process.env.PG_PASSWORD,
-  port: process.env.PG_PORT,
-});
+// const db = new pg.Client({
+//   user: process.env.PG_USER,
+//   host: process.env.PG_HOST,
+//   database: process.env.PG_DATABASE,
+//   password: process.env.PG_PASSWORD,
+//   port: process.env.PG_PORT,
+  
+// });
+const dbConfig = process.env.DATABASE_URL
+  ? {
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false }, // Ensure SSL for production
+    }
+  : {
+      user: process.env.PG_USER,
+      host: process.env.PG_HOST,
+      database: process.env.PG_DATABASE,
+      password: process.env.PG_PASSWORD,
+      port: process.env.PG_PORT,
+    };
 
 // Function to connect to the database
 async function connectDb() {
@@ -397,23 +409,31 @@ app.post('/cancel-booking', async (req, res) => {
 
     // Calcular días restantes hasta la llegada
     const timeDifference = startDate - today;
-    const daysUntilArrival = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+
+    const daysUntilArrival = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));// 24 or 48?
     console.log("Days until arrival:", daysUntilArrival);
     // Validar estado de la reserva
     if (booking.status === 'cancelled') {
       return res.status(400).json({ message: "This booking has already been cancelled." });
     }
-
+    const { cancelation_days } = await getEnvVariables();
+    console.log("Cancel days " + cancelation_days + " today is " + today + " startd date is " + startDate)
     // Validar si faltan menos de 2 días
-    if (daysUntilArrival < 2) {
+    if (daysUntilArrival < 0) {
+      // Booking is already expired
       return res.status(400).json({
-        message: "You can only cancel a booking up to 2 days before the arrival date.",
+        message: "This booking has already expired.",
       });
+    } else if (daysUntilArrival < cancelation_days) {
+      // Booking is within the cancellation window
+      return res.status(400).json({
+        message: `You can only cancel a booking up to ${cancelation_days} days before the arrival date.`,
+      })
     }
-
+    const updateStatus = `UPDATE parking_bookings SET status = 'cancelled' WHERE id = $1`
     // Manejar reservas pendientes sin `payment_intent`
     if (booking.status === 'pending' && !booking.payment_intent) {
-      await db.query(`UPDATE parking_bookings SET status = 'cancelled' WHERE id = $1`, [bookingId]);
+      await db.query(updateStatus, [bookingId]);
       await sendMailConfirmation({
         bookingId: booking.id,
         name: booking.name,
@@ -450,6 +470,7 @@ app.post('/cancel-booking', async (req, res) => {
     console.log("Retrieved Charge:", charge);
 
     if (charge.refunded) {
+      await db.query(updateStatus, [bookingId]);
       return res.status(400).json({ message: "Payment already refunded." });
     }
 
@@ -458,7 +479,7 @@ app.post('/cancel-booking', async (req, res) => {
     console.log("Refund successful for charge:", charge.id);
 
     // Actualizar estado de la reserva
-    await db.query(`UPDATE parking_bookings SET status = 'cancelled' WHERE id = $1`, [bookingId]);
+    await db.query(updateStatus, [bookingId]);
 
     await sendMailConfirmation({
       bookingId: booking.id,

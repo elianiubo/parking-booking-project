@@ -412,7 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function updatePage() {
 
 
-    try {
+    try  {
       const response = await fetch('/check-pending', { method: 'POST' });
       const result = await response.json();
 

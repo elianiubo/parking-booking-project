@@ -51,7 +51,7 @@ function generateHeader(doc, invoice) {
     .text(invoice.address3, 200, 124, { align: "right" })
     .text(`VAT Number: ${invoice.vat_number}`, 200, 148, { align: "right" })
     .text(`KVK: ${invoice.kvk_number}`, 200, 136, { align: "right" })
-    
+
     .moveDown();
 }
 
@@ -86,14 +86,20 @@ function generateCustomerInformation(doc, invoice) {
       .text(invoice.companyName || "", 150, customerInformationTop + 60) // Adjusted value position
       .text("Company Address:", 50, customerInformationTop + 75) // Moved to the left
       .text(invoice.companyAddress || "", 150, customerInformationTop + 75) // Adjusted value position
-      .text("KVK Number:", 50, customerInformationTop + 105) // Moved to the left
-      .text(invoice.companyKvk || "", 150, customerInformationTop + 105) // Adjusted value position
-      .text("VAT Number:", 50, customerInformationTop + 90) // Moved to the left
-      .text(invoice.companyVat || "", 150, customerInformationTop + 90);// Adjusted value position
-      
-      
-      // .moveDown();
-      rulePosition = customerInformationTop + 120;
+    // if ther's no company kvk don't write the placeholder
+    if (invoice.companyKvk) {
+      doc
+        .text("KVK Number:", 50, customerInformationTop + 105) // Moved to the left
+        .text(invoice.companyKvk || "", 150, customerInformationTop + 105) // Adjusted value position
+    } // if ther's no company vat don't write the placeholder
+    if (invoice.companyVat) {
+      doc
+        .text("VAT Number:", 50, customerInformationTop + 90) // Moved to the left
+        .text(invoice.companyVat || "", 150, customerInformationTop + 90);// Adjusted value position
+
+    }
+    // .moveDown();
+    rulePosition = customerInformationTop + 120;
   }
 
   generateHr(doc, rulePosition);
