@@ -59,7 +59,7 @@ async function connectDb() {
 connectDb();
 
 // Export dbClient to make it available for other modules
-export { db };
+export { dbConfig };
 //const stripe = new Stripe(process.env.STRIPE_KEY);
 
 //onsole.log('Stripe Key:', process.env.STRIPE_KEY);
