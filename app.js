@@ -23,26 +23,14 @@ let stripe; // Declare globally to make it accessible across the application
 
 
 env.config();
-// const db = new pg.Client({
-//   user: process.env.PG_USER,
-//   host: process.env.PG_HOST,
-//   database: process.env.PG_DATABASE,
-//   password: process.env.PG_PASSWORD,
-//   port: process.env.PG_PORT,
+const db = new pg.Client({
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: process.env.PG_PORT,
   
-// });
-const dbConfig = process.env.DATABASE_URL
-  ? {
-      connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false }, // Ensure SSL for production
-    }
-  : {
-      user: process.env.PG_USER,
-      host: process.env.PG_HOST,
-      database: process.env.PG_DATABASE,
-      password: process.env.PG_PASSWORD,
-      port: process.env.PG_PORT,
-    };
+});
 
 // Function to connect to the database
 async function connectDb() {
@@ -59,7 +47,7 @@ async function connectDb() {
 connectDb();
 
 // Export dbClient to make it available for other modules
-export { dbConfig };
+export { db };
 //const stripe = new Stripe(process.env.STRIPE_KEY);
 
 //onsole.log('Stripe Key:', process.env.STRIPE_KEY);
@@ -94,7 +82,7 @@ app.get('/', async (req, res) => {
     const { address1, address2, address3, phone, contact_email } = await getEnvVariables();
 
 
-    res.render('index.ejs', { totalPrice: 0, faqs, address1, address2, address3, phone, contact_email });
+    res.render('index.ejs',{ totalPrice: 0, faqs, address1, address2, address3, phone, contact_email });
 
   } catch (error) {
     console.error('Error fetching FAQs:', error);
