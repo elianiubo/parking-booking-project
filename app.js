@@ -42,8 +42,10 @@ console.log('Database URL:', process.env.DATABASE_URL);
 // Function to connect to the database
 async function connectDb() {
   try {
+    console.log('Database URL:', process.env.DATABASE_URL)
     await db.connect(); // Connect to PostgreSQL
     console.log('Connected to PostgreSQL');
+    
   } catch (error) {
     console.error('Error connecting to PostgreSQL:', error);
     process.exit(1); // Exit if connection fails
