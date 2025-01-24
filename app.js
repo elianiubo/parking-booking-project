@@ -9,6 +9,7 @@ import axios from "axios"
 import Stripe from "stripe"
 import session from 'express-session'
 import { createInvoice } from "./public/createInvoice.js"
+import pgSession from 'connect-pg-simple';
 
 
 
@@ -23,14 +24,19 @@ let stripe; // Declare globally to make it accessible across the application
 
 
 env.config();
-const db = new pg.Client({
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
-  database: process.env.PG_DATABASE,
-  password: process.env.PG_PASSWORD,
-  port: process.env.PG_PORT,
+// const db = new pg.Client({
+//   user: process.env.PG_USER,
+//   host: process.env.PG_HOST,
+//   database: process.env.PG_DATABASE,
+//   password: process.env.PG_PASSWORD,
+//   port: process.env.PG_PORT,
   
+// });
+const db = new pg.Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }, // For Render or other managed databases
 });
+
 
 // Function to connect to the database
 async function connectDb() {
@@ -60,11 +66,20 @@ app.use(express.json());
 // Middleware for session handling
 
 
+// app.use(session({
+//   secret: process.env.SESSION_SECRET, // Use the retrieved session secret
+//   resave: false,
+//   saveUninitialized: true,
+//   cookie: { secure: false }, // Set `true` if using HTTPS
+// }));
 app.use(session({
-  secret: process.env.SESSION_SECRET, // Use the retrieved session secret
+  store: new pgSession({
+    pool: db, // Use your existing PostgreSQL connection
+  }),
+  secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false }, // Set `true` if using HTTPS
+  saveUninitialized: false,
+  cookie: { secure: false }, // Set to true if using HTTPS
 }));
 
 // app.use(session({
