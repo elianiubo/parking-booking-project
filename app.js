@@ -30,12 +30,13 @@ env.config();
 //   database: process.env.PG_DATABASE,
 //   password: process.env.PG_PASSWORD,
 //   port: process.env.PG_PORT,
-  
+
 // });
 const db = new pg.Client({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }, // For Render or other managed databases
+  ssl: false , // For Render or other managed databases
 });
+console.log('Database URL:', process.env.DATABASE_URL);
 
 
 // Function to connect to the database
@@ -73,7 +74,7 @@ app.use(express.json());
 //   cookie: { secure: false }, // Set `true` if using HTTPS
 // }));
 app.use(session({
-  store: new pgSession({
+  store: new (pgSession(session))({
     pool: db, // Use your existing PostgreSQL connection
   }),
   secret: process.env.SESSION_SECRET,
@@ -97,7 +98,7 @@ app.get('/', async (req, res) => {
     const { address1, address2, address3, phone, contact_email } = await getEnvVariables();
 
 
-    res.render('index.ejs',{ totalPrice: 0, faqs, address1, address2, address3, phone, contact_email });
+    res.render('index.ejs', { totalPrice: 0, faqs, address1, address2, address3, phone, contact_email });
 
   } catch (error) {
     console.error('Error fetching FAQs:', error);
