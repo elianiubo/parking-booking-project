@@ -18,8 +18,7 @@ import pgSession from 'connect-pg-simple';
 
 const app = express();
 const PORT = 3000;
-const YOUR_DOMAIN = 'http://localhost:3000';
-let stripe; // Declare globally to make it accessible across the application
+ // Declare globally to make it accessible across the application
 
 
 
@@ -34,10 +33,11 @@ env.config();
 // });
 const db = new pg.Client({
   connectionString: process.env.DATABASE_URL,
-  ssl: false , // For Render or other managed databases
+  ssl: { rejectUnauthorized: false } // For Render or other managed databases
 });
 console.log('Database URL:', process.env.DATABASE_URL);
 
+console.log('PG_USER:', process.env.PG_USER);
 
 // Function to connect to the database
 async function connectDb() {
@@ -57,9 +57,9 @@ connectDb();
 
 // Export dbClient to make it available for other modules
 export { db };
-//const stripe = new Stripe(process.env.STRIPE_KEY);
 
-//onsole.log('Stripe Key:', process.env.STRIPE_KEY);
+
+//console.log('Stripe Key:', process.env.STRIPE_KEY);
 
 // Middleware
 
@@ -84,6 +84,8 @@ app.use(session({
   saveUninitialized: false,
   cookie: { secure: false }, // Set to true if using HTTPS
 }));
+console.log('Stripe Key:', process.env.STRIPE_KEY);
+const stripe = new Stripe(process.env.STRIPE_KEY);
 
 // app.use(session({
 //   secret: process.env.SESSION_SECRET,  // Replace with a secure secret
@@ -153,16 +155,16 @@ app.get('/confirmation', async (req, res) => {
 // });
 // gets the stripe key from getEnvVariables and globally initializes the secret_key
 //for the session in function createSession
-(async () => {
-  try {
-    const { stripeKey } = await getEnvVariables(); // Retrieve Stripe key from DB
-    stripe = new Stripe(stripeKey); // Initialize Stripe
-    console.log('Stripe initialized successfully.');
-  } catch (error) {
-    console.error('Failed to initialize Stripe:', error.message);
-    process.exit(1); // Exit if initialization fails
-  }
-})();
+// (async () => {
+//   try {
+//     //const { stripeKey } = await getEnvVariables(); // Retrieve Stripe key from DB
+//     stripe = new Stripe(stripeKey); // Initialize Stripe
+//     console.log('Stripe initialized successfully.');
+//   } catch (error) {
+//     console.error('Failed to initialize Stripe:', error.message);
+//     process.exit(1); // Exit if initialization fails
+//   }
+// })();
 app.get('/cancel-booking', async (req, res) => {
   const { address1, address2, address3, phone, contact_email, cancelation_days } = await getEnvVariables();
   res.render('cancel-booking.ejs', { address1, address2, address3, phone, contact_email, cancelation_days });
@@ -177,7 +179,7 @@ async function getEnvVariables() {
         WHERE key_name = ANY($1)
       `;
     const requiredKeys = [
-      'EMAIL', 'EMAIL_PASS', 'STRIPE_KEY', 'CANCEL_MINUTES',
+      'EMAIL', 'EMAIL_PASS', 'CANCEL_MINUTES',
       'address1', 'address2', 'address3', 'contact-email',
       'phone', 'SESSION_SECRET', 'kvk_number', 'vat_number', 'cancelation_days',
     ];
@@ -197,7 +199,6 @@ async function getEnvVariables() {
     return {
       emailOut: envVariables['EMAIL'],
       pass: envVariables['EMAIL_PASS'],
-      stripeKey: envVariables['STRIPE_KEY'],
       cancel_minutes: parseInt(envVariables['CANCEL_MINUTES']),
       address1: envVariables['address1'],
       address2: envVariables['address2'],
@@ -366,7 +367,7 @@ async function sendMailConfirmation(data, action = 'confirmation') {
     if (error) {
       console.error('Error sending email:', error);
     } else {
-      //console.log('Stripe session URL:', session.url);
+      console.log('Stripe session URL:', session.url);
       console.log('Email sent:', info.response);
     }
   });
@@ -595,9 +596,9 @@ async function createBookingAndUserDetails(bookingData, userData, totalPrice, to
 }
 async function createSession({ bookingId, email, name, slot, totalPrice, totalDays, arrival_date, departure_date, arrival_time, departure_time, }) {
   try {
-    if (!stripe) {
-      throw new Error('Stripe is not initialized. Please check the setupStripe function.');
-    }
+    // if (!stripe) {
+    //   throw new Error('Stripe is not initialized. Please check the setupStripe function.');
+    // }
     const { cancel_minutes } = await getEnvVariables()
     console.log("Cancel Duration from DB:", cancel_minutes);
     // Create Stripe session
