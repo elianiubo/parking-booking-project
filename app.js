@@ -29,7 +29,7 @@ const db = new pg.Client({
   database: process.env.PG_DATABASE,
   password: process.env.PG_PASSWORD,
   port: process.env.PG_PORT,
-  
+
 });
 
 // Function to connect to the database
@@ -48,18 +48,17 @@ connectDb();
 
 // Export dbClient to make it available for other modules
 export { db };
+//Use this when handling stripe key diffferently
 //const stripe = new Stripe(process.env.STRIPE_KEY);
-
-//onsole.log('Stripe Key:', process.env.STRIPE_KEY);
+//console.log('Stripe Key:', process.env.STRIPE_KEY);
 
 // Middleware
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(express.json());
+
+
 // Middleware for session handling
-
-
 app.use(session({
   secret: process.env.SESSION_SECRET, // Use the retrieved session secret
   resave: false,
@@ -67,12 +66,6 @@ app.use(session({
   cookie: { secure: false }, // Set `true` if using HTTPS
 }));
 
-// app.use(session({
-//   secret: process.env.SESSION_SECRET,  // Replace with a secure secret
-//   resave: false,
-//   saveUninitialized: true,
-//   cookie: { secure: false }, // Set `true` if using HTTPS
-// }));
 // Routes
 app.get('/', async (req, res) => {
   try {
@@ -81,8 +74,7 @@ app.get('/', async (req, res) => {
     const faqs = query.rows;
     const { address1, address2, address3, phone, contact_email } = await getEnvVariables();
 
-
-    res.render('index.ejs',{ totalPrice: 0, faqs, address1, address2, address3, phone, contact_email });
+    res.render('index.ejs', { totalPrice: 0, faqs, address1, address2, address3, phone, contact_email });
 
   } catch (error) {
     console.error('Error fetching FAQs:', error);
@@ -99,7 +91,6 @@ app.get('/confirmation', async (req, res) => {
     // return res.status(400).send('No confirmation data found.');
     return res.redirect('/')
   }
-
   const { name, bookingId, totalPrice } = confirmationData;
   const { address1, address2, address3, phone, contact_email } = await getEnvVariables();
 
@@ -118,23 +109,7 @@ app.get('/confirmation', async (req, res) => {
 });
 
 
-// app.get('/faq', async (req, res) => {
-//   try {
-//     const result = await db.query('SELECT * FROM faq');
-//     const data = result.rows; // Get the rows from the database
-
-//     if (data.length === 0) {
-//       return res.render('booking-form', { faqs: [] }); // If no data, pass an empty array
-//     }
-
-//     res.render('booking-form', { faqs: data }); // Pass the fetched FAQs to the view
-//   } catch (error) {
-//     console.error('Error fetching FAQs:', error);
-//     res.status(500).send('Server error');
-//   }
-// });
-// gets the stripe key from getEnvVariables and globally initializes the secret_key
-//for the session in function createSession
+//Gets stripe key from DB
 (async () => {
   try {
     const { stripeKey } = await getEnvVariables(); // Retrieve Stripe key from DB
@@ -145,6 +120,7 @@ app.get('/confirmation', async (req, res) => {
     process.exit(1); // Exit if initialization fails
   }
 })();
+
 app.get('/cancel-booking', async (req, res) => {
   const { address1, address2, address3, phone, contact_email, cancelation_days } = await getEnvVariables();
   res.render('cancel-booking.ejs', { address1, address2, address3, phone, contact_email, cancelation_days });
@@ -202,7 +178,7 @@ function calculatetotalDays(arrival, departure) {
   return totalDays
 
 }
-// Hcalculates total price that the price is used in 
+// calculates total price that the price is used in 
 function calculateTotalPrice(totalDays, basePrice, extraDayPrice, maxDays) {
   if (totalDays <= maxDays) {
     return parseFloat(basePrice.toFixed(2));
@@ -228,7 +204,7 @@ async function getAvailableSlot(arrival_date, departure_date) {
   const values = [arrival_date, departure_date];
   return db.query(query, values);
 }
-//Funtion that gets user data and sned the email wether is pending or confirmed booking
+//Funtion that gets user data and send the email wether is pending or confirmed booking
 //the email format is also developed
 async function sendMailConfirmation(data, action = 'confirmation') {
   console.log('Data received in sendMailConfirmation:', data);
@@ -246,7 +222,7 @@ async function sendMailConfirmation(data, action = 'confirmation') {
     console.error('Recipient email is invalid or missing.');
     return;
   }
-  console.log("Sending confirmation email to:", email);
+  //console.log("Sending confirmation email to:", email);
   let pdfBuffer, subject, htmlCOntent = null;
   if (action === 'confirmation') {
 
@@ -272,8 +248,7 @@ async function sendMailConfirmation(data, action = 'confirmation') {
       cancelTimeText = `${cancel_minutes} minute${cancel_minutes > 1 ? 's' : ''}`;
     }
 
-    console.log("Formatted cancel time:", cancelTimeText);
-
+    //console.log("Formatted cancel time:", cancelTimeText);
 
     subject = `${isPaid ? 'Booking Confirmation ' : 'Booking Pending for Payment'}(Ref: EIN${bookingId})`;
     htmlCOntent = `
@@ -354,19 +329,18 @@ async function sendMailConfirmation(data, action = 'confirmation') {
   });
 
 }
-
+//Route  to gandle the cancelarion of the bookings
 app.post('/cancel-booking', async (req, res) => {
-  const { ref_number: refNumber } = req.body;
-  console.log("Request body received:", req.body);
-  if (!/^EIN\d+$/.test(refNumber)) {
+  const { ref_number: refNumber } = req.body; //gets ref number
+  //console.log("Request body received:", req.body);
+  if (!/^EIN\d+$/.test(refNumber)) { //if user input doesn't match the one in db
     console.log("Invalid REF number format:", refNumber);
     return res.status(400).json({ message: "Invalid REF number format. Use format 'EIN123'." });
   }
-
   const bookingId = parseInt(refNumber.replace('EIN', ''), 10);
 
   try {
-    // Recuperar detalles de la reserva
+    // Get booking details
     const result = await db.query(`
            SELECT 
         pb.id, 
@@ -392,20 +366,20 @@ app.post('/cancel-booking', async (req, res) => {
 
     const booking = result.rows[0];
     console.log(booking)
-    const startDate = new Date(booking.startdate); // Objeto Date
+    const startDate = new Date(booking.startdate); // Object Date
     const today = new Date();
 
-    // Calcular días restantes hasta la llegada
+    // Calculate days from arrival date
     const timeDifference = startDate - today;
 
-    const daysUntilArrival = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));// 24 or 48?
+    const daysUntilArrival = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));// 
     console.log("Days until arrival:", daysUntilArrival);
     // Validar estado de la reserva
     if (booking.status === 'cancelled') {
       return res.status(400).json({ message: "This booking has already been cancelled." });
     }
     const { cancelation_days } = await getEnvVariables();
-    console.log("Cancel days " + cancelation_days + " today is " + today + " startd date is " + startDate)
+    //console.log("Cancel days " + cancelation_days + " today is " + today + " startd date is " + startDate)
     // Validar si faltan menos de 2 días
     if (daysUntilArrival < 0) {
       // Booking is already expired
@@ -419,7 +393,7 @@ app.post('/cancel-booking', async (req, res) => {
       })
     }
     const updateStatus = `UPDATE parking_bookings SET status = 'cancelled' WHERE id = $1`
-    // Manejar reservas pendientes sin `payment_intent`
+    // Handle booking without `payment_intent` and status pending
     if (booking.status === 'pending' && !booking.payment_intent) {
       await db.query(updateStatus, [bookingId]);
       await sendMailConfirmation({
@@ -430,43 +404,28 @@ app.post('/cancel-booking', async (req, res) => {
       return res.json({ status: 'cancelled', message: "Pending booking successfully cancelled. No refund needed, a confirmation email has been sent." });
     }
 
-
-    // // Verificar si la cancelación es posible (2 días antes)
-    // if ((startDate - today) / (1000 * 60 * 60 * 24) < 2) {
-    //   if (booking.status === 'pending' && !booking.payment_intent) {
-    //     await db.query(`UPDATE parking_bookings SET status = 'cancelled' WHERE id = $1`, [bookingId]);
-    //     return res.json({ status: 'cancelled', message: "Pending booking successfully cancelled. No refund needed." });
-    //   }
-    // }
-
-    // Manejar reservas pendientes sin `payment_intent`
-    // if (booking.status === 'pending' && !booking.payment_intent) {
-    //   await db.query(`UPDATE parking_bookings SET status = 'cancelled' WHERE id = $1`, [bookingId]);
-    //   return res.json({ status: 'cancelled', message: "Pending booking successfully cancelled. No refund needed." });
-    // }
-
     const paymentIntent = await stripe.paymentIntents.retrieve(booking.payment_intent);
-    console.log("Retrieved Payment Intent:", paymentIntent);
-
+    //console.log("Retrieved Payment Intent:", paymentIntent);
+    //If there was no payment intent
     if (!paymentIntent.latest_charge) {
       console.error("No charge associated with this payment intent:", booking.payment_intent);
       return res.status(400).json({ message: "No charges found for this booking's payment intent." });
     }
 
-    // Recuperar el cargo usando el campo latest_charge
+    // get the payment latest_charge
     const charge = await stripe.charges.retrieve(paymentIntent.latest_charge);
     console.log("Retrieved Charge:", charge);
-
+    //refund custyomer if found
     if (charge.refunded) {
       await db.query(updateStatus, [bookingId]);
       return res.status(400).json({ message: "Payment already refunded." });
     }
 
-    // Crear reembolso basado en el cargo
+    // make the refound
     await stripe.refunds.create({ charge: charge.id });
     console.log("Refund successful for charge:", charge.id);
 
-    // Actualizar estado de la reserva
+    // update booking status
     await db.query(updateStatus, [bookingId]);
 
     await sendMailConfirmation({
@@ -480,49 +439,8 @@ app.post('/cancel-booking', async (req, res) => {
     console.error("Error cancelling booking:", error);
     return res.status(500).json({ message: "Internal server error. Please try again later." });
   }
-  // const { payment_intent, total_price, startdate } = checkResult.rows[0];
-  // const arrivalDate = new Date(startdate);
-  // const currentDate = new Date();
-
-  // // Calcular la diferencia en días
-  // const timeDifference = arrivalDate - currentDate;
-  // const daysDifference = timeDifference / (1000 * 3600 * 24); // Convertir milisegundos a días
-
-  // if (daysDifference <= 2) {
-  //   return res.status(400).json({ message: "Unfortunately, booking cannot be cancelled as it's within 2 days of arrival." });
-  // }
-
-  // // Recuperar detalles de pago desde Stripe
-  // const paymentDetails = await stripe.paymentIntents.retrieve(payment_intent);
-
-  // // Verificar si los detalles de pago son correctos y si ya fue reembolsado
-  // if (!paymentDetails || !paymentDetails.charges || !paymentDetails.charges.data || paymentDetails.charges.data.length === 0) {
-  //   return res.status(400).json({ message: 'No charge found for this payment intent, or charge data is unavailable.' });
-  // }
-
-  // // if (paymentDetails.charges.data[0].refunded) {
-  // //   return res.status(400).json({ message: 'Booking already cancelled' });
-  // // }
-
-  // Realizar el reembolso
-  //   await stripe.refunds.create({
-  //     payment_intent,
-  //     amount: Math.round(total_price * 100), // Convertir el precio total a centavos
-  //   });
-
-  //   // Actualizar el estado de la reserva a 'cancelada'
-  //   await db.query(`UPDATE parking_bookings SET status = 'cancelled' WHERE id = $1`, [bookingId]);
-
-  //   // Enviar respuesta de éxito
-  //   return res.status(200).json({ message: 'Booking cancelled and refunded successfully.' });
-  // } catch (error) {
-  //   console.error('Error cancelling booking:', error);
-  //   if (!res.headersSent) {
-  //     return res.status(500).json({ message: "Booking not possible to cancel as it's past the period time" });
-  //   }
-  // }
 });
-
+//Make and inster in db user data
 async function createBookingAndUserDetails(bookingData, userData, totalPrice, totalDays) {
   try {
 
@@ -535,22 +453,12 @@ async function createBookingAndUserDetails(bookingData, userData, totalPrice, to
     const bookingResult = await db.query(bookingQuery, [...bookingData, totalPrice, totalDays]);
     const bookingId = bookingResult.rows[0].id; // Extract the booking ID
 
-    // Insert the user booking data
-    //   const userBookingQuery = `
-    //   INSERT INTO user_bookings(
-    //   parking_spot_id, name, email, arrival_date, departure_date,
-    //   arrival_time, departure_time, car_brand, car_color, car_type, license_plate, fk_parking_bookings_id
-    // )
-    // VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-    //   RETURNING id;
-    // `;
-
     // Step 2: Add bookingId to the userData array
     const userDataWithBookingId = [
       ...userData,
       bookingId // Append booking ID to userData
     ];
-    console.log('User data with bookingId:', userDataWithBookingId);
+    //console.log('User data with bookingId:', userDataWithBookingId);
 
     // Insert the user booking data
     const userBookingQuery = `
@@ -575,6 +483,7 @@ async function createBookingAndUserDetails(bookingData, userData, totalPrice, to
     throw error;  // Rethrow the error for handling elsewhere
   }
 }
+//Create session for stripe payment
 async function createSession({ bookingId, email, name, slot, totalPrice, totalDays, arrival_date, departure_date, arrival_time, departure_time, }) {
   try {
     if (!stripe) {
@@ -582,15 +491,10 @@ async function createSession({ bookingId, email, name, slot, totalPrice, totalDa
     }
     const { cancel_minutes } = await getEnvVariables()
     console.log("Cancel Duration from DB:", cancel_minutes);
-    // Create Stripe session
-    // Parse cancel_duration into minutes
-    // const durationInMinutes = parseFloat(cancel_minutes);
-    // if (isNaN(durationInMinutes) || durationInMinutes <= 0) {
-    //   throw new Error("Invalid cancel duration from database.");
-    // }
+   
     const query = `select created from parking_bookings where id = $1`
     const result = await db.query(query, [bookingId])
-    console.log("ID from the creted from db" + bookingId)
+    //console.log("ID from the creted from db" + bookingId)
     if (result.rows.length === 0) {
       throw new Error('No data found with the given ID');
     }
@@ -612,18 +516,10 @@ async function createSession({ bookingId, email, name, slot, totalPrice, totalDa
       ],
       mode: 'payment',
       success_url: `http://localhost:3000/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      // cancel_url: `http://localhost:3000/payment-cancelled?session_id={CHECKOUT_SESSION_ID}`,
-      //cancel_url not necessary so far cox if cancelled still link shows payment page(within 2 hours that is still avaliable)
-      //and if expired shows pages expired
-      //expires_at: Math.floor((new Date(createdDate).getTime() + 30 * 60 * 60 * 1000) / 1000),
-
       //it expires at 30 min CHANGE TO 2 HOURS IN THE FUTURE
       expires_at: Math.floor((new Date(createdDate).getTime() + cancel_minutes * 60 * 1000) / 1000), // Expire in 30 minutes
 
       client_reference_id: bookingId,
-
-      //customer_email: email this make email to be in the input payment system
-
     });
 
 
@@ -653,11 +549,10 @@ async function createSession({ bookingId, email, name, slot, totalPrice, totalDa
 }
 
 
-// Routes
-//GETS THE USER DATA AND CHECKS IF THE'RS AN AVALIABLE SLOT ON SELECTED INPUTS AND DATES
-//IF THERE IS A BOOKING PROCEES IS MADE
+//GETS THE USER DATA AND CHECKS IF THERS AN AVALIABLE SLOT ON SELECTED INPUTS AND DATES
+//IF THERE IS, A BOOKING PROCEES IS MADE
 app.post('/book', async (req, res) => {
-  // const { arrival_date, departure_date, arrival_time, departure_time, name, email, car_brand, car_color, car_type, license_plate } = req.body;
+
   const {
     arrival_date, departure_date, arrival_time, departure_time,
     name, email, car_brand, car_color, car_type, license_plate,
@@ -666,7 +561,7 @@ app.post('/book', async (req, res) => {
   try {
     const arrival = new Date(arrival_date);
     const departure = new Date(departure_date);
-    // const totalDays =
+    
     const totalDays = calculatetotalDays(arrival, departure)
     console.log(totalDays)
     //AVALIABLE SLOT not FOUND
@@ -702,9 +597,7 @@ app.post('/book', async (req, res) => {
       arrival_time,
       departure_time,
       isPaid: false
-    });
-    //mail is sent on the session payment link
-    //sendMailConfirmation({ id: bookingId, name, email, arrival_date, departure_date, totalPrice, availableSlot });
+    });   
     res.json({ bookingId, sessionUrl, parking_spot_id: availableSlot, totalPrice, name, totalDays });
   } catch (err) {
     console.error(err);
@@ -741,16 +634,7 @@ app.post('/check-pending', async (req, res) => {
     if (!cancel_minutes) {
       throw new Error('Cancel time not defined or invalid');
     }
-    // const query = `
-    //   UPDATE parking_bookings
-    //   SET "status" = 'cancelled'
-    //   WHERE "status" = 'pending'
-    //     AND created < NOW() - INTERVAL 2h
-    //   RETURNING id;
-    // `;
-    // const result = await db.query(query);
-
-    //Changed the query to get the time of the booking depending on te value of cancel time in DB
+    
     //link explains the CAST
     //https://neon.tech/postgresql/postgresql-tutorial/postgresql-cast
     const query = `
@@ -775,7 +659,7 @@ app.post('/check-pending', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
+//If poayment was completed from the session link
 app.get('/payment-success', async (req, res) => {
   const sessionId = req.query.session_id;
   console.log('Session ID received:', sessionId);
@@ -807,8 +691,6 @@ app.get('/payment-success', async (req, res) => {
 
     const result = await db.query(query, [bookingId]);
 
-
-
     // Actualiza el estado de la reserva en la base de datos
     const update = ` UPDATE parking_bookings 
       SET payment_intent = $1, status = 'confirmed' 
@@ -821,7 +703,7 @@ app.get('/payment-success', async (req, res) => {
     const booking = result.rows[0];
     const totalPrice = parseFloat(result.rows[0].total_price);
     // console.log('Booking details from database:', booking);
-    // Generate invoice
+   
     // Generate and save invoice to the database
     console.log("Booking Data booking:", booking); // Log the full booking object
     console.log("Total Price:", booking.total_price); // Log total_price specifically
@@ -835,8 +717,6 @@ app.get('/payment-success', async (req, res) => {
       address3,
       kvk_number,
       vat_number
-
-
     });
 
     const invoiceNumber = `INV${bookingId}`;
@@ -849,7 +729,6 @@ app.get('/payment-success', async (req, res) => {
       address3,
       kvk_number,
       vat_number,
-      //slot: booking.parking_spot_id,
       bookings: [
         {
           description: 'Parking Reservation',
@@ -861,15 +740,12 @@ app.get('/payment-success', async (req, res) => {
       totalPrice,
       invoiceNumber, // Example invoice number, could be a generated value
       invoiceDate: formatDate(new Date), // Use current date for invoice date
-      // customerName: booking.name,
-      // customerEmail: booking.email,
       companyKvk: booking.kvk_number || null, // Include only if available
       companyVat: booking.vat_number || null, // Include only if available
       companyName: booking.company_name || null, // Include only if available
       companyAddress: [booking.company_address, booking.postal_code, booking.city, booking.country]
         .filter(Boolean) // Remove any `null`, `undefined`, or empty values
         .join(", ") || null,
-      // contactName: booking.contact_name || null,
       grandTotal: totalPrice, // Assuming grandTotal is same as totalPrice
 
     }, db);
@@ -940,7 +816,6 @@ cron.schedule('*/5 * * * *', async () => {
     console.error('Error running scheduled task:', error);
   }
 });
-
 
 
 // Start Server

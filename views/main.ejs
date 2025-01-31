@@ -1,3 +1,4 @@
+<!-- Main Page for form and faq section -->
 <div id="form-box">
     <h2 class="book-h2-form">Book Your Parking Spot</h2>
     <p class="book-p-form">Secure parking at affordable rates. Fill in your details to book!</p>
@@ -112,13 +113,12 @@
                 <div class="form-group ">
                     <label for="companyName">Company Name <span>*</span></label>
                     <input type="text" id="companyName" name="companyName" placeholder="Company name" required>
-                    <p class="error-message" id="company-name-error" style="display: none;" ></p>
+                    <p class="error-message" id="company-name-error" style="display: none;"></p>
                 </div>
                 <div class="form-group ">
                     <label for="companyAddress">Company Address <span>*</span></label>
-                    <input type="text" id="companyAddress" name="companyAddress"
-                        placeholder="Street" required>
-                        <p class="error-message" id="company-address-error" style="display: none;"></p>
+                    <input type="text" id="companyAddress" name="companyAddress" placeholder="Street" required>
+                    <p class="error-message" id="company-address-error" style="display: none;"></p>
                     <input type="text" id="postalCode" name="postalCode" placeholder="Postal Code" required>
                     <p class="error-message" id="postal-code-error" style="display: none;"></p>
                     <input type="text" id="city" name="city" placeholder="City" required>
@@ -131,32 +131,20 @@
                 <div class="form-group ">
                     <label for="vatNumber">VAT Number (if applicable)</label>
                     <input type="text" id="vatNumber" name="vatNumber" placeholder="VAT Number">
-                    
+
                 </div>
                 <div class="form-group ">
                     <label for="kvkNumber">KVK Number (optional)</label>
                     <input type="text" id="kvkNumber" name="kvkNumber" placeholder="KVK number">
-                    
+
                 </div>
             </div>
-            <!-- <div class="row">
-                <div class="form-group ">
-                    <label for="contactName">Contact Name</label>
-                    <input type="text" id="contactName" name="contactName">
-                </div> -->
-            <!-- <div class="form-group ">
-                <label for="notes">Additional Notes/Reference Number</label>
-                <textarea id="notes" name="notes"></textarea>
-            </div> -->
         </div>
 
         <button type="submit" id="submit-btn" disabled>Submit</button>
-
     </form>
-
-
+    <!-- Shows error in extra inputs form -->
     <div id="confirmation-message" style="display: none;">
-
         <p id="confirmation-text"></p>
     </div>
 </div>
@@ -188,7 +176,5 @@
             </div>
             <% }); %>
     </div>
-
-
 </section>
 <img id="top-btn" src="/assets/icons/top-arrow.png" alt="">

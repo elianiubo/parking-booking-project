@@ -17,7 +17,7 @@
 
 <body>
     <header>
-        <%- include('partials/header.ejs ') %>
+        <%- include('partials/header.ejs') %>
     </header>
     <main>
         <div id="cancel-box">
@@ -41,16 +41,6 @@
                         <input type="text" id="ref_number" name="ref_number" required>
                         <p id="error-message" class="error-message" style="display: none;"></p>
                     </div>
-                    <!-- <div class="form-group">
-                        <label for="arrival_date">Arrival Date <span>*</span></label>
-                        <input type="date" id="arrival_date" name="arrival_date" required>
-                        <p class="error-message"></p>
-                    </div>
-                    <div class="form-group">
-                        <label for="departure_date">Departure Date <span>*</span></label>
-                        <input type="date" id="departure_date" name="departure_date" required>
-                        <p class="error-message"></p>
-                    </div> -->
                 </div>
                 <button type="submit" id="submit-btn">Submit</button>
             </form>
@@ -136,42 +126,6 @@
                 responseMessageElement.style.display = "block";
             }
         })
-
-        //             if (response.ok) {
-        //                 // Mostrar mensaje de cancelación exitosa
-        //                 confirmationTextElement.innerHTML = `
-        //     <div class="para-confirmed-div">
-        //       <p>Your booking was successfully cancelled.</p>
-        //       <p>You should receive your money shortly.<br>
-        //       <p>Hope we see you again soon.</p>
-        //       <button class="buttons" id="new-booking-btn">Make Another Booking</button>
-        //     </div>
-        //   `;
-        //             } else if (response.status === 400) {
-        //                 // Mostrar mensaje de error si la cancelación no es posible
-        //                 confirmationTextElement.innerHTML = `
-        //     <div class="para-confirmed-div">
-        //       <p>${result.message || 'This booking has already been cancelled.'}</p>
-        //     </div>
-        //   `;
-        //             } else {
-        //                 // Manejar errores inesperados
-        //                 confirmationTextElement.innerHTML = `
-        //     <div class="para-confirmed-div">
-        //       <p>${result.message || 'An error occurred while cancelling the booking.'}</p>
-        //     </div>
-        //   `;
-        //             }
-        //         } catch (error) {
-        //             console.error("Error cancelling booking:", error);
-        //             confirmationTextElement.innerHTML = `
-        //   <div class="para-confirmed-div">
-        //     <p>An unexpected error occurred. Please try again later.</p>
-        //   </div>
-        // `;
-        //         }
-        //     });
-
 
     </script>
 </body>

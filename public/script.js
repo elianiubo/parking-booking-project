@@ -1,6 +1,3 @@
-location
-
-
 document.addEventListener("DOMContentLoaded", () => {
 
 
@@ -132,7 +129,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Dropdown validation
-
     if (selectElement.value === '0') { // No option selected
       showErrors(optionError, "Please choose an option.");
       isValid = false;
@@ -176,33 +172,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return allInputsValid;
   };
 
-  // Function to validate the dropdown selection and overall form state
-  const validateFormInputs = () => {
-    const isDropdownValid = selectElement.value !== '0'; // Check if a valid option is selected
-    const areInputsValid = validateInputs(); // Check if all inputs are valid
-
-    // Update the submit button state and other UI elements
-    if (isDropdownValid && areInputsValid) {
-      submitButton.disabled = false; // Enable the submit button
-    } else {
-      submitButton.disabled = true; // Disable the submit button
-      if (!isDropdownValid) {
-        errorMessage.style.display = 'block'; // Show the dropdown error
-      }
-    }
-  };
-
-  // // Function to handle dropdown-specific behavior
-  // const handleDropdownChange = () => {
-  //   if (selectElement.value === '1') { // 'Yes' selected
-  //     companySection.style.display = 'block'; // Show the company inputs
-  //     companySection.querySelectorAll('input').forEach(input => input.removeAttribute('disabled'));
-  //   } else { // 'No' or invalid selection
-  //     companySection.style.display = 'none'; // Hide the company inputs
-  //     companySection.querySelectorAll('input').forEach(input => input.setAttribute('disabled', 'disabled'));
-  //   }
-  //   validateFormInputs(); // Revalidate the form
-  // }
   const handleDropdownChange = () => {
     if (selectElement.value === '1') { // "Yes" selected
       companySection.style.display = 'block'; // Show company section
@@ -293,7 +262,6 @@ document.addEventListener("DOMContentLoaded", () => {
         daysDisplay.textContent = ""; // Reset the days display
         submitButton.disabled = true; // Disable submit button
       }
-      // validateFormInputs();
     } catch (error) {
       console.error("Error checking availability:", error);
       priceDisplay.textContent = "Error checking availability"; // Show error message
@@ -370,11 +338,6 @@ document.addEventListener("DOMContentLoaded", () => {
              <button class="buttons" id="new-booking-btn">Make Another Booking</button>
           </div>
         `;
-          // Add "Book Your Spot" behavior after response is processed
-          // document.getElementById("book-spot").addEventListener('click', () => {
-          //   // Reload the page with the hash for smooth scrolling to the form
-          //   window.location.href = '/';
-          // });
 
         } else {
           console.error('Booking failed:', result.message);
@@ -391,11 +354,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         });
 
-        // //scroll to form when make booking
-        // document.getElementById("book-spot").addEventListener('click', () => {
-        //   // Recargar la página con el hash para desplazarse automáticamente al formulario
-        //   window.location.href = '/';
-        // });
       } catch (error) {
         console.error('Error submitting form:', error);
         alert('An error occurred while processing your booking.');
@@ -408,7 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   });
 
-  //chanckes the pending status on rout /check-pending everytime user loads the page
+  //chanckes the pending status on route /check-pending everytime user loads the page
   async function updatePage() {
 
 
@@ -450,7 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Call the validation function on page load to ensure proper state
   handleDropdownChange(); // Set the correct initial state
 
-  
+  //makes the scrreen gp to the top page
   const mybutton = document.getElementById("top-btn");
   window.onscroll = function () { scrollFunction() };
   function scrollFunction() {
@@ -464,11 +422,4 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
   })
-  //  // Toggle Menu Visibility
-  //   const toggleButton = document.getElementById('menu-toggle');
-  //   const menu = document.getElementById('menu');
-
-  //   toggleButton.addEventListener('click', () => {
-  //       menu.classList.toggle('active');
-  //   });
 });

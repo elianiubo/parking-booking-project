@@ -32,7 +32,6 @@ async function createInvoice(invoice, db) {
     bufferStream.on('error', reject);
   });
 
-  // Save the PDF buffer to your database (e.g., MongoDB, SQL)
   // Save the PDF buffer to your PostgreSQL database
   await savePdfToDatabase(db, invoice.bookingId, pdfBuffer, invoice);
 
@@ -202,23 +201,6 @@ async function savePdfToDatabase(db, bookingId, pdfBuffer, invoice) {
   }
 }
 
-// // Example invoice object
-// const invoice = {
-//   bookingId: '355',
-//   name: 'Elia Niubo Burgos',
-//   email: 'elia.nibu@gmail.com',
-//   totalPrice: 49.00,
-//   items: [
-//     {
-//       description: 'Parking Reservation',
-//       totalDays: 2,
-//       totalAmount: 49.00
-//     }
-//   ]
-// };
-
-
-
 function generateHr(doc, y) {
   doc
     .strokeColor("#aaaaaa")
@@ -227,10 +209,4 @@ function generateHr(doc, y) {
     .lineTo(550, y)
     .stroke();
 }
-// Create and store the invoice PDF
-// createInvoice(invoice)
-//   .then(() => console.log('Invoice created and saved to database'))
-//   .catch(console.error);
-
-
 export { createInvoice };
